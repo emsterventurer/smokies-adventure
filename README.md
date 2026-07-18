@@ -1,33 +1,46 @@
-# Adventure Companion — Commit #011
+# Adventure Companion — Commit #013
 
-## Feedback Mode & Build Visibility Fix
+## Family Release Candidate — Milestone 2 Frozen
 
-This build fixes the missing development badge and adds Feedback Mode.
+Commit #013 is the final feature build for Milestone 2.
 
-### Build tools
+### Column-first Smart Stop Cards
 
-- Highly visible **Commit #011** badge in the upper-right corner
-- Badge is injected directly after the opening body tag so it appears reliably
-- Tap the badge to see version, milestone, feature, and update date
-- Works on desktop and mobile
+On desktop, stop cards now read:
 
-### Feedback Mode
+1. Down the left column
+2. Then from the top of the right column
 
-Tap the floating 📝 button to record:
+Columns are balanced automatically:
 
-- Bug
-- Idea
-- Confusing experience
-- Something you love
-- Screen/day name
-- Written note
-- 1–5 star screen rating
+- 8 stops → 4 + 4
+- 7 stops → 4 + 3
+- 5 stops → 3 + 2
 
-Feedback is stored locally on the current device. Use **View saved notes** to review it later.
+On phones, stop cards remain one continuous vertical timeline.
 
-### Stop-card visibility
+### Family-release polish
 
-Stop cards are available on both phone and desktop. They appear after opening an individual trip day. Desktop now uses a two-column stop-card layout where space allows.
+- Chronological numbering remains continuous across columns
+- A visible continuation cue appears after the first desktop column
+- Final Wyndham cards are visually distinct
+- Final route message says the family is done for the day
+- Build badge identifies Commit #013
+- Milestone 2 is labeled Frozen
+
+### Feature freeze
+
+After publishing this build:
+
+- Add no new Milestone 2 features
+- Record findings with Feedback Mode
+- Fix only release blockers, bugs, and approved cosmetic defects
+- Number fixes as Commit #013.1, #013.2, and so forth
+- Tag the approved family version as `milestone-2-family-release`
+
+### Testing
+
+Use `MILESTONE_2_TEST_SCRIPT.md`, included in this package, for the complete desktop, phone, offline, navigation, reservation, persistence, and family-usability test.
 
 ## Publish
 
@@ -35,6 +48,4 @@ Upload every file to the root of the existing `smokies-adventure` repository, re
 
 Suggested commit message:
 
-`Commit #011 — Feedback Mode & Build Visibility Fix`
-
-After GitHub Pages deploys, open or refresh Adventure Companion and confirm the upper-right badge says **Commit #011**.
+`Commit #013 — Freeze Milestone 2 Family Release Candidate`

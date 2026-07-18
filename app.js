@@ -1,7 +1,7 @@
 
 const APP_BUILD={
-  version:"Commit #011",
-  label:"Feedback Mode & Build Visibility Fix",
+  version:"Commit #013",
+  label:"Family Release Candidate — Milestone 2 Frozen",
   date:"July 18, 2026"
 };
 
@@ -176,7 +176,9 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const localISO=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 function phase(d){d=new Date(d.getFullYear(),d.getMonth(),d.getDate());return d<planning?"dreaming":d<start?"planning":d<end?"experiencing":"remembering"}
 
-const STOP_DATA={"2026-08-07":[{"time":"Arrival","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Home base","duration":"Check-in and settle in","tip":"Unload only what you need before dinner."},{"time":"6:00 PM","icon":"🍽️","name":"Local Goat","query":"Local Goat Pigeon Forge TN","type":"Dinner reservation","duration":"About 90 minutes","tip":"Arrive a few minutes early; parking is on site."},{"time":"7:45 PM","icon":"⛲","name":"The Island in Pigeon Forge","query":"The Island in Pigeon Forge TN","type":"Evening stroll","duration":"45–75 minutes","tip":"Use the large free lot and tram if everyone is tired."},{"time":"Afterward","icon":"🍦","name":"The Island Creamery","query":"The Island Creamery Pigeon Forge TN","type":"Dessert","duration":"20–30 minutes","tip":"Keep this optional if arrival day runs long."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Set out tomorrow’s shoes and water bottles tonight."}],"2026-08-08":[{"time":"9:30 AM","icon":"🥞","name":"Five Oaks Farm Kitchen","query":"Five Oaks Farm Kitchen Sevierville TN","type":"Breakfast","duration":"60–75 minutes","tip":"A filling breakfast before the park and waterfall walk."},{"time":"11:15 AM","icon":"🌲","name":"Sugarlands Visitor Center","query":"Sugarlands Visitor Center Gatlinburg TN","type":"National park stop","duration":"35–50 minutes","tip":"Use restrooms here before the waterfall walk."},{"time":"12:05 PM","icon":"💧","name":"Cataract Falls Trailhead","query":"Cataract Falls Trailhead Gatlinburg TN","type":"Easy waterfall walk","duration":"35–50 minutes","tip":"The trail begins near Sugarlands; keep the family together."},{"time":"1:30 PM","icon":"🫖","name":"Wild Plum Tea Room","query":"Wild Plum Tea Room Gatlinburg TN","type":"Lunch reservation","duration":"75–90 minutes","tip":"This is a timed stop—leave the waterfall with margin."},{"time":"3:00 PM","icon":"🎨","name":"Great Smoky Arts and Crafts Community","query":"Great Smoky Arts and Crafts Community Gatlinburg TN","type":"Artisan loop","duration":"2–2.5 hours","tip":"Choose a few studios rather than trying to visit every one."},{"time":"6:00 PM","icon":"🍽️","name":"The Park Grill","query":"The Park Grill Gatlinburg TN","type":"Dinner target","duration":"90 minutes","tip":"Reservation is pending; keep the backup flexible."},{"time":"After dinner","icon":"🍩","name":"The Donut Friar","query":"The Donut Friar Gatlinburg TN","type":"Dessert","duration":"20–30 minutes","tip":"Park once for dinner and The Village when practical."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Expect slower Saturday traffic leaving Gatlinburg."}],"2026-08-09":[{"time":"9:30 AM","icon":"🍎","name":"Applewood Farmhouse Restaurant","query":"Applewood Farmhouse Restaurant Sevierville TN","type":"Breakfast","duration":"60–75 minutes","tip":"The Apple Barn area is close to the resort."},{"time":"10:45 AM","icon":"🛍️","name":"Apple Barn Village","query":"Apple Barn Village Sevierville TN","type":"Shops and cider mill","duration":"90 minutes","tip":"Keep purchases together so nothing is left behind."},{"time":"After lunch","icon":"🍷","name":"Apple Barn Winery","query":"Apple Barn Winery Sevierville TN","type":"Wine tasting","duration":"45–60 minutes","tip":"Choose the Wine of the Trip without rushing."},{"time":"After tasting","icon":"🥧","name":"Apple Barn Bakery","query":"Apple Barn Bakery Sevierville TN","type":"Dessert","duration":"20–30 minutes","tip":"Pick something that travels well if everyone is full."},{"time":"Afternoon","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Protected downtime","duration":"2.5 hours","tip":"This open block is intentional, not empty."},{"time":"6:00 PM","icon":"🍽️","name":"Seasons 101","query":"Seasons 101 Sevierville TN","type":"Dinner reservation","duration":"90 minutes","tip":"Allow time for downtown parking."}],"2026-08-10":[{"time":"8:30 AM","icon":"🎢","name":"Dollywood","query":"Dollywood Pigeon Forge TN","type":"Theme park","duration":"Full day","tip":"Navigate directly to parking and arrive before opening."},{"time":"Evening","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Leave while everyone is still smiling."}],"2026-08-11":[{"time":"11:00 AM","icon":"🪨","name":"Forbidden Caverns","query":"Forbidden Caverns Sevierville TN","type":"Guided cave tour","duration":"75 minutes","tip":"Bring a light layer; caves stay cool."},{"time":"12:45 PM","icon":"🍖","name":"Delauder's BBQ","query":"Delauder's BBQ Gatlinburg TN","type":"Lunch","duration":"60–75 minutes","tip":"Check hours before departure because local schedules can vary."},{"time":"Afternoon","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Protected downtime","duration":"2.5 hours","tip":"Do not fill this block unless the family asks."},{"time":"6:15 PM","icon":"🍔","name":"Blue Moose Burgers & Wings","query":"Blue Moose Burgers and Wings Pigeon Forge TN","type":"Dinner target","duration":"75 minutes","tip":"Keep dinner relaxed before the coaster."},{"time":"8:15 PM","icon":"🎢","name":"Rocky Top Mountain Coaster","query":"Rocky Top Mountain Coaster Pigeon Forge TN","type":"Night adventure","duration":"60–90 minutes","tip":"The illuminated ride is the point—wait until after dark."},{"time":"Night","icon":"🍦","name":"Ice cream near Rocky Top","query":"ice cream near Rocky Top Mountain Coaster Pigeon Forge TN","type":"Dessert","duration":"20–30 minutes","tip":"Choose the closest easy stop based on energy."}],"2026-08-12":[{"time":"9:00 AM","icon":"🥞","name":"Lil Black Bear Café","query":"Lil Black Bear Cafe Pigeon Forge TN","type":"Breakfast","duration":"60 minutes","tip":"Leave enough margin for the 10:30 zipline reservation."},{"time":"10:30 AM","icon":"🪂","name":"Legacy Mountain Ziplines","query":"Legacy Mountain Ziplines Sevierville TN","type":"Timed reservation","duration":"2–3 hours","tip":"Arrive at the check-in time shown in the confirmation."},{"time":"Early afternoon","icon":"🦜","name":"Parrot Mountain and Gardens","query":"Parrot Mountain and Gardens Pigeon Forge TN","type":"Animal experience","duration":"90–120 minutes","tip":"Protect time for the bird interaction and photos."},{"time":"Late afternoon","icon":"🌾","name":"The Old Mill","query":"The Old Mill Pigeon Forge TN","type":"Historic district","duration":"2–3 hours","tip":"Park once and walk the district."},{"time":"Dinner","icon":"🍽️","name":"The Old Mill Restaurant","query":"The Old Mill Restaurant Pigeon Forge TN","type":"Dinner target","duration":"90 minutes","tip":"Expect a possible wait; browse nearby while holding your place."},{"time":"After dinner","icon":"🍦","name":"Old Mill Creamery","query":"Old Mill Creamery Pigeon Forge TN","type":"Dessert","duration":"20–30 minutes","tip":"Take dessert toward the river if the evening is pleasant."}],"2026-08-13":[{"time":"9:30 AM","icon":"🥞","name":"Pancake Pantry","query":"Pancake Pantry Gatlinburg TN","type":"Breakfast","duration":"60–75 minutes","tip":"Park downtown once for breakfast and the aquarium."},{"time":"10:45 AM","icon":"🐧","name":"Ripley's Aquarium of the Smokies","query":"Ripley's Aquarium of the Smokies Gatlinburg TN","type":"Ticketed attraction","duration":"2–3 hours","tip":"Have ticket links ready before entering."},{"time":"Afternoon","icon":"🏙️","name":"Downtown Gatlinburg","query":"Downtown Gatlinburg TN","type":"Flexible exploration","duration":"1–2 hours","tip":"Choose low-height activities and protect dinner timing."},{"time":"6:15 PM","icon":"🍽️","name":"The Greenbrier Restaurant","query":"The Greenbrier Restaurant Gatlinburg TN","type":"Farewell reservation","duration":"2 hours","tip":"Drive separately from downtown parking and arrive relaxed."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Final resort return","duration":"End of day","tip":"This is the last full-night return—take it in."}],"2026-08-14":[{"time":"Morning","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Checkout","duration":"Final room check","tip":"Photograph the room after the final sweep if useful."},{"time":"Departure","icon":"🏡","name":"Home","query":"Durham NC","type":"Drive home","duration":"Road trip","tip":"Use your preferred live navigation for traffic-aware routing."}]};
+const STOP_DATA={"2026-08-07":[{"time":"Arrival","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Home base","duration":"Check-in and settle in","tip":"Unload only what you need before dinner."},{"time":"6:00 PM","icon":"🍽️","name":"Local Goat","query":"Local Goat Pigeon Forge TN","type":"Dinner reservation","duration":"About 90 minutes","tip":"Arrive a few minutes early; parking is on site."},{"time":"7:45 PM","icon":"⛲","name":"The Island in Pigeon Forge","query":"The Island in Pigeon Forge TN","type":"Evening stroll","duration":"45–75 minutes","tip":"Use the large free lot and tram if everyone is tired."},{"time":"Afterward","icon":"🍦","name":"The Island Creamery","query":"The Island Creamery Pigeon Forge TN","type":"Dessert","duration":"20–30 minutes","tip":"Keep this optional if arrival day runs long."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Set out tomorrow’s shoes and water bottles tonight."}],"2026-08-08":[{"time":"9:30 AM","icon":"🥞","name":"Five Oaks Farm Kitchen","query":"Five Oaks Farm Kitchen Sevierville TN","type":"Breakfast","duration":"60–75 minutes","tip":"A filling breakfast before the park and waterfall walk."},{"time":"11:15 AM","icon":"🌲","name":"Sugarlands Visitor Center","query":"Sugarlands Visitor Center Gatlinburg TN","type":"National park stop","duration":"35–50 minutes","tip":"Use restrooms here before the waterfall walk."},{"time":"12:05 PM","icon":"💧","name":"Cataract Falls Trailhead","query":"Cataract Falls Trailhead Gatlinburg TN","type":"Easy waterfall walk","duration":"35–50 minutes","tip":"The trail begins near Sugarlands; keep the family together."},{"time":"1:30 PM","icon":"🫖","name":"Wild Plum Tea Room","query":"Wild Plum Tea Room Gatlinburg TN","type":"Lunch reservation","duration":"75–90 minutes","tip":"This is a timed stop—leave the waterfall with margin."},{"time":"3:00 PM","icon":"🎨","name":"Great Smoky Arts and Crafts Community","query":"Great Smoky Arts and Crafts Community Gatlinburg TN","type":"Artisan loop","duration":"2–2.5 hours","tip":"Choose a few studios rather than trying to visit every one."},{"time":"6:00 PM","icon":"🍽️","name":"The Park Grill","query":"The Park Grill Gatlinburg TN","type":"Dinner target","duration":"90 minutes","tip":"Reservation is pending; keep the backup flexible."},{"time":"After dinner","icon":"🍩","name":"The Donut Friar","query":"The Donut Friar Gatlinburg TN","type":"Dessert","duration":"20–30 minutes","tip":"Park once for dinner and The Village when practical."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Expect slower Saturday traffic leaving Gatlinburg."}],"2026-08-09":[{"time":"9:30 AM","icon":"🍎","name":"Applewood Farmhouse Restaurant","query":"Applewood Farmhouse Restaurant Sevierville TN","type":"Breakfast","duration":"60–75 minutes","tip":"The Apple Barn area is close to the resort."},{"time":"10:45 AM","icon":"🛍️","name":"Apple Barn Village","query":"Apple Barn Village Sevierville TN","type":"Shops and cider mill","duration":"90 minutes","tip":"Keep purchases together so nothing is left behind."},{"time":"After lunch","icon":"🍷","name":"Apple Barn Winery","query":"Apple Barn Winery Sevierville TN","type":"Wine tasting","duration":"45–60 minutes","tip":"Choose the Wine of the Trip without rushing."},{"time":"After tasting","icon":"🥧","name":"Apple Barn Bakery","query":"Apple Barn Bakery Sevierville TN","type":"Dessert","duration":"20–30 minutes","tip":"Pick something that travels well if everyone is full."},{"time":"Afternoon","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Protected downtime","duration":"2.5 hours","tip":"This open block is intentional, not empty."},{"time":"6:00 PM","icon":"🍽️","name":"Seasons 101","query":"Seasons 101 Sevierville TN","type":"Dinner reservation","duration":"90 minutes","tip":"Allow time for downtown parking."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Finish the route back at the family home base."}],"2026-08-10":[{"time":"8:30 AM","icon":"🎢","name":"Dollywood","query":"Dollywood Pigeon Forge TN","type":"Theme park","duration":"Full day","tip":"Navigate directly to parking and arrive before opening."},{"time":"Evening","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Leave while everyone is still smiling."}],"2026-08-11":[{"time":"11:00 AM","icon":"🪨","name":"Forbidden Caverns","query":"Forbidden Caverns Sevierville TN","type":"Guided cave tour","duration":"75 minutes","tip":"Bring a light layer; caves stay cool."},{"time":"12:45 PM","icon":"🍖","name":"Delauder's BBQ","query":"Delauder's BBQ Gatlinburg TN","type":"Lunch","duration":"60–75 minutes","tip":"Check hours before departure because local schedules can vary."},{"time":"Afternoon","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Protected downtime","duration":"2.5 hours","tip":"Do not fill this block unless the family asks."},{"time":"6:15 PM","icon":"🍔","name":"Blue Moose Burgers & Wings","query":"Blue Moose Burgers and Wings Pigeon Forge TN","type":"Dinner target","duration":"75 minutes","tip":"Keep dinner relaxed before the coaster."},{"time":"8:15 PM","icon":"🎢","name":"Rocky Top Mountain Coaster","query":"Rocky Top Mountain Coaster Pigeon Forge TN","type":"Night adventure","duration":"60–90 minutes","tip":"The illuminated ride is the point—wait until after dark."},{"time":"Night","icon":"🍦","name":"Ice cream near Rocky Top","query":"ice cream near Rocky Top Mountain Coaster Pigeon Forge TN","type":"Dessert","duration":"20–30 minutes","tip":"Choose the closest easy stop based on energy."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Finish the route back at the family home base."}],"2026-08-12":[{"time":"9:00 AM","icon":"🥞","name":"Lil Black Bear Café","query":"Lil Black Bear Cafe Pigeon Forge TN","type":"Breakfast","duration":"60 minutes","tip":"Leave enough margin for the 10:30 zipline reservation."},{"time":"10:30 AM","icon":"🪂","name":"Legacy Mountain Ziplines","query":"Legacy Mountain Ziplines Sevierville TN","type":"Timed reservation","duration":"2–3 hours","tip":"Arrive at the check-in time shown in the confirmation."},{"time":"Early afternoon","icon":"🦜","name":"Parrot Mountain and Gardens","query":"Parrot Mountain and Gardens Pigeon Forge TN","type":"Animal experience","duration":"90–120 minutes","tip":"Protect time for the bird interaction and photos."},{"time":"Late afternoon","icon":"🌾","name":"The Old Mill","query":"The Old Mill Pigeon Forge TN","type":"Historic district","duration":"2–3 hours","tip":"Park once and walk the district."},{"time":"Dinner","icon":"🍽️","name":"The Old Mill Restaurant","query":"The Old Mill Restaurant Pigeon Forge TN","type":"Dinner target","duration":"90 minutes","tip":"Expect a possible wait; browse nearby while holding your place."},{"time":"After dinner","icon":"🍦","name":"Old Mill Creamery","query":"Old Mill Creamery Pigeon Forge TN","type":"Dessert","duration":"20–30 minutes","tip":"Take dessert toward the river if the evening is pleasant."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Finish the route back at the family home base."}],"2026-08-13":[{"time":"9:30 AM","icon":"🥞","name":"Pancake Pantry","query":"Pancake Pantry Gatlinburg TN","type":"Breakfast","duration":"60–75 minutes","tip":"Park downtown once for breakfast and the aquarium."},{"time":"10:45 AM","icon":"🐧","name":"Ripley's Aquarium of the Smokies","query":"Ripley's Aquarium of the Smokies Gatlinburg TN","type":"Ticketed attraction","duration":"2–3 hours","tip":"Have ticket links ready before entering."},{"time":"Afternoon","icon":"🏙️","name":"Downtown Gatlinburg","query":"Downtown Gatlinburg TN","type":"Flexible exploration","duration":"1–2 hours","tip":"Choose low-height activities and protect dinner timing."},{"time":"6:15 PM","icon":"🍽️","name":"The Greenbrier Restaurant","query":"The Greenbrier Restaurant Gatlinburg TN","type":"Farewell reservation","duration":"2 hours","tip":"Drive separately from downtown parking and arrive relaxed."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Final resort return","duration":"End of day","tip":"This is the last full-night return—take it in."}],"2026-08-14":[{"time":"Morning","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Checkout","duration":"Final room check","tip":"Photograph the room after the final sweep if useful."},{"time":"Departure","icon":"🏡","name":"Home","query":"Durham NC","type":"Drive home","duration":"Road trip","tip":"Use your preferred live navigation for traffic-aware routing."}]};
+const RESERVATION_DATA={"2026-08-07":[{"name":"Club Wyndham Smoky Mountains","icon":"🏨","status":"Confirmed","time":"Aug 7–14","confirmation":"Add confirmation #","phone":"","website":"https://www.wyndhamhotels.com/","notes":"Primary lodging and daily home base."},{"name":"Local Goat","icon":"🍽️","status":"Confirmed","time":"6:00 PM","confirmation":"Reservation confirmed","phone":"","website":"https://localgoatpf.com/","notes":"Arrival-night dinner."}],"2026-08-08":[{"name":"Wild Plum Tea Room","icon":"🫖","status":"Contacted","time":"Lunch target","confirmation":"Confirm final seating","phone":"","website":"https://wildplumtearoom.com/","notes":"Hours are limited; verify before trip."},{"name":"The Park Grill","icon":"🍽️","status":"Pending","time":"6:00 PM target","confirmation":"Reservation window not yet open","phone":"","website":"https://parkgrillgatlinburg.com/","notes":"Keep a nearby dinner backup until confirmed."}],"2026-08-09":[{"name":"Seasons 101","icon":"🍽️","status":"Confirmed","time":"6:00 PM","confirmation":"Reservation confirmed","phone":"","website":"https://seasons101.com/","notes":"Downtown Sevierville dinner."}],"2026-08-10":[{"name":"Dollywood","icon":"🎢","status":"Tickets purchased","time":"All day","confirmation":"Tickets at Work — add ticket link","phone":"","website":"https://www.dollywood.com/","notes":"Any-day tickets purchased. Preferred parking decision still open."}],"2026-08-11":[{"name":"Forbidden Caverns","icon":"🪨","status":"Planned","time":"11:00 AM target","confirmation":"Check ticket policy","phone":"","website":"https://forbiddencavern.com/","notes":"Verify operating hours before departure."},{"name":"Rocky Top Mountain Coaster","icon":"🎢","status":"Planned","time":"8:15 PM target","confirmation":"Purchase onsite or add ticket","phone":"","website":"https://www.rockytopcoaster.com/","notes":"Night ride is intentional."}],"2026-08-12":[{"name":"Legacy Mountain Ziplines","icon":"🪂","status":"Confirmed","time":"10:30 AM","confirmation":"Add confirmation #","phone":"","website":"https://legacymountainziplines.com/","notes":"Timed reservation. Confirm required check-in time."}],"2026-08-13":[{"name":"Ripley's Aquarium of the Smokies","icon":"🐧","status":"Tickets needed","time":"10:45 AM target","confirmation":"Add ticket link after purchase","phone":"","website":"https://www.ripleyaquariums.com/gatlinburg/","notes":"Weekday visit planned."},{"name":"The Greenbrier Restaurant","icon":"🍽️","status":"Confirmed","time":"6:15 PM","confirmation":"Reservation confirmed","phone":"","website":"https://greenbrierrestaurant.com/","notes":"Farewell dinner."}],"2026-08-14":[]};
+const READINESS_ITEMS=[{"id":"lodging","label":"Lodging","icon":"🏨","detail":"Wyndham stay confirmed","done":true},{"id":"dollywood","label":"Dollywood tickets","icon":"🎢","detail":"Tickets purchased","done":true},{"id":"zipline","label":"Zipline","icon":"🪂","detail":"Aug 12 at 10:30 AM","done":true},{"id":"dining","label":"Dining reservations","icon":"🍽️","detail":"Park Grill and Wild Plum still need confirmation","done":false},{"id":"aquarium","label":"Aquarium tickets","icon":"🐧","detail":"Purchase or add ticket link","done":false},{"id":"parking","label":"Parking decisions","icon":"🅿️","detail":"Decide on Dollywood preferred parking","done":false},{"id":"packing","label":"Family packing","icon":"🧳","detail":"Complete before departure","done":false},{"id":"weather","label":"Weather check","icon":"🌤️","detail":"Connect in Milestone 3","done":false},{"id":"navigation","label":"Navigation","icon":"🗺️","detail":"Waze and Google Maps ready","done":true},{"id":"budget","label":"Trip budget","icon":"💵","detail":"Daily estimates available","done":true}];
 const DAY_DASH={
   "2026-08-07":{icon:"🧳",leave:"5:35 PM",first:"Check in at Club Wyndham",reservation:"Local Goat · 6:00 PM",sunset:"8:30 PM",pace:"Easy arrival evening",focus:"Arrive, settle in, and celebrate"},
   "2026-08-08":{icon:"🏞️",leave:"9:05 AM",first:"Five Oaks Farm Kitchen",reservation:"Wild Plum · 1:30 PM",sunset:"8:29 PM",pace:"Full but flexible",focus:"Waterfall, artisans, and local flavor"},
@@ -205,25 +207,146 @@ function googleRoute(origin,destination){return `https://www.google.com/maps/dir
 function smartStopsMarkup(d){
   const stops=STOP_DATA[d.date]||[];
   if(!stops.length)return "";
-  return `<section class="smartStops">
-    <div class="smartStopsHead"><div><span class="eyebrow">SMART STOP CARDS</span><h3>Navigate the day</h3></div><span>${stops.length} stops</span></div>
-    <p class="stopIntro">Waze starts from your current location. Google’s route button connects each planned stop to the next one.</p>
-    <div class="stopCards">${stops.map((stop,i)=>{
-      const next=stops[i+1],route=next?googleRoute(stop.query,next.query):"";
-      return `<article class="stopCard">
-        <div class="stopOrder"><span>${i+1}</span><i></i></div>
-        <div class="stopBody">
-          <div class="stopTitle"><span class="stopIcon">${stop.icon}</span><div><small>${stop.time} · ${stop.type}</small><h4>${stop.name}</h4></div></div>
-          <div class="stopFacts"><span>⏱ ${stop.duration}</span><span>🌿 ${stop.tip}</span></div>
-          <div class="navActions">
-            <a href="${wazeSearch(stop.query)}" target="_blank" rel="noopener">🚙 Waze</a>
-            <a href="${mapsSearch(stop.query)}" target="_blank" rel="noopener">📍 Google Maps</a>
-            ${next?`<a class="nextRoute" href="${route}" target="_blank" rel="noopener">Next: ${next.name} →</a>`:`<span class="routeComplete">Day route complete ✓</span>`}
-          </div>
+
+  const splitAt=Math.ceil(stops.length/2);
+  const columns=[stops.slice(0,splitAt),stops.slice(splitAt)];
+
+  function stopCardMarkup(stop,absoluteIndex){
+    const next=stops[absoluteIndex+1];
+    const route=next?googleRoute(stop.query,next.query):"";
+    const isReturn=stop.name==="Club Wyndham Smoky Mountains" && absoluteIndex===stops.length-1;
+    return `<article class="stopCard ${isReturn?"returnStop":""}">
+      <div class="stopOrder"><span>${absoluteIndex+1}</span><i></i></div>
+      <div class="stopBody">
+        <div class="stopTitle">
+          <span class="stopIcon">${stop.icon}</span>
+          <div><small>${stop.time} · ${stop.type}</small><h4>${stop.name}</h4></div>
         </div>
-      </article>`
-    }).join("")}</div>
+        <div class="stopFacts"><span>⏱ ${stop.duration}</span><span>🌿 ${stop.tip}</span></div>
+        <div class="navActions">
+          <a href="${wazeSearch(stop.query)}" target="_blank" rel="noopener">🚙 Waze</a>
+          <a href="${mapsSearch(stop.query)}" target="_blank" rel="noopener">📍 Google Maps</a>
+          ${next?`<a class="nextRoute" href="${route}" target="_blank" rel="noopener">Next: ${next.name} →</a>`:`<span class="routeComplete">You’re done for today ✓</span>`}
+        </div>
+      </div>
+    </article>`;
+  }
+
+  return `<section class="smartStops">
+    <div class="smartStopsHead">
+      <div><span class="eyebrow">SMART STOP CARDS</span><h3>Navigate the day</h3></div>
+      <span>${stops.length} stops</span>
+    </div>
+    <p class="stopIntro">Read down the first column, then continue at the top of the second. On mobile, the route remains one continuous vertical timeline.</p>
+    <div class="stopColumns">
+      ${columns.map((column,columnIndex)=>{
+        const offset=columnIndex===0?0:splitAt;
+        return `<div class="stopColumn">${column.map((stop,index)=>stopCardMarkup(stop,offset+index)).join("")}</div>`;
+      }).join("")}
+    </div>
   </section>`
+}
+
+
+const READINESS_KEY="adventureCompanionReadiness";
+
+function statusClass(status){
+  const s=String(status||"").toLowerCase();
+  if(s.includes("confirm")||s.includes("purchased"))return "confirmed";
+  if(s.includes("pending")||s.includes("needed")||s.includes("contacted"))return "pending";
+  return "planned";
+}
+
+function reservationMarkup(d){
+  const items=RESERVATION_DATA[d.date]||[];
+  if(!items.length)return "";
+  return `<section class="reservationCenter">
+    <div class="reservationCenterHead">
+      <div><span class="eyebrow">RESERVATION CENTER</span><h3>Bookings for this day</h3></div>
+      <span>${items.length} item${items.length===1?"":"s"}</span>
+    </div>
+    <div class="reservationCards">${items.map(item=>`
+      <article class="reservationCard">
+        <div class="reservationTop">
+          <span class="reservationIcon">${item.icon}</span>
+          <div><small>${item.time}</small><h4>${item.name}</h4></div>
+          <span class="reservationStatus ${statusClass(item.status)}">${item.status}</span>
+        </div>
+        <div class="reservationDetails">
+          <div><span>Confirmation</span><strong>${item.confirmation}</strong></div>
+          <p>${item.notes}</p>
+        </div>
+        <div class="reservationActions">
+          ${item.phone?`<a href="tel:${item.phone}">📞 Call</a>`:""}
+          ${item.website?`<a href="${item.website}" target="_blank" rel="noopener">🌐 Website</a>`:""}
+          <button type="button" class="copyReservation" data-copy="${item.name} — ${item.time} — ${item.confirmation}">Copy details</button>
+        </div>
+      </article>`).join("")}</div>
+  </section>`
+}
+
+function readReadiness(){
+  try{return JSON.parse(localStorage.getItem(READINESS_KEY)||"{}")}catch(e){return {}}
+}
+function saveReadiness(state){
+  localStorage.setItem(READINESS_KEY,JSON.stringify(state));
+}
+function readinessState(item){
+  const state=readReadiness();
+  return state[item.id]===undefined?item.done:Boolean(state[item.id]);
+}
+function readinessPercent(){
+  const complete=READINESS_ITEMS.filter(readinessState).length;
+  return Math.round(complete/READINESS_ITEMS.length*100);
+}
+function readinessMarkup(){
+  const pct=readinessPercent();
+  return `<section class="readinessScreen">
+    <div class="readinessHero">
+      <span class="eyebrow">MILESTONE 2 RELEASE CANDIDATE</span>
+      <h2>Trip Readiness</h2>
+      <p>Finish the practical details before sharing Adventure Companion with the family.</p>
+      <div class="readinessMeter" aria-label="${pct}% ready">
+        <div class="readinessRing" style="--pct:${pct}"><strong>${pct}%</strong><small>ready</small></div>
+        <div><strong>${READINESS_ITEMS.filter(readinessState).length} of ${READINESS_ITEMS.length}</strong><span>trip areas complete</span></div>
+      </div>
+    </div>
+    <div class="readinessList">${READINESS_ITEMS.map(item=>{
+      const done=readinessState(item);
+      return `<label class="readinessItem ${done?"done":""}">
+        <input type="checkbox" data-readiness="${item.id}" ${done?"checked":""}>
+        <span class="readinessIcon">${item.icon}</span>
+        <span><strong>${item.label}</strong><small>${item.detail}</small></span>
+        <b>${done?"Ready":"Open"}</b>
+      </label>`
+    }).join("")}</div>
+    <p class="readinessNote">Weather remains intentionally open until Milestone 3 adds live intelligence.</p>
+  </section>`;
+}
+
+function wireReleaseCandidateTools(){
+  document.querySelectorAll(".copyReservation").forEach(button=>{
+    button.addEventListener("click",async()=>{
+      try{
+        await navigator.clipboard.writeText(button.dataset.copy||"");
+        const old=button.textContent;
+        button.textContent="Copied ✓";
+        setTimeout(()=>button.textContent=old,1200);
+      }catch(e){}
+    });
+  });
+  document.querySelectorAll("[data-readiness]").forEach(box=>{
+    box.addEventListener("change",()=>{
+      const state=readReadiness();
+      state[box.dataset.readiness]=box.checked;
+      saveReadiness(state);
+      const host=document.querySelector("#readinessHost");
+      if(host){
+        host.innerHTML=readinessMarkup();
+        wireReleaseCandidateTools();
+      }
+    });
+  });
 }
 
 function dashboardMarkup(d){
@@ -279,6 +402,7 @@ if(v==="trip")s.innerHTML=`<h3>🎒 Trip Snapshot</h3><p><b>Dates:</b> August 7�
 if(v==="companion")s.innerHTML=`<h3>🌿 Remy's Corner</h3><div class="brandStamp"><img src="icon-192.png" alt=""><span><strong>Adventure Companion</strong><small>Making New Traditions</small></span></div><div class=remy>The itinerary supports the experience; it does not have to control it.</div><p class=info>During the trip, each daily page keeps timing, stop-by-stop navigation, parking, food, photos, Plan B, budget, and the reason the day matters together in one place. Family members can use the same shared link.</p>`;
 $$("[data-open]").forEach(b=>b.onclick=()=>showDay(b.dataset.open));s.scrollIntoView({behavior:"smooth",block:"start"})}
 function showDay(date){const d=DATA.days.find(x=>x.date===date);if(!d)return;const s=$("#screen");s.hidden=false;s.innerHTML=`<div class=dayHead><button class=back data-back>← Week</button><span class=dayPosition>Day ${dayNumber(date)} of ${DATA.days.length}</span></div>\n${dashboardMarkup(d)}\n<div class=dayHero><small>${d.short} · ${d.theme}</small><h3>${d.title}</h3><p>${d.why}</p><div class=dayChips><span>🚗 ${d.drive}</span><span>💵 ${d.budget}</span><span>📸 Photo moments</span></div></div>
+${reservationMarkup(d)}
 ${smartStopsMarkup(d)}\n<div class=reservationSummary><span><b>🍽️ Food plan</b><small>${d.food}</small></span><strong>›</strong></div><div class=why><b>◆ Why this day matters</b><br>${d.why}</div><div class=timeline>${d.schedule.map(e=>`<div class=event><time>${e[0]}</time><span>${e[1]}</span></div>`).join("")}</div>
 <details open><summary>Route, driving & parking</summary><p class=info><b>Route:</b> ${d.route}<br><b>Driving:</b> ${d.drive}<br><b>Parking:</b> ${d.parking}<br><b>Crowd strategy:</b> ${d.crowds}</p></details>
 <details><summary>Foodie callout</summary><p class=info><b>Restaurant:</b> ${d.food}<br><b>Signature dishes:</b> ${d.dishes}<br><b>Dessert:</b> ${d.dessert}</p></details>
@@ -368,3 +492,25 @@ if("serviceWorker" in navigator){
 }else{
   window.addEventListener("load",wireBuildTools);
 }
+
+window.addEventListener("load",()=>{
+  let host=document.querySelector("#readinessHost");
+  if(!host){
+    const main=document.querySelector("main");
+    if(main){
+      host=document.createElement("div");
+      host.id="readinessHost";
+      host.innerHTML=readinessMarkup();
+      main.appendChild(host);
+    }
+  }
+  wireReleaseCandidateTools();
+});
+
+const releaseObserver=new MutationObserver(()=>{
+  wireReleaseCandidateTools();
+});
+window.addEventListener("load",()=>{
+  const root=document.querySelector("main")||document.body;
+  releaseObserver.observe(root,{childList:true,subtree:true});
+});
