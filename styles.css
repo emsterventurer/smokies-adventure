@@ -804,3 +804,12 @@ a[data-view="private"],
   .nextRoute{padding-left:8px!important;padding-right:8px!important}
   .nextDriveTime{font-size:.64rem}
 }
+
+
+/* M3-02.5 — Start cards and stable baseline polish */
+.stopCard.startStop{border-color:#b7c7b9;background:linear-gradient(135deg,#f6faf5,#edf4ed)}
+.stopCard.startStop .stopOrder{background:#dfeadf;color:var(--f)}
+.stopCard.startStop .stopOrder span{font-size:.68rem;letter-spacing:.02em;font-weight:800}
+.stopCard.startStop .stopTitle h4{font-size:1.15rem}
+.startAddress{margin:.25rem 0 0;color:var(--mut);font-size:.78rem;line-height:1.35}
+.stopCard.startStop .nextRoute{box-shadow:inset 0 0 0 1px rgba(31,72,52,.12)}
