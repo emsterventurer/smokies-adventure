@@ -1,32 +1,41 @@
-# Adventure Companion — Commit #009
+# Adventure Companion — Commit #010
 
-## Milestone 2, Part 2: Smart Stop Cards & Navigation
+## Development Mode & Update Prompt
 
 This build adds:
 
-- Smart stop cards for all eight adventure days
-- Stop time, purpose, expected duration, and practical tip
-- One-tap Waze navigation for every destination
-- One-tap Google Maps search for every destination
-- Google stop-to-stop driving links connecting each planned stop to the next
-- A visual numbered route through each day
-- Clear end-of-route status on the final stop
-- Updated Daily Adventure and Companion language
+- A visible development badge showing the current commit
+- Tap-to-expand build information
+- Automatic service-worker update checks whenever the app opens
+- An “Adventure Companion has an update” notification
+- A one-tap **Refresh now** button
+- Automatic reload after the new service worker takes control
+- Improved cache handling so new builds appear more reliably
+- Offline fallback retained
 
-## Navigation behavior
+## Current build
 
-- **Waze** opens the destination and routes from the phone’s current location.
-- **Google Maps** opens the selected place.
-- **Next: ...** opens driving directions from the current planned stop to the following planned stop.
-
-The destination links use place searches rather than fragile coordinates so they remain useful if a business entrance or listing changes.
+- Version: Commit #010
+- Feature: Development Mode & Update Prompt
+- Updated: July 18, 2026
 
 ## Publish
 
-Upload every file in this folder to the root of the existing `smokies-adventure` repository and replace the prior versions.
+Upload every file in this folder to the root of the existing `smokies-adventure` repository and replace the previous versions.
 
 Suggested commit message:
 
-`Commit #009 — Smart Stop Cards & Navigation`
+`Commit #010 — Development Mode & Update Prompt`
 
-GitHub Pages should redeploy automatically after the commit reaches the publishing branch.
+GitHub Pages should redeploy automatically.
+
+## Phone behavior
+
+After this build is live:
+
+1. Open Adventure Companion from the phone's Home Screen.
+2. The badge should show **Commit #010**.
+3. On future deployments, the app checks for a new service worker.
+4. When a new build is detected, tap **Refresh now**.
+
+The development badge can be removed or hidden before the family launch.

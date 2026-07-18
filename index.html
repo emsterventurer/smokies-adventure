@@ -18,10 +18,28 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="Adventure Companion">
 
+<meta name="adventure-companion-build" content="Commit #010">
+<meta name="adventure-companion-build-date" content="July 18, 2026">
+
+
 
 <title>Adventure Companion · Family Premiere</title>
 <link rel="stylesheet" href="styles.css"></head>
 <body>
+
+<div id="devBadge" class="devBadge" role="status" aria-label="Current build">
+  <span class="devDot"></span>
+  <span><strong>Commit #010</strong><small>Development build</small></span>
+</div>
+
+<div id="updateToast" class="updateToast" hidden>
+  <div>
+    <strong>Adventure Companion has an update</strong>
+    <small>A newer build is ready.</small>
+  </div>
+  <button id="refreshApp" type="button">Refresh now</button>
+  <button id="dismissUpdate" class="dismissUpdate" type="button" aria-label="Dismiss update">×</button>
+</div>
 
 <div id="brandSplash" class="brandSplash" aria-hidden="true">
   <div class="brandSplashInner">

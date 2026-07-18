@@ -1,4 +1,51 @@
 
+const APP_BUILD={
+  version:"Commit #010",
+  label:"Development Mode & Update Prompt",
+  date:"July 18, 2026"
+};
+
+function showUpdateToast(){
+  const toast=document.querySelector("#updateToast");
+  if(!toast)return;
+  toast.hidden=false;
+  requestAnimationFrame(()=>toast.classList.add("show"));
+}
+
+function hideUpdateToast(){
+  const toast=document.querySelector("#updateToast");
+  if(!toast)return;
+  toast.classList.remove("show");
+  setTimeout(()=>toast.hidden=true,250);
+}
+
+function activateWaitingWorker(reg){
+  if(reg?.waiting){
+    reg.waiting.postMessage({type:"SKIP_WAITING"});
+  }
+}
+
+function wireBuildTools(){
+  const badge=document.querySelector("#devBadge");
+  if(badge){
+    badge.title=`${APP_BUILD.version} — ${APP_BUILD.label} — ${APP_BUILD.date}`;
+    badge.addEventListener("click",()=>{
+      badge.classList.toggle("expanded");
+    });
+  }
+
+  document.querySelector("#dismissUpdate")?.addEventListener("click",hideUpdateToast);
+
+  document.querySelector("#refreshApp")?.addEventListener("click",async()=>{
+    try{
+      const reg=await navigator.serviceWorker?.getRegistration();
+      activateWaitingWorker(reg);
+    }catch(e){}
+    window.location.reload();
+  });
+}
+
+
 window.addEventListener("load",()=>{
   const splash=$("#brandSplash");
   setTimeout(()=>splash?.classList.add("hide"),900);
@@ -171,4 +218,37 @@ function familyQuestionFor(date){
 
 if("serviceWorker" in navigator){
   window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));
+}
+
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",async()=>{
+    wireBuildTools();
+    try{
+      const reg=await navigator.serviceWorker.register("service-worker.js");
+
+      if(reg.waiting){
+        showUpdateToast();
+      }
+
+      reg.addEventListener("updatefound",()=>{
+        const worker=reg.installing;
+        if(!worker)return;
+        worker.addEventListener("statechange",()=>{
+          if(worker.state==="installed" && navigator.serviceWorker.controller){
+            showUpdateToast();
+          }
+        });
+      });
+
+      navigator.serviceWorker.addEventListener("controllerchange",()=>{
+        window.location.reload();
+      });
+
+      // Check for a newer deployment whenever the app opens.
+      reg.update().catch(()=>{});
+    }catch(e){}
+  });
+}else{
+  window.addEventListener("load",wireBuildTools);
 }
