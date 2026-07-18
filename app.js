@@ -1,7 +1,7 @@
 
 const APP_BUILD={
-  version:"M3-01",
-  label:"Private Trip Details",
+  version:"M3-01/02",
+  label:"Reservation Enhancements & Manager",
   date:"July 18, 2026"
 };
 
@@ -250,10 +250,7 @@ function smartStopsMarkup(d){
 
 
 
-const PRIVATE_DETAILS_KEY="adventureCompanionPrivateDetailsV1";
-const PRIVATE_PIN_KEY="adventureCompanionPrivatePinV1";
-const PRIVATE_SESSION_KEY="adventureCompanionPrivateUnlocked";
-let privateUnlocked=sessionStorage.getItem(PRIVATE_SESSION_KEY)==="1";
+const RESERVATION_OVERRIDES_KEY="adventureCompanionReservationOverridesV1";
 
 function escapeHtml(value){
   return String(value??"").replace(/[&<>"']/g,ch=>({
@@ -271,251 +268,149 @@ function safeUrl(value){
   }catch(e){return ""}
 }
 
-function privateId(date,item,index){
+function reservationKey(date,index,item){
   return `${date}::${index}::${item.name}`;
 }
 
-function readPrivateDetails(){
-  try{return JSON.parse(localStorage.getItem(PRIVATE_DETAILS_KEY)||"{}")}catch(e){return {}}
+function readReservationOverrides(){
+  try{return JSON.parse(localStorage.getItem(RESERVATION_OVERRIDES_KEY)||"{}")}catch(e){return {}}
 }
 
-function savePrivateDetails(data){
-  localStorage.setItem(PRIVATE_DETAILS_KEY,JSON.stringify(data));
+function saveReservationOverrides(data){
+  localStorage.setItem(RESERVATION_OVERRIDES_KEY,JSON.stringify(data));
 }
 
-function getPrivateRecord(date,item,index){
-  const all=readPrivateDetails();
-  return all[privateId(date,item,index)]||{};
+function getReservationRecord(date,item,index){
+  const overrides=readReservationOverrides();
+  const saved=overrides[reservationKey(date,index,item)]||{};
+  return {
+    confirmation:saved.confirmation ?? "",
+    ticketUrl:saved.ticketUrl ?? "",
+    documentUrl:saved.documentUrl ?? "",
+    parkingNotes:saved.parkingNotes ?? "",
+    phone:saved.phone ?? item.phone ?? "",
+    website:saved.website ?? item.website ?? "",
+    notes:saved.notes ?? item.notes ?? "",
+    status:saved.status ?? item.status ?? "Pending"
+  };
 }
 
-function hasPrivatePin(){
-  return Boolean(localStorage.getItem(PRIVATE_PIN_KEY));
-}
-
-async function hashPin(pin){
-  const text=new TextEncoder().encode(`AdventureCompanion:${pin}`);
-  if(window.crypto?.subtle){
-    const hash=await crypto.subtle.digest("SHA-256",text);
-    return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,"0")).join("");
-  }
-  return btoa(`AdventureCompanion:${pin}`);
-}
-
-function privateIntroMarkup(){
-  const setup=!hasPrivatePin();
-  return `<section class="privateGate">
-    <div class="privateGateIcon">🔐</div>
-    <span class="eyebrow">M3-01 · ORGANIZER SPACE</span>
-    <h2>${setup?"Set up Private Trip Details":"Unlock Private Trip Details"}</h2>
-    <p>${setup
-      ?"Create a 4–8 digit organizer PIN. Confirmation numbers and links will be saved only in this browser on this device."
-      :"Enter the organizer PIN to view or edit locally saved trip details."}</p>
-    <label class="privatePinLabel">
-      Organizer PIN
-      <input id="privatePinInput" type="password" inputmode="numeric" autocomplete="off" minlength="4" maxlength="8" placeholder="4–8 digits">
-    </label>
-    ${setup?`<label class="privatePinLabel">
-      Confirm PIN
-      <input id="privatePinConfirm" type="password" inputmode="numeric" autocomplete="off" minlength="4" maxlength="8" placeholder="Repeat PIN">
-    </label>`:""}
-    <button id="privateUnlock" class="privatePrimary" type="button">${setup?"Create private space":"Unlock"}</button>
-    <p id="privateGateMessage" class="privateMessage" aria-live="polite"></p>
-    <div class="privateNotice">
-      <strong>Local privacy, not bank-level security</strong>
-      <span>This keeps details out of the public GitHub files and out of the shared family view. Anyone with access to this browser’s storage could potentially retrieve them.</span>
-    </div>
-  </section>`;
-}
-
-function privateManagerMarkup(){
-  const all=readPrivateDetails();
+function managerMarkup(){
   const groups=Object.entries(RESERVATION_DATA).filter(([,items])=>items.length);
-  const savedCount=Object.keys(all).filter(k=>Object.values(all[k]||{}).some(Boolean)).length;
-  return `<section class="privateManager">
-    <div class="privateManagerHead">
+  return `<section class="reservationManager">
+    <div class="reservationManagerHead">
       <div>
-        <span class="eyebrow">M3-01 · PRIVATE TRIP DETAILS</span>
-        <h2>Organizer Reservation Vault</h2>
-        <p>Save confirmations, ticket links, booking-document links, phone numbers, and parking notes without publishing them in the family app.</p>
+        <span class="eyebrow">M3-01/02 · SHARED TRIP DETAILS</span>
+        <h2>Manage Reservations</h2>
+        <p>Add or update confirmation numbers, ticket links, reservation documents, parking notes, phone numbers, websites, and status. Saved information appears on the shared reservation cards.</p>
       </div>
-      <button id="privateLock" class="privateSecondary" type="button">🔒 Lock</button>
+      <button id="resetReservationDetails" class="managerSecondary" type="button">Reset saved edits</button>
     </div>
-    <div class="privateSummary">
-      <article><strong>${groups.reduce((n,[,items])=>n+items.length,0)}</strong><span>reservations</span></article>
-      <article><strong>${savedCount}</strong><span>with private details</span></article>
-      <article><strong>Local</strong><span>this device only</span></article>
+    <div class="managerNotice">
+      These details are stored in this browser. They are visible to anyone using this copy of the app, but they do not automatically sync to a different device.
     </div>
-    <div class="privateToolbar">
-      <button id="privateExpandAll" type="button">Expand all</button>
-      <button id="privateCollapseAll" type="button">Collapse all</button>
-      <button id="privateClearAll" class="dangerText" type="button">Clear private data</button>
-    </div>
-    <div class="privateGroups">${groups.map(([date,items])=>`
-      <section class="privateDayGroup">
+    <div class="reservationManagerGroups">${groups.map(([date,items])=>`
+      <section class="managerDay">
         <h3>${dateLabel(date)}</h3>
-        ${items.map((item,index)=>privateEditorMarkup(date,item,index)).join("")}
+        ${items.map((item,index)=>managerEditorMarkup(date,item,index)).join("")}
       </section>`).join("")}
     </div>
-    <div class="privateFooterNotice">
-      <strong>Important:</strong> Private details do not sync to another phone or browser. Keep your original confirmation emails as the source of truth.
-    </div>
   </section>`;
 }
 
-function privateEditorMarkup(date,item,index){
-  const rec=getPrivateRecord(date,item,index);
-  const hasData=Object.values(rec).some(Boolean);
-  const id=privateId(date,item,index);
-  return `<details class="privateReservation" data-private-id="${escapeHtml(id)}" ${hasData?"":"open"}>
+function managerEditorMarkup(date,item,index){
+  const rec=getReservationRecord(date,item,index);
+  const key=reservationKey(date,index,item);
+  return `<details class="managerReservation">
     <summary>
-      <span class="privateReservationIcon">${item.icon}</span>
-      <span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.time)} · ${escapeHtml(item.status)}</small></span>
-      <b>${hasData?"Saved":"Add details"}</b>
+      <span class="managerIcon">${item.icon}</span>
+      <span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.time)} · ${escapeHtml(rec.status)}</small></span>
+      <b>Edit</b>
     </summary>
-    <form class="privateForm" data-private-form="${escapeHtml(id)}">
-      <input type="hidden" name="date" value="${escapeHtml(date)}">
-      <input type="hidden" name="index" value="${index}">
-      <div class="privateFormGrid">
+    <form class="managerForm" data-reservation-form="${escapeHtml(key)}">
+      <div class="managerGrid">
         <label>Confirmation number
-          <input name="confirmation" value="${escapeHtml(rec.confirmation||"")}" placeholder="Example: ABC12345" autocomplete="off">
+          <input name="confirmation" value="${escapeHtml(rec.confirmation)}" placeholder="Example: ABC12345">
+        </label>
+        <label>Status
+          <select name="status">
+            ${["Confirmed","Pending","Action Needed"].map(s=>`<option ${rec.status===s?"selected":""}>${s}</option>`).join("")}
+          </select>
         </label>
         <label>Contact phone
-          <input name="phone" type="tel" value="${escapeHtml(rec.phone||"")}" placeholder="Optional">
+          <input name="phone" type="tel" value="${escapeHtml(rec.phone)}" placeholder="Optional">
+        </label>
+        <label>Website
+          <input name="website" type="url" value="${escapeHtml(rec.website)}" placeholder="https://…">
         </label>
         <label class="wide">Ticket or reservation link
-          <input name="ticketUrl" type="url" value="${escapeHtml(rec.ticketUrl||"")}" placeholder="https://…">
+          <input name="ticketUrl" type="url" value="${escapeHtml(rec.ticketUrl)}" placeholder="https://…">
         </label>
-        <label class="wide">Booking document link
-          <input name="documentUrl" type="url" value="${escapeHtml(rec.documentUrl||"")}" placeholder="Google Drive, email, or secure document link">
+        <label class="wide">Reservation document link
+          <input name="documentUrl" type="url" value="${escapeHtml(rec.documentUrl)}" placeholder="https://…">
         </label>
-        <label class="wide">Parking or check-in notes
-          <textarea name="parkingNotes" rows="2" placeholder="Where to park, arrival time, entrance, or check-in instructions">${escapeHtml(rec.parkingNotes||"")}</textarea>
+        <label class="wide">Parking notes
+          <textarea name="parkingNotes" rows="2" placeholder="Parking lot, entrance, arrival or check-in guidance">${escapeHtml(rec.parkingNotes)}</textarea>
         </label>
-        <label class="wide">Private organizer notes
-          <textarea name="notes" rows="2" placeholder="Anything useful that should not appear in the family view">${escapeHtml(rec.notes||"")}</textarea>
+        <label class="wide">Trip notes
+          <textarea name="notes" rows="2" placeholder="Shared notes for the family">${escapeHtml(rec.notes)}</textarea>
         </label>
       </div>
-      <div class="privateFormActions">
-        <button class="privateSave" type="submit">Save details</button>
-        ${rec.ticketUrl?`<a href="${escapeHtml(safeUrl(rec.ticketUrl))}" target="_blank" rel="noopener">🎟️ Open ticket</a>`:""}
-        ${rec.documentUrl?`<a href="${escapeHtml(safeUrl(rec.documentUrl))}" target="_blank" rel="noopener">📄 Open document</a>`:""}
-        <button class="privateDelete" type="button">Remove saved details</button>
+      <div class="managerActions">
+        <button class="managerSave" type="submit">Save reservation</button>
+        <button class="managerClear" type="button">Clear custom details</button>
+        <span class="managerStatus" aria-live="polite"></span>
       </div>
-      <p class="privateSaveStatus" aria-live="polite"></p>
     </form>
   </details>`;
 }
 
-async function handlePrivateGate(){
-  const pin=document.querySelector("#privatePinInput")?.value.trim()||"";
-  const message=document.querySelector("#privateGateMessage");
-  if(!/^\d{4,8}$/.test(pin)){
-    if(message)message.textContent="Use a 4–8 digit PIN.";
-    return;
-  }
-  if(!hasPrivatePin()){
-    const confirmPin=document.querySelector("#privatePinConfirm")?.value.trim()||"";
-    if(pin!==confirmPin){
-      if(message)message.textContent="The PINs do not match.";
-      return;
-    }
-    localStorage.setItem(PRIVATE_PIN_KEY,await hashPin(pin));
-  }else{
-    const expected=localStorage.getItem(PRIVATE_PIN_KEY);
-    if(await hashPin(pin)!==expected){
-      if(message)message.textContent="That PIN did not match.";
-      return;
-    }
-  }
-  privateUnlocked=true;
-  sessionStorage.setItem(PRIVATE_SESSION_KEY,"1");
-  renderPrivateScreen();
-}
-
-function renderPrivateScreen(){
-  const s=document.querySelector("#screen");
-  if(!s)return;
-  s.hidden=false;
-  s.innerHTML=privateUnlocked?privateManagerMarkup():privateIntroMarkup();
-  wirePrivateScreen();
-  s.scrollIntoView({behavior:"smooth",block:"start"});
-}
-
-function wirePrivateScreen(){
-  document.querySelector("#privateUnlock")?.addEventListener("click",handlePrivateGate);
-  document.querySelector("#privatePinInput")?.addEventListener("keydown",e=>{
-    if(e.key==="Enter")handlePrivateGate();
-  });
-  document.querySelector("#privateLock")?.addEventListener("click",()=>{
-    privateUnlocked=false;
-    sessionStorage.removeItem(PRIVATE_SESSION_KEY);
-    renderPrivateScreen();
-  });
-  document.querySelector("#privateExpandAll")?.addEventListener("click",()=>{
-    document.querySelectorAll(".privateReservation").forEach(d=>d.open=true);
-  });
-  document.querySelector("#privateCollapseAll")?.addEventListener("click",()=>{
-    document.querySelectorAll(".privateReservation").forEach(d=>d.open=false);
-  });
-  document.querySelector("#privateClearAll")?.addEventListener("click",()=>{
-    if(confirm("Remove every locally saved confirmation, link, phone number, and private note?")){
-      localStorage.removeItem(PRIVATE_DETAILS_KEY);
-      renderPrivateScreen();
+function wireReservationManager(){
+  document.querySelector("#resetReservationDetails")?.addEventListener("click",()=>{
+    if(confirm("Reset all reservation edits saved in this browser?")){
+      localStorage.removeItem(RESERVATION_OVERRIDES_KEY);
+      renderReservationManager();
     }
   });
-  document.querySelectorAll("[data-private-form]").forEach(form=>{
+  document.querySelectorAll("[data-reservation-form]").forEach(form=>{
     form.addEventListener("submit",e=>{
       e.preventDefault();
       const data=new FormData(form);
-      const key=form.dataset.privateForm;
-      const all=readPrivateDetails();
-      const record={
+      const all=readReservationOverrides();
+      const key=form.dataset.reservationForm;
+      all[key]={
         confirmation:String(data.get("confirmation")||"").trim(),
+        status:String(data.get("status")||"Pending"),
         phone:String(data.get("phone")||"").trim(),
+        website:safeUrl(data.get("website")),
         ticketUrl:safeUrl(data.get("ticketUrl")),
         documentUrl:safeUrl(data.get("documentUrl")),
         parkingNotes:String(data.get("parkingNotes")||"").trim(),
         notes:String(data.get("notes")||"").trim(),
         updatedAt:new Date().toISOString()
       };
-      all[key]=record;
-      savePrivateDetails(all);
-      const status=form.querySelector(".privateSaveStatus");
-      if(status)status.textContent="✓ Saved on this device";
-      const details=form.closest(".privateReservation");
-      const badge=details?.querySelector("summary b");
-      if(badge)badge.textContent="Saved";
-      setTimeout(()=>{if(status)status.textContent=""},2200);
+      saveReservationOverrides(all);
+      const status=form.querySelector(".managerStatus");
+      if(status)status.textContent="✓ Saved";
+      setTimeout(()=>{if(status)status.textContent=""},1800);
     });
-    form.querySelector(".privateDelete")?.addEventListener("click",()=>{
-      const key=form.dataset.privateForm;
-      if(confirm("Remove the saved private details for this reservation?")){
-        const all=readPrivateDetails();
-        delete all[key];
-        savePrivateDetails(all);
-        renderPrivateScreen();
-      }
+    form.querySelector(".managerClear")?.addEventListener("click",()=>{
+      const all=readReservationOverrides();
+      delete all[form.dataset.reservationForm];
+      saveReservationOverrides(all);
+      renderReservationManager();
     });
   });
 }
 
-function privateDaySummaryMarkup(date){
-  if(!privateUnlocked)return "";
-  const items=RESERVATION_DATA[date]||[];
-  const rows=items.map((item,index)=>({item,rec:getPrivateRecord(date,item,index)}))
-    .filter(x=>Object.values(x.rec).some(Boolean));
-  if(!rows.length)return "";
-  return `<section class="privateDaySummary">
-    <div class="privateDaySummaryHead"><span>🔐 Organizer details</span><button type="button" data-view="private">Manage all</button></div>
-    ${rows.map(({item,rec})=>`<article>
-      <strong>${escapeHtml(item.name)}</strong>
-      ${rec.confirmation?`<span>Confirmation: ${escapeHtml(rec.confirmation)}</span>`:""}
-      ${rec.phone?`<a href="tel:${escapeHtml(rec.phone)}">📞 Call</a>`:""}
-      ${rec.ticketUrl?`<a href="${escapeHtml(safeUrl(rec.ticketUrl))}" target="_blank" rel="noopener">🎟️ Ticket</a>`:""}
-      ${rec.documentUrl?`<a href="${escapeHtml(safeUrl(rec.documentUrl))}" target="_blank" rel="noopener">📄 Document</a>`:""}
-      ${rec.parkingNotes?`<small>${escapeHtml(rec.parkingNotes)}</small>`:""}
-    </article>`).join("")}
-  </section>`;
+function renderReservationManager(){
+  const s=document.querySelector("#screen");
+  if(!s)return;
+  s.hidden=false;
+  s.innerHTML=managerMarkup();
+  wireReservationManager();
+  $$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));
+  s.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 const READINESS_KEY="adventureCompanionReadiness";
@@ -536,26 +431,28 @@ function reservationMarkup(d){
       <span>${items.length} item${items.length===1?"":"s"}</span>
     </div>
     <div class="reservationCards">${items.map((item,index)=>{
-      const rec=privateUnlocked?getPrivateRecord(d.date,item,index):{};
+      const rec=getReservationRecord(d.date,item,index);
+      const status=statusClass(rec.status);
       return `<article class="reservationCard">
         <div class="reservationTop">
           <span class="reservationIcon">${item.icon}</span>
-          <div><small>${item.time}</small><h4>${item.name}</h4></div>
-          <span class="reservationStatus ${statusClass(item.status)}">${item.status}</span>
+          <div><small>${escapeHtml(item.time)}</small><h4>${escapeHtml(item.name)}</h4></div>
+          <span class="reservationStatus ${status}">${escapeHtml(rec.status)}</span>
         </div>
-        <div class="reservationDetails">
-          <div><span>Family view</span><strong>${item.confirmation}</strong></div>
-          <p>${item.notes}</p>
-          ${privateUnlocked&&rec.confirmation?`<div class="unlockedConfirmation"><span>🔐 Confirmation</span><strong>${escapeHtml(rec.confirmation)}</strong></div>`:""}
+        <div class="reservationDetails enhanced">
+          ${rec.confirmation?`<div><span>Confirmation #</span><strong>${escapeHtml(rec.confirmation)}</strong></div>`:""}
+          ${rec.phone?`<div><span>Contact</span><strong>${escapeHtml(rec.phone)}</strong></div>`:""}
+          ${rec.parkingNotes?`<div class="wideDetail"><span>🅿️ Parking</span><strong>${escapeHtml(rec.parkingNotes)}</strong></div>`:""}
+          ${rec.notes?`<p>${escapeHtml(rec.notes)}</p>`:""}
         </div>
         <div class="reservationActions">
-          ${item.phone?`<a href="tel:${item.phone}">📞 Call</a>`:""}
-          ${item.website?`<a href="${item.website}" target="_blank" rel="noopener">🌐 Website</a>`:""}
-          ${privateUnlocked&&rec.ticketUrl?`<a href="${escapeHtml(safeUrl(rec.ticketUrl))}" target="_blank" rel="noopener">🎟️ Ticket</a>`:""}
-          ${privateUnlocked&&rec.documentUrl?`<a href="${escapeHtml(safeUrl(rec.documentUrl))}" target="_blank" rel="noopener">📄 Document</a>`:""}
+          ${rec.phone?`<a href="tel:${escapeHtml(rec.phone)}">📞 Call</a>`:""}
+          ${rec.website?`<a href="${escapeHtml(safeUrl(rec.website))}" target="_blank" rel="noopener">🌐 Website</a>`:""}
+          ${rec.ticketUrl?`<a href="${escapeHtml(safeUrl(rec.ticketUrl))}" target="_blank" rel="noopener">🎟️ Tickets / Reservation</a>`:""}
+          ${rec.documentUrl?`<a href="${escapeHtml(safeUrl(rec.documentUrl))}" target="_blank" rel="noopener">📄 Reservation Document</a>`:""}
         </div>
       </article>`}).join("")}</div>
-    <button class="privateAccessButton" data-view="private" type="button">🔐 ${privateUnlocked?"Manage private details":"Organizer private details"}</button>
+    <button class="manageReservationsButton" data-view="manageReservations" type="button">✏️ Manage reservation details</button>
   </section>`
 }
 
@@ -629,7 +526,7 @@ function dashboardMarkup(d){
       <article><small>📍 FIRST STOP</small><strong>${x.first||d.schedule[0][1]}</strong></article>
       <article><small>🎟️ KEY BOOKING</small><strong>${x.reservation||"No timed booking"}</strong></article>
       <article><small>🚗 DRIVE</small><strong>${d.drive}</strong></article>
-      <article><small>🌤️ WEATHER</small><strong>Live forecast in M3-03</strong></article>
+      <article><small>🌤️ WEATHER</small><strong>Live forecast coming in M3-03</strong></article>
       <article><small>🌅 SUNSET</small><strong>${x.sunset||"Check closer to trip"}</strong></article>
     </div>
     <div class="dashboardFooter"><span>🌿 ${x.pace||"Flexible pace"}</span><span class="weatherSoon">Weather connects in Milestone 3</span></div>
@@ -662,15 +559,23 @@ function bindCompletion(){
 }
 function view(v){$$("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===v));if(v==="home"){$("#screen").hidden=true;scrollTo({top:0,behavior:"smooth"});return}const s=$("#screen");s.hidden=false;
 if(v==="week")s.innerHTML=`<div class=weekHeading><div><span class=eyebrow>MILESTONE 3</span><h3>🗓️ Our Adventure Week</h3></div><span class=weekProgress>${completedDays().length}/8 complete</span></div><p class=info>Each day opens to a dashboard plus smart stop cards with Waze, Google Maps, and stop-to-stop route links.</p><div class=familyDayGrid>${DATA.days.map(d=>{const dt=new Date(d.date+"T12:00:00"),x=DAY_DASH[d.date],done=isComplete(d.date);return `<div class="familyDayCard ${done?"completed":""}"><button data-open="${d.date}"><span class=datePill><small>${dt.toLocaleDateString(undefined,{weekday:"short"})}</small><b>${dt.getDate()}</b></span><span class=summary><strong>${done?"✓ ":""}${d.title}</strong><small>${x.icon} ${x.leave} · ${x.reservation}</small><em>${x.focus}</em></span><span class=chev>›</span></button></div>`}).join("")}</div>`;
-if(v==="reservations")s.innerHTML=`<div class="reservationIndexHead"><div><span class="eyebrow">FAMILY VIEW</span><h3>🍽️ Reservations</h3></div><button class="privateAccessButton compact" data-view="private" type="button">🔐 Organizer details</button></div>${DATA.reservations.map(r=>`<div class=res><span><b>${r.name}</b><small>${r.date} · ${r.time}</small></span><strong class="${r.status==="Confirmed"?"confirmed":"pending"}">${r.status}</strong></div>`).join("")}`;
-if(v==="private"){renderPrivateScreen();return;}
+if(v==="reservations")s.innerHTML=`<div class="reservationIndexHead">
+  <div><span class="eyebrow">SHARED FAMILY VIEW</span><h3>🍽️ Reservations</h3></div>
+  <button class="manageReservationsButton compact" data-view="manageReservations" type="button">✏️ Manage</button>
+</div>${Object.entries(RESERVATION_DATA).filter(([,items])=>items.length).map(([date,items])=>`
+  <section class="reservationIndexDay"><h4>${dateLabel(date)}</h4>
+  ${items.map((item,index)=>{const rec=getReservationRecord(date,item,index);return `<article class="reservationIndexCard">
+    <span>${item.icon}</span>
+    <div><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.time)}${rec.confirmation?` · Confirmation ${escapeHtml(rec.confirmation)}`:""}</small></div>
+    <b class="${statusClass(rec.status)}">${escapeHtml(rec.status)}</b>
+  </article>`}).join("")}</section>`).join("")}`;
+if(v==="manageReservations"){renderReservationManager();return;}
 if(v==="traditions")s.innerHTML=`<h3>💚 Moments to Protect</h3><ul class=info>${DATA.traditions.map(t=>`<li>${t}</li>`).join("")}</ul>`;
 if(v==="trip")s.innerHTML=`<h3>🎒 Trip Snapshot</h3><p><b>Dates:</b> August 7–14, 2026</p><p><b>Home base:</b> ${DATA.trip.homeBase}</p><p><b>Travel party:</b> ${DATA.trip.party}</p><p><b>Priorities:</b> Stay together, place busy attractions on weekdays, eat well, minimize unnecessary driving, and preserve rest.</p>`;
 if(v==="companion")s.innerHTML=`<h3>🌿 Remy's Corner</h3><div class="brandStamp"><img src="icon-192.png" alt=""><span><strong>Adventure Companion</strong><small>Making New Traditions</small></span></div><div class=remy>The itinerary supports the experience; it does not have to control it.</div><p class=info>During the trip, each daily page keeps timing, stop-by-stop navigation, parking, food, photos, Plan B, and the reason the day matters together in one place. Family members can use the same shared link.</p>`;
 $$("[data-open]").forEach(b=>b.onclick=()=>showDay(b.dataset.open));$$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));s.scrollIntoView({behavior:"smooth",block:"start"})}
 function showDay(date){const d=DATA.days.find(x=>x.date===date);if(!d)return;const s=$("#screen");s.hidden=false;s.innerHTML=`<div class=dayHead><button class=back data-back>← Week</button><span class=dayPosition>Day ${dayNumber(date)} of ${DATA.days.length}</span></div>\n${dashboardMarkup(d)}\n<div class=dayHero><small>${d.short} · ${d.theme}</small><h3>${d.title}</h3><p>${d.why}</p><div class=dayChips><span>🚗 ${d.drive}</span><span>🌤️ Weather-ready day plan</span><span>📸 Photo moments</span></div></div>
 ${reservationMarkup(d)}
-${privateDaySummaryMarkup(d.date)}
 ${smartStopsMarkup(d)}\n<div class=reservationSummary><span><b>🍽️ Food plan</b><small>${d.food}</small></span><strong>›</strong></div><div class=why><b>◆ Why this day matters</b><br>${d.why}</div><div class=timeline>${d.schedule.map(e=>`<div class=event><time>${e[0]}</time><span>${e[1]}</span></div>`).join("")}</div>
 <details open><summary>Route, driving & parking</summary><p class=info><b>Route:</b> ${d.route}<br><b>Driving:</b> ${d.drive}<br><b>Parking:</b> ${d.parking}<br><b>Crowd strategy:</b> ${d.crowds}</p></details>
 <details><summary>Foodie callout</summary><p class=info><b>Restaurant:</b> ${d.food}<br><b>Signature dishes:</b> ${d.dishes}<br><b>Dessert:</b> ${d.dessert}</p></details>
@@ -804,7 +709,7 @@ function dismissAdventureIntro(skipNextTime){
 function wireAdventureIntroFix(){
   document.querySelectorAll("button,a").forEach(el=>{
     const text=(el.textContent||"").trim().toLowerCase();
-    if(text==="enter adventure" || text==="enter our adventure" || text==="start adventure"){
+    if(text==="enter adventure" || text==="start adventure"){
       if(el.dataset.introFixed==="1")return;
       el.dataset.introFixed="1";
       el.addEventListener("click",()=>dismissAdventureIntro(false),{capture:true});

@@ -1,31 +1,29 @@
-# Adventure Companion — M3-01
+# Adventure Companion — M3-01/02
 
-## Private Trip Details
+## Reservation Enhancements & Reservation Manager
 
-M3-01 begins Milestone 3 by separating organizer-only reservation information from the public family itinerary.
+This combined release keeps one shared family experience and adds richer reservation information plus editing directly inside the app.
 
 ### Included
 
-- Organizer Private Details screen
-- Optional 4–8 digit organizer PIN
-- Confirmation numbers
-- Ticket/reservation links
-- Booking-document links
+- Confirmation numbers shown on reservation cards
+- Ticket or reservation links
+- Reservation-document links
+- Parking notes
 - Contact phone numbers
-- Parking and check-in notes
-- Private organizer notes
-- Local browser storage only
-- Lock/unlock control for the current browser session
-- Private details shown within a day only while Organizer Space is unlocked
-- Budget tile removed from the family dashboard
-- Weather-ready dashboard tile added for M3-03
+- Website links
+- Shared family notes
+- Reservation status: Confirmed, Pending, or Action Needed
+- Manage Reservations screen
+- Add and update reservation details without editing JavaScript
+- Details saved in the current browser
+- Budget removed from the dashboard and Trip Readiness
+- Weather placeholder added for M3-03
 
-### Privacy model
+### Storage behavior
 
-Private information is not placed in the public app source or GitHub repository. It is stored in the browser's local storage on the device where it is entered.
+Edits are stored in the current browser's local storage. Everyone using that browser sees the same reservation information. The data does not automatically sync to another phone, tablet, or browser.
 
-The PIN is a casual privacy barrier, not strong encryption. Private details do not automatically sync across devices.
+### Suggested commit message
 
-### Suggested GitHub commit message
-
-`M3-01 — Add organizer-only private trip details`
+`M3-01/02 — Add shared reservation details and in-app manager`

@@ -479,93 +479,66 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:760px;
 
 
 /* =========================================================
-   M3-01 — Private Trip Details
+   M3-01/02 — Shared Reservation Enhancements & Manager
    ========================================================= */
-.privateGate,.privateManager{max-width:920px;margin:0 auto}
-.privateGate{text-align:center;padding:24px 8px}
-.privateGateIcon{font-size:3rem;margin-bottom:8px}
-.privateGate h2,.privateManager h2{margin:.25rem 0 .55rem;color:var(--forest,#294c3a)}
-.privateGate>p{max-width:610px;margin:0 auto 20px;color:#55645c}
-.privatePinLabel{display:block;max-width:360px;margin:12px auto;text-align:left;font-weight:700;color:#34483d}
-.privatePinLabel input,.privateForm input,.privateForm textarea{
+.manageReservationsButton,.managerSecondary{
+  border:0;border-radius:999px;padding:10px 15px;font-weight:800;cursor:pointer
+}
+.manageReservationsButton{background:#294c3a;color:#fff;margin-top:12px}
+.manageReservationsButton.compact{margin:0;white-space:nowrap;font-size:.8rem}
+.reservationDetails.enhanced{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.reservationDetails.enhanced .wideDetail,.reservationDetails.enhanced p{grid-column:1/-1}
+.reservationDetails.enhanced div{padding:9px 10px;border-radius:10px;background:#f3f7f4}
+.reservationDetails.enhanced span,.reservationDetails.enhanced strong{display:block}
+.reservationDetails.enhanced span{font-size:.72rem;color:#67756d;text-transform:uppercase;letter-spacing:.04em}
+.reservationDetails.enhanced strong{margin-top:3px;color:#2d4939}
+.reservationManager{max-width:950px;margin:0 auto}
+.reservationManagerHead{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
+.reservationManagerHead h2{margin:.25rem 0 .5rem;color:#294c3a}
+.reservationManagerHead p{margin:0;max-width:700px;color:#58685f;line-height:1.5}
+.managerSecondary{background:#eef3ef;color:#294c3a;white-space:nowrap}
+.managerNotice{margin:18px 0;padding:13px 15px;border-radius:13px;background:#fff8df;border:1px solid #eadca2;color:#5b5030}
+.managerDay{margin:22px 0}
+.managerDay>h3{margin:0 0 8px;color:#365745}
+.managerReservation{border:1px solid #d8e2dc;border-radius:15px;background:#fff;margin:10px 0;overflow:hidden}
+.managerReservation[open]{box-shadow:0 8px 24px rgba(36,66,48,.08)}
+.managerReservation summary{list-style:none;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:14px 15px;cursor:pointer;background:#f8fbf9}
+.managerReservation summary::-webkit-details-marker{display:none}
+.managerReservation summary span:nth-child(2) strong,.managerReservation summary span:nth-child(2) small{display:block}
+.managerReservation summary span:nth-child(2) small{color:#6e7b73;margin-top:2px}
+.managerReservation summary b{font-size:.75rem;color:#426751;background:#e5f0e9;padding:5px 9px;border-radius:999px}
+.managerIcon{font-size:1.4rem}
+.managerForm{padding:16px}
+.managerGrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.managerGrid label{font-size:.8rem;font-weight:800;color:#3d5145}
+.managerGrid label.wide{grid-column:1/-1}
+.managerGrid input,.managerGrid textarea,.managerGrid select{
   width:100%;box-sizing:border-box;margin-top:6px;border:1px solid #c8d3cc;border-radius:12px;
   background:#fff;padding:12px 13px;font:inherit;color:#24382d
 }
-.privatePinLabel input:focus,.privateForm input:focus,.privateForm textarea:focus{
-  outline:3px solid rgba(78,124,95,.18);border-color:#527a61
-}
-.privatePrimary,.privateSecondary,.privateAccessButton,.privateToolbar button{
-  border:0;border-radius:999px;padding:11px 16px;font-weight:800;cursor:pointer
-}
-.privatePrimary,.privateAccessButton{background:#294c3a;color:#fff}
-.privateSecondary,.privateToolbar button{background:#edf3ef;color:#294c3a}
-.privatePrimary{min-width:200px;margin-top:8px}
-.privateMessage{min-height:1.35em!important;margin:10px auto!important;color:#9a3f37!important;font-weight:700}
-.privateNotice,.privateFooterNotice{
-  max-width:650px;margin:24px auto 0;padding:14px 16px;border-radius:14px;background:#fff8df;
-  border:1px solid #eadca2;text-align:left;color:#5c5131
-}
-.privateNotice strong,.privateNotice span{display:block}
-.privateNotice span{margin-top:4px;font-size:.9rem;line-height:1.45}
-.privateManagerHead{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
-.privateManagerHead p{margin:.2rem 0;color:#5a6960;max-width:680px;line-height:1.5}
-.privateSummary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}
-.privateSummary article{padding:16px;border:1px solid #dce6df;border-radius:15px;background:#f8fbf9;text-align:center}
-.privateSummary strong,.privateSummary span{display:block}
-.privateSummary strong{font-size:1.35rem;color:#294c3a}
-.privateSummary span{font-size:.78rem;color:#66756c;margin-top:3px}
-.privateToolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
-.privateToolbar .dangerText{color:#9b3c37;background:#fff0ed}
-.privateDayGroup{margin:20px 0}
-.privateDayGroup>h3{margin:0 0 9px;color:#365745;font-size:1rem}
-.privateReservation{border:1px solid #d8e2dc;border-radius:15px;background:#fff;margin:10px 0;overflow:hidden}
-.privateReservation[open]{box-shadow:0 8px 24px rgba(36,66,48,.08)}
-.privateReservation summary{
-  list-style:none;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;
-  padding:14px 15px;cursor:pointer;background:#f8fbf9
-}
-.privateReservation summary::-webkit-details-marker{display:none}
-.privateReservationIcon{font-size:1.4rem}
-.privateReservation summary span:nth-child(2) strong,.privateReservation summary span:nth-child(2) small{display:block}
-.privateReservation summary span:nth-child(2) small{color:#6e7b73;margin-top:2px}
-.privateReservation summary b{font-size:.75rem;color:#426751;background:#e5f0e9;padding:5px 9px;border-radius:999px}
-.privateForm{padding:16px}
-.privateFormGrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
-.privateForm label{font-size:.8rem;font-weight:800;color:#3d5145}
-.privateForm label.wide{grid-column:1/-1}
-.privateForm textarea{resize:vertical;min-height:70px}
-.privateFormActions{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin-top:14px}
-.privateFormActions button,.privateFormActions a{
-  border:0;border-radius:999px;padding:9px 13px;font-weight:800;text-decoration:none;font-size:.83rem;cursor:pointer
-}
-.privateSave{background:#294c3a;color:#fff}
-.privateFormActions a{background:#edf3ef;color:#294c3a}
-.privateDelete{background:transparent;color:#9b3c37}
-.privateSaveStatus{margin:8px 0 0;color:#3f754e;font-weight:800;font-size:.8rem}
-.privateFooterNotice{max-width:none;margin-top:22px}
-.privateAccessButton{margin-top:12px}
-.privateAccessButton.compact{margin:0;white-space:nowrap;font-size:.78rem;padding:9px 12px}
-.reservationIndexHead,.privateDaySummaryHead{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.unlockedConfirmation{margin-top:10px;padding:9px 11px;border-radius:10px;background:#eef6f0}
-.unlockedConfirmation span,.unlockedConfirmation strong{display:block}
-.privateDaySummary{border:1px solid #bfd2c5;border-radius:16px;background:#f2f8f4;padding:14px;margin:16px 0}
-.privateDaySummaryHead{margin-bottom:8px}
-.privateDaySummaryHead span{font-weight:900;color:#294c3a}
-.privateDaySummaryHead button{border:0;background:transparent;color:#315e43;font-weight:800;cursor:pointer}
-.privateDaySummary article{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 0;border-top:1px solid #d8e5dc}
-.privateDaySummary article:first-of-type{border-top:0}
-.privateDaySummary article strong{min-width:180px}
-.privateDaySummary article span,.privateDaySummary article a,.privateDaySummary article small{font-size:.82rem}
-.privateDaySummary article a{text-decoration:none;background:#fff;border:1px solid #d4e0d8;padding:5px 8px;border-radius:999px;color:#294c3a}
-.privateDaySummary article small{flex-basis:100%;color:#607068}
+.managerGrid textarea{resize:vertical}
+.managerActions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:14px}
+.managerActions button{border:0;border-radius:999px;padding:9px 13px;font-weight:800;cursor:pointer}
+.managerSave{background:#294c3a;color:#fff}
+.managerClear{background:#fff0ed;color:#943b35}
+.managerStatus{color:#3f754e;font-weight:800}
+.reservationIndexHead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.reservationIndexDay{margin:18px 0}
+.reservationIndexDay h4{margin:0 0 8px;color:#365745}
+.reservationIndexCard{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:12px;border:1px solid #dfe7e2;border-radius:13px;margin:8px 0;background:#fff}
+.reservationIndexCard div strong,.reservationIndexCard div small{display:block}
+.reservationIndexCard div small{color:#6b786f;margin-top:2px}
+.reservationIndexCard>b{font-size:.75rem;padding:5px 8px;border-radius:999px}
+.reservationIndexCard>b.confirmed{background:#e4f1e7;color:#2f6b42}
+.reservationIndexCard>b.pending{background:#fff2ce;color:#80611d}
+.reservationIndexCard>b.action-needed{background:#fde7e2;color:#923b32}
 .quick{grid-template-columns:repeat(5,minmax(0,1fr))}
 @media(max-width:760px){
-  .privateManagerHead{display:block}
-  .privateManagerHead .privateSecondary{margin-top:12px}
-  .privateSummary{grid-template-columns:1fr 1fr}
-  .privateSummary article:last-child{grid-column:1/-1}
-  .privateFormGrid{grid-template-columns:1fr}
-  .privateForm label.wide{grid-column:auto}
-  .reservationIndexHead{align-items:flex-start}
+  .reservationManagerHead{display:block}
+  .reservationManagerHead .managerSecondary{margin-top:12px}
+  .managerGrid{grid-template-columns:1fr}
+  .managerGrid label.wide{grid-column:auto}
+  .reservationDetails.enhanced{grid-template-columns:1fr}
+  .reservationDetails.enhanced .wideDetail,.reservationDetails.enhanced p{grid-column:auto}
   .quick{grid-template-columns:1fr 1fr}
 }
