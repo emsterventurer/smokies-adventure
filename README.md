@@ -1,36 +1,32 @@
-# Adventure Companion — Commit #008
+# Adventure Companion — Commit #009
 
-## Milestone 2, Part 1: Daily Dashboard & Progress Trail
+## Milestone 2, Part 2: Smart Stop Cards & Navigation
 
 This build adds:
 
-- A Daily Dashboard for every adventure day
-- Leave-by time
-- First destination
-- Key reservation or ticket reminder
-- Estimated driving time
-- Daily budget
-- Sunset time
-- Day pace and focus
-- A persistent “Mark complete” control
-- A progress counter across the full trip
-- Completed-day styling in the Adventure Week
-- A progress trail that remembers completed days on the device
-- A preview of Day 1 from the planning home screen
-- A clear placeholder for live weather in Milestone 3
+- Smart stop cards for all eight adventure days
+- Stop time, purpose, expected duration, and practical tip
+- One-tap Waze navigation for every destination
+- One-tap Google Maps search for every destination
+- Google stop-to-stop driving links connecting each planned stop to the next
+- A visual numbered route through each day
+- Clear end-of-route status on the final stop
+- Updated Daily Adventure and Companion language
 
-## Publish to GitHub Pages
+## Navigation behavior
 
-Upload every file in this folder to the root of the existing `smokies-adventure` repository.
+- **Waze** opens the destination and routes from the phone’s current location.
+- **Google Maps** opens the selected place.
+- **Next: ...** opens driving directions from the current planned stop to the following planned stop.
 
-Replace the existing files when prompted.
+The destination links use place searches rather than fragile coordinates so they remain useful if a business entrance or listing changes.
+
+## Publish
+
+Upload every file in this folder to the root of the existing `smokies-adventure` repository and replace the prior versions.
 
 Suggested commit message:
 
-`Commit #008 — Daily Dashboard & Progress Trail`
+`Commit #009 — Smart Stop Cards & Navigation`
 
 GitHub Pages should redeploy automatically after the commit reaches the publishing branch.
-
-## Testing note
-
-Use the Preview Date control to move into August 7–14 and see the experience-day home dashboard. Completion progress is stored locally in the browser, so each family member can mark days complete independently on their own device.
