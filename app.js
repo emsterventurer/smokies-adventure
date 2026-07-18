@@ -1,9 +1,25 @@
 
 const APP_BUILD={
-  version:"Commit #010",
-  label:"Development Mode & Update Prompt",
+  version:"Commit #011",
+  label:"Feedback Mode & Build Visibility Fix",
   date:"July 18, 2026"
 };
+
+const FEEDBACK_KEY="adventureCompanionFeedback";
+let selectedFeedbackKind="";
+let selectedFeedbackRating=0;
+
+function openPanel(panel){
+  if(!panel)return;
+  panel.hidden=false;
+  requestAnimationFrame(()=>panel.classList.add("open"));
+}
+
+function closePanel(panel){
+  if(!panel)return;
+  panel.classList.remove("open");
+  setTimeout(()=>panel.hidden=true,220);
+}
 
 function showUpdateToast(){
   const toast=document.querySelector("#updateToast");
@@ -20,22 +36,120 @@ function hideUpdateToast(){
 }
 
 function activateWaitingWorker(reg){
-  if(reg?.waiting){
-    reg.waiting.postMessage({type:"SKIP_WAITING"});
+  if(reg?.waiting)reg.waiting.postMessage({type:"SKIP_WAITING"});
+}
+
+function currentScreenLabel(){
+  const activeDay=document.querySelector(".dayDetail:not([hidden]) h1, .dayDetail:not([hidden]) h2");
+  if(activeDay?.textContent)return activeDay.textContent.trim();
+  const heading=document.querySelector("main h1, main h2, .screen.active h1, .screen.active h2");
+  return heading?.textContent?.trim()||document.title||"Adventure Companion";
+}
+
+function readFeedback(){
+  try{return JSON.parse(localStorage.getItem(FEEDBACK_KEY)||"[]")}catch(e){return []}
+}
+
+function writeFeedback(items){
+  localStorage.setItem(FEEDBACK_KEY,JSON.stringify(items));
+}
+
+function renderSavedFeedback(){
+  const host=document.querySelector("#feedbackSaved");
+  if(!host)return;
+  const notes=readFeedback();
+  host.hidden=false;
+  if(!notes.length){
+    host.innerHTML="<p>No feedback saved yet.</p>";
+    return;
   }
+  host.innerHTML=`<div class="savedFeedbackHead"><strong>Saved feedback</strong><button id="clearFeedback" type="button">Clear all</button></div>
+    <div class="savedFeedbackList">${notes.slice().reverse().map(n=>`
+      <article>
+        <small>${n.kind||"note"} · ${n.rating?`${n.rating}/5`:"not rated"} · ${n.date}</small>
+        <strong>${n.screen}</strong>
+        <p>${String(n.note).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]))}</p>
+      </article>`).join("")}</div>`;
+  document.querySelector("#clearFeedback")?.addEventListener("click",()=>{
+    if(confirm("Clear all saved feedback notes?")){
+      writeFeedback([]);
+      renderSavedFeedback();
+    }
+  });
+}
+
+function resetFeedbackForm(){
+  selectedFeedbackKind="";
+  selectedFeedbackRating=0;
+  document.querySelectorAll(".feedbackKinds button").forEach(b=>b.classList.remove("selected"));
+  document.querySelectorAll(".feedbackStars button").forEach(b=>{
+    b.classList.remove("selected");
+    b.textContent="☆";
+  });
+  const note=document.querySelector("#feedbackNote");
+  if(note)note.value="";
+  const screen=document.querySelector("#feedbackScreen");
+  if(screen)screen.value=currentScreenLabel();
 }
 
 function wireBuildTools(){
-  const badge=document.querySelector("#devBadge");
-  if(badge){
-    badge.title=`${APP_BUILD.version} — ${APP_BUILD.label} — ${APP_BUILD.date}`;
-    badge.addEventListener("click",()=>{
-      badge.classList.toggle("expanded");
+  const buildPanel=document.querySelector("#buildPanel");
+  const feedbackPanel=document.querySelector("#feedbackPanel");
+
+  document.querySelector("#devBadge")?.addEventListener("click",()=>openPanel(buildPanel));
+  document.querySelector("#closeBuildPanel")?.addEventListener("click",()=>closePanel(buildPanel));
+
+  document.querySelector("#feedbackButton")?.addEventListener("click",()=>{
+    resetFeedbackForm();
+    openPanel(feedbackPanel);
+  });
+  document.querySelector("#closeFeedbackPanel")?.addEventListener("click",()=>closePanel(feedbackPanel));
+
+  document.querySelectorAll(".feedbackKinds button").forEach(button=>{
+    button.addEventListener("click",()=>{
+      selectedFeedbackKind=button.dataset.kind||"";
+      document.querySelectorAll(".feedbackKinds button").forEach(b=>b.classList.toggle("selected",b===button));
     });
-  }
+  });
 
+  document.querySelectorAll(".feedbackStars button").forEach(button=>{
+    button.addEventListener("click",()=>{
+      selectedFeedbackRating=Number(button.dataset.rating||0);
+      document.querySelectorAll(".feedbackStars button").forEach(b=>{
+        const active=Number(b.dataset.rating)<=selectedFeedbackRating;
+        b.classList.toggle("selected",active);
+        b.textContent=active?"★":"☆";
+      });
+    });
+  });
+
+  document.querySelector("#saveFeedback")?.addEventListener("click",()=>{
+    const screen=document.querySelector("#feedbackScreen")?.value.trim()||currentScreenLabel();
+    const note=document.querySelector("#feedbackNote")?.value.trim();
+    if(!note){
+      document.querySelector("#feedbackNote")?.focus();
+      return;
+    }
+    const items=readFeedback();
+    items.push({
+      kind:selectedFeedbackKind||"note",
+      rating:selectedFeedbackRating,
+      screen,
+      note,
+      build:APP_BUILD.version,
+      date:new Date().toLocaleString()
+    });
+    writeFeedback(items);
+    const saved=document.querySelector("#feedbackSaved");
+    if(saved){
+      saved.hidden=false;
+      saved.innerHTML='<p class="savedConfirmation">✓ Feedback saved on this device.</p>';
+    }
+    setTimeout(()=>closePanel(feedbackPanel),800);
+  });
+
+  document.querySelector("#viewFeedback")?.addEventListener("click",renderSavedFeedback);
   document.querySelector("#dismissUpdate")?.addEventListener("click",hideUpdateToast);
-
   document.querySelector("#refreshApp")?.addEventListener("click",async()=>{
     try{
       const reg=await navigator.serviceWorker?.getRegistration();
@@ -44,6 +158,8 @@ function wireBuildTools(){
     window.location.reload();
   });
 }
+
+
 
 
 window.addEventListener("load",()=>{

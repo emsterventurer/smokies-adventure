@@ -1,41 +1,40 @@
-# Adventure Companion — Commit #010
+# Adventure Companion — Commit #011
 
-## Development Mode & Update Prompt
+## Feedback Mode & Build Visibility Fix
 
-This build adds:
+This build fixes the missing development badge and adds Feedback Mode.
 
-- A visible development badge showing the current commit
-- Tap-to-expand build information
-- Automatic service-worker update checks whenever the app opens
-- An “Adventure Companion has an update” notification
-- A one-tap **Refresh now** button
-- Automatic reload after the new service worker takes control
-- Improved cache handling so new builds appear more reliably
-- Offline fallback retained
+### Build tools
 
-## Current build
+- Highly visible **Commit #011** badge in the upper-right corner
+- Badge is injected directly after the opening body tag so it appears reliably
+- Tap the badge to see version, milestone, feature, and update date
+- Works on desktop and mobile
 
-- Version: Commit #010
-- Feature: Development Mode & Update Prompt
-- Updated: July 18, 2026
+### Feedback Mode
+
+Tap the floating 📝 button to record:
+
+- Bug
+- Idea
+- Confusing experience
+- Something you love
+- Screen/day name
+- Written note
+- 1–5 star screen rating
+
+Feedback is stored locally on the current device. Use **View saved notes** to review it later.
+
+### Stop-card visibility
+
+Stop cards are available on both phone and desktop. They appear after opening an individual trip day. Desktop now uses a two-column stop-card layout where space allows.
 
 ## Publish
 
-Upload every file in this folder to the root of the existing `smokies-adventure` repository and replace the previous versions.
+Upload every file to the root of the existing `smokies-adventure` repository, replacing the current files.
 
 Suggested commit message:
 
-`Commit #010 — Development Mode & Update Prompt`
+`Commit #011 — Feedback Mode & Build Visibility Fix`
 
-GitHub Pages should redeploy automatically.
-
-## Phone behavior
-
-After this build is live:
-
-1. Open Adventure Companion from the phone's Home Screen.
-2. The badge should show **Commit #010**.
-3. On future deployments, the app checks for a new service worker.
-4. When a new build is detected, tap **Refresh now**.
-
-The development badge can be removed or hidden before the family launch.
+After GitHub Pages deploys, open or refresh Adventure Companion and confirm the upper-right badge says **Commit #011**.

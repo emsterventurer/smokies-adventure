@@ -18,7 +18,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="Adventure Companion">
 
-<meta name="adventure-companion-build" content="Commit #010">
+<meta name="adventure-companion-build" content="Commit #011">
 <meta name="adventure-companion-build-date" content="July 18, 2026">
 
 
@@ -27,9 +27,77 @@
 <link rel="stylesheet" href="styles.css"></head>
 <body>
 
-<div id="devBadge" class="devBadge" role="status" aria-label="Current build">
-  <span class="devDot"></span>
-  <span><strong>Commit #010</strong><small>Development build</small></span>
+<div id="buildTools" class="buildTools">
+  <button id="devBadge" class="devBadge" type="button" aria-label="Show current build information">
+    <span class="devDot"></span>
+    <span class="devBadgeText"><strong>Commit #011</strong><small>Development build</small></span>
+  </button>
+
+  <button id="feedbackButton" class="feedbackButton" type="button" aria-label="Open feedback mode">📝</button>
+</div>
+
+<div id="buildPanel" class="buildPanel" hidden>
+  <div class="panelHandle"></div>
+  <div class="panelHeader">
+    <div>
+      <span class="eyebrow">DEVELOPMENT MODE</span>
+      <h3>Adventure Companion</h3>
+    </div>
+    <button id="closeBuildPanel" class="panelClose" type="button" aria-label="Close">×</button>
+  </div>
+  <dl class="buildDetails">
+    <div><dt>Version</dt><dd>Commit #011</dd></div>
+    <div><dt>Milestone</dt><dd>Milestone 2</dd></div>
+    <div><dt>Feature</dt><dd>Feedback Mode & Build Visibility Fix</dd></div>
+    <div><dt>Updated</dt><dd>July 18, 2026</dd></div>
+  </dl>
+  <p class="buildHint">Stop cards appear inside each individual day on both phone and desktop.</p>
+</div>
+
+<div id="feedbackPanel" class="feedbackPanel" hidden>
+  <div class="panelHandle"></div>
+  <div class="panelHeader">
+    <div>
+      <span class="eyebrow">FEEDBACK MODE</span>
+      <h3>Capture what you notice</h3>
+    </div>
+    <button id="closeFeedbackPanel" class="panelClose" type="button" aria-label="Close">×</button>
+  </div>
+
+  <div class="feedbackKinds" role="group" aria-label="Feedback type">
+    <button type="button" data-kind="bug">🐞 Bug</button>
+    <button type="button" data-kind="idea">💡 Idea</button>
+    <button type="button" data-kind="confusing">🤔 Confusing</button>
+    <button type="button" data-kind="love">💚 Love it</button>
+  </div>
+
+  <label class="feedbackLabel">
+    Screen or day
+    <input id="feedbackScreen" type="text" placeholder="Example: Day 2 stop cards">
+  </label>
+
+  <label class="feedbackLabel">
+    What did you notice?
+    <textarea id="feedbackNote" rows="4" placeholder="Describe what happened or what you would change."></textarea>
+  </label>
+
+  <div class="ratingRow">
+    <span>Screen rating</span>
+    <div id="feedbackStars" class="feedbackStars" aria-label="Rate this screen">
+      <button type="button" data-rating="1">☆</button>
+      <button type="button" data-rating="2">☆</button>
+      <button type="button" data-rating="3">☆</button>
+      <button type="button" data-rating="4">☆</button>
+      <button type="button" data-rating="5">☆</button>
+    </div>
+  </div>
+
+  <div class="feedbackActions">
+    <button id="saveFeedback" class="saveFeedback" type="button">Save feedback</button>
+    <button id="viewFeedback" type="button">View saved notes</button>
+  </div>
+
+  <div id="feedbackSaved" class="feedbackSaved" hidden></div>
 </div>
 
 <div id="updateToast" class="updateToast" hidden>
@@ -41,13 +109,8 @@
   <button id="dismissUpdate" class="dismissUpdate" type="button" aria-label="Dismiss update">×</button>
 </div>
 
-<div id="brandSplash" class="brandSplash" aria-hidden="true">
-  <div class="brandSplashInner">
-    <img src="icon-512.png" alt="">
-    <h1>Adventure Companion</h1>
-    <p>Making New Traditions</p>
-    <div class="brandPromise">🏔️ Adventure · 🌿 Growth · 💚 Connection</div>
-  </div>
+
+
 </div>
 
 
