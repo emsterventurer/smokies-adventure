@@ -18,7 +18,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="Adventure Companion">
 
-<meta name="adventure-companion-build" content="M3-01/02.2">
+<meta name="adventure-companion-build" content="M3-01/02.3">
 <meta name="adventure-companion-build-date" content="July 18, 2026">
 
 
@@ -30,7 +30,7 @@
 <div id="buildTools" class="buildTools">
   <button id="devBadge" class="devBadge" type="button" aria-label="Show current build information">
     <span class="devDot"></span>
-    <span class="devBadgeText"><strong>M3-01/02.2</strong><small>Development build</small></span>
+    <span class="devBadgeText"><strong>M3-01/02.3</strong><small>Development build</small></span>
   </button>
 
   <button id="feedbackButton" class="feedbackButton" type="button" aria-label="Open feedback mode">📝</button>
@@ -46,9 +46,9 @@
     <button id="closeBuildPanel" class="panelClose" type="button" aria-label="Close">×</button>
   </div>
   <dl class="buildDetails">
-    <div><dt>Version</dt><dd>M3-01/02.2</dd></div>
+    <div><dt>Version</dt><dd>M3-01/02.3</dd></div>
     <div><dt>Milestone</dt><dd>Milestone 3</dd></div>
-    <div><dt>Feature</dt><dd>Simplified Reservation Hub</dd></div>
+    <div><dt>Feature</dt><dd>Adventure Trail & Reservation Fix</dd></div>
     <div><dt>Updated</dt><dd>July 18, 2026</dd></div>
   </dl>
   <p class="buildHint">Stop cards appear inside each individual day on both phone and desktop.</p>
@@ -127,6 +127,31 @@
 </div>
 
 <div class="app">
+
+<aside class="desktopSideNav" aria-label="Adventure Companion navigation">
+  <div class="sideBrand">
+    <img src="icon-192.png" alt="">
+    <span><strong>Adventure</strong><small>COMPANION</small></span>
+  </div>
+  <div class="sideMenu">
+    <button class="active" data-view="home">⌂<span>Dashboard</span></button>
+    <button data-view="week">🗓️<span>Daily Adventure</span></button>
+    <button data-view="reservations">🍽️<span>Reservations</span></button>
+    <button data-view="traditions">💚<span>Traditions</span></button>
+    <button data-view="trip">🎒<span>Trip Snapshot</span></button>
+  </div>
+  <section class="sideParty">
+    <small>TRAVEL PARTY</small>
+    <span>● Papa</span>
+    <span>● Bubbe</span>
+    <span>● Emily</span>
+    <span>● Jake</span>
+    <span>● Kaseryn</span>
+  </section>
+  <blockquote>Making new traditions.</blockquote>
+</aside>
+
+<div class="desktopContent">
 <header class="hero">
   <div class="ridge r1"></div><div class="ridge r2"></div>
   <div class="heroText"><small>EMILY'S ADVENTURE COMPANION</small><h1>Making New Traditions</h1><p>One adventure at a time.</p><div>🏔️ 🌿 💚</div></div>
@@ -183,6 +208,7 @@
 
 <p class="privacyNote">Shared family itinerary · Reservation details are visible to everyone using this browser.</p>
 </main>
+</div>
 <nav>
 <button class="active" data-view="home">⌂<small>Home</small></button>
 <button data-view="week">🗺️<small>Adventure</small></button>

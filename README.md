@@ -1,20 +1,23 @@
-# Adventure Companion — M3-01/02.2
+# Adventure Companion — M3-01/02.3
 
-## Simplified Reservation Hub
+## Adventure Trail & Reservation Fix
 
-This release removes all remaining organizer/private-detail references and simplifies reservation management.
+This build completes the requested visual and functional refinements.
 
 ### Changes
 
-- No Private Details or organizer-only links
-- No PIN or alternate reservation view
-- Manage Reservations appears only within Reservations
-- A small **Manage** action appears in the Reservations header
-- Daily reservation sections use a subtle Manage action rather than a large duplicate button
-- Confirmation numbers, ticket links, documents, parking notes, contact information, and shared notes remain
+- Fixed the Manage Reservations button with a dedicated event handler
+- Added a clear return-to-Reservations action in the editor
+- Updated Travel Party to Papa, Bubbe, Emily, Jake, and Kaseryn
+- Replaced plain Adventure Trail boxes with nature-inspired stepping stones
+- Each stone now clearly says Day 1, Day 2, and so on
+- Current and completed days have distinct styling
+- Added the Adventure Companion menu on the left for desktop
+- Retained bottom navigation on phones
+- Kept the existing Daily Dashboard and its current information
+- Confirmation numbers, ticket links, documents, parking notes, contact details, notes, and statuses remain
 - Budget content remains removed
-- Service-worker cache updated to replace older cached interface files
 
 ### Suggested commit message
 
-`M3-01/02.2 — Simplify reservations and remove private-detail remnants`
+`M3-01/02.3 — Fix reservation manager and add stepping-stone trail`
