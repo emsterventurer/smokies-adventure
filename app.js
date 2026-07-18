@@ -1,7 +1,7 @@
 
 const APP_BUILD={
-  version:"M3-01/02",
-  label:"Reservation Enhancements & Manager",
+  version:"M3-01/02.2",
+  label:"Simplified Reservation Hub",
   date:"July 18, 2026"
 };
 
@@ -300,7 +300,7 @@ function managerMarkup(){
   return `<section class="reservationManager">
     <div class="reservationManagerHead">
       <div>
-        <span class="eyebrow">M3-01/02 · SHARED TRIP DETAILS</span>
+        <span class="eyebrow">M3-01/02 · RESERVATION DETAILS</span>
         <h2>Manage Reservations</h2>
         <p>Add or update confirmation numbers, ticket links, reservation documents, parking notes, phone numbers, websites, and status. Saved information appears on the shared reservation cards.</p>
       </div>
@@ -428,7 +428,7 @@ function reservationMarkup(d){
   return `<section class="reservationCenter">
     <div class="reservationCenterHead">
       <div><span class="eyebrow">RESERVATION CENTER</span><h3>Bookings for this day</h3></div>
-      <span>${items.length} item${items.length===1?"":"s"}</span>
+      <div class="reservationCenterTools"><span>${items.length} item${items.length===1?"":"s"}</span><button data-view="manageReservations" type="button">✏️ Manage</button></div>
     </div>
     <div class="reservationCards">${items.map((item,index)=>{
       const rec=getReservationRecord(d.date,item,index);
@@ -452,7 +452,6 @@ function reservationMarkup(d){
           ${rec.documentUrl?`<a href="${escapeHtml(safeUrl(rec.documentUrl))}" target="_blank" rel="noopener">📄 Reservation Document</a>`:""}
         </div>
       </article>`}).join("")}</div>
-    <button class="manageReservationsButton" data-view="manageReservations" type="button">✏️ Manage reservation details</button>
   </section>`
 }
 
@@ -559,8 +558,8 @@ function bindCompletion(){
 }
 function view(v){$$("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===v));if(v==="home"){$("#screen").hidden=true;scrollTo({top:0,behavior:"smooth"});return}const s=$("#screen");s.hidden=false;
 if(v==="week")s.innerHTML=`<div class=weekHeading><div><span class=eyebrow>MILESTONE 3</span><h3>🗓️ Our Adventure Week</h3></div><span class=weekProgress>${completedDays().length}/8 complete</span></div><p class=info>Each day opens to a dashboard plus smart stop cards with Waze, Google Maps, and stop-to-stop route links.</p><div class=familyDayGrid>${DATA.days.map(d=>{const dt=new Date(d.date+"T12:00:00"),x=DAY_DASH[d.date],done=isComplete(d.date);return `<div class="familyDayCard ${done?"completed":""}"><button data-open="${d.date}"><span class=datePill><small>${dt.toLocaleDateString(undefined,{weekday:"short"})}</small><b>${dt.getDate()}</b></span><span class=summary><strong>${done?"✓ ":""}${d.title}</strong><small>${x.icon} ${x.leave} · ${x.reservation}</small><em>${x.focus}</em></span><span class=chev>›</span></button></div>`}).join("")}</div>`;
-if(v==="reservations")s.innerHTML=`<div class="reservationIndexHead">
-  <div><span class="eyebrow">SHARED FAMILY VIEW</span><h3>🍽️ Reservations</h3></div>
+if(v==="reservations")s.innerHTML=`<div class="reservationIndexHead simplified">
+  <div><span class="eyebrow">TRIP RESERVATIONS</span><h3>🍽️ Reservations</h3></div>
   <button class="manageReservationsButton compact" data-view="manageReservations" type="button">✏️ Manage</button>
 </div>${Object.entries(RESERVATION_DATA).filter(([,items])=>items.length).map(([date,items])=>`
   <section class="reservationIndexDay"><h4>${dateLabel(date)}</h4>

@@ -532,7 +532,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:760px;
 .reservationIndexCard>b.confirmed{background:#e4f1e7;color:#2f6b42}
 .reservationIndexCard>b.pending{background:#fff2ce;color:#80611d}
 .reservationIndexCard>b.action-needed{background:#fde7e2;color:#923b32}
-.quick{grid-template-columns:repeat(5,minmax(0,1fr))}
+.quick{grid-template-columns:repeat(4,minmax(0,1fr))}
 @media(max-width:760px){
   .reservationManagerHead{display:block}
   .reservationManagerHead .managerSecondary{margin-top:12px}
@@ -542,3 +542,30 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:760px;
   .reservationDetails.enhanced .wideDetail,.reservationDetails.enhanced p{grid-column:auto}
   .quick{grid-template-columns:1fr 1fr}
 }
+
+/* M3-01/02.1 — Manage Reservations lives only inside Reservations */
+
+
+/* M3-01/02.2 — Simplified reservation hub */
+.reservationIndexHead.simplified{
+  align-items:center;
+  padding-bottom:10px;
+  border-bottom:1px solid #e1e8e3;
+}
+.reservationIndexHead.simplified h3{margin:.15rem 0 0}
+.reservationCenterTools{display:flex;align-items:center;gap:9px}
+.reservationCenterTools button{
+  border:0;
+  background:transparent;
+  color:#315e43;
+  font-weight:800;
+  cursor:pointer;
+  padding:5px 7px;
+}
+.reservationCenter>.manageReservationsButton{display:none!important}
+button[data-view="private"],
+a[data-view="private"],
+.privateAccessButton,
+.privateGate,
+.privateManager,
+.privateDaySummary{display:none!important}

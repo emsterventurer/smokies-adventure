@@ -1,29 +1,20 @@
-# Adventure Companion — M3-01/02
+# Adventure Companion — M3-01/02.2
 
-## Reservation Enhancements & Reservation Manager
+## Simplified Reservation Hub
 
-This combined release keeps one shared family experience and adds richer reservation information plus editing directly inside the app.
+This release removes all remaining organizer/private-detail references and simplifies reservation management.
 
-### Included
+### Changes
 
-- Confirmation numbers shown on reservation cards
-- Ticket or reservation links
-- Reservation-document links
-- Parking notes
-- Contact phone numbers
-- Website links
-- Shared family notes
-- Reservation status: Confirmed, Pending, or Action Needed
-- Manage Reservations screen
-- Add and update reservation details without editing JavaScript
-- Details saved in the current browser
-- Budget removed from the dashboard and Trip Readiness
-- Weather placeholder added for M3-03
-
-### Storage behavior
-
-Edits are stored in the current browser's local storage. Everyone using that browser sees the same reservation information. The data does not automatically sync to another phone, tablet, or browser.
+- No Private Details or organizer-only links
+- No PIN or alternate reservation view
+- Manage Reservations appears only within Reservations
+- A small **Manage** action appears in the Reservations header
+- Daily reservation sections use a subtle Manage action rather than a large duplicate button
+- Confirmation numbers, ticket links, documents, parking notes, contact information, and shared notes remain
+- Budget content remains removed
+- Service-worker cache updated to replace older cached interface files
 
 ### Suggested commit message
 
-`M3-01/02 — Add shared reservation details and in-app manager`
+`M3-01/02.2 — Simplify reservations and remove private-detail remnants`
