@@ -49,3 +49,16 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:760px;
 .reservationSummary small,.reservationSummary strong{display:block}.reservationSummary small{color:var(--mut);margin-top:3px}
 .familyQuestion{background:#f2e8cb;border-radius:15px;padding:14px;margin-top:13px;line-height:1.45}.familyQuestion b{color:var(--fd)}
 @media(max-width:420px){.journeyTrail{overflow-x:auto;grid-template-columns:repeat(8,54px);padding-bottom:4px}.familyPromise{font-size:.65rem}}
+
+/* Commit #007 — Brand & Install */
+.brandSplash{position:fixed;inset:0;z-index:300;background:linear-gradient(160deg,#183327,#294c3a 58%,#456b55);display:grid;place-items:center;transition:opacity .55s ease,visibility .55s ease}
+.brandSplash.hide{opacity:0;visibility:hidden}
+.brandSplashInner{text-align:center;color:white;padding:28px}
+.brandSplashInner img{width:min(56vw,240px);height:auto;border-radius:26%;box-shadow:0 20px 55px rgba(0,0,0,.28);animation:brandRise .8s ease both}
+.brandSplashInner h1{font-size:2rem;margin:20px 0 6px;font-weight:500;animation:brandRise .8s .12s ease both}
+.brandSplashInner p{margin:0;font-style:italic;color:rgba(255,255,255,.83);animation:brandRise .8s .22s ease both}
+.brandPromise{margin-top:18px;font-size:.76rem;letter-spacing:.03em;color:#f2e8cb;animation:brandRise .8s .3s ease both}
+@keyframes brandRise{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+.brandStamp{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;background:rgba(255,255,255,.1);border-radius:14px}
+.brandStamp img{width:46px;height:46px;border-radius:13px}.brandStamp strong,.brandStamp small{display:block}.brandStamp small{opacity:.72;margin-top:2px}
+@media(prefers-reduced-motion:reduce){.brandSplashInner img,.brandSplashInner h1,.brandSplashInner p,.brandPromise{animation:none}}

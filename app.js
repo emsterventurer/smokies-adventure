@@ -1,3 +1,10 @@
+
+window.addEventListener("load",()=>{
+  const splash=$("#brandSplash");
+  setTimeout(()=>splash?.classList.add("hide"),900);
+  setTimeout(()=>splash?.remove(),1600);
+});
+
 let DATA;
 const start=new Date("2026-08-07T00:00:00"), end=new Date("2026-08-15T00:00:00"), planning=new Date("2026-07-01T00:00:00");
 const phases=["dreaming","planning","experiencing","remembering"];
@@ -17,7 +24,7 @@ if(v==="week")s.innerHTML=`<h3>🗓️ Our Adventure Week</h3><p class=info>Tap 
 if(v==="reservations")s.innerHTML=`<h3>🍽️ Reservations</h3>${DATA.reservations.map(r=>`<div class=res><span><b>${r.name}</b><small>${r.date} · ${r.time}</small></span><strong class="${r.status==="Confirmed"?"confirmed":"pending"}">${r.status}</strong></div>`).join("")}`;
 if(v==="traditions")s.innerHTML=`<h3>💚 Moments to Protect</h3><ul class=info>${DATA.traditions.map(t=>`<li>${t}</li>`).join("")}</ul>`;
 if(v==="trip")s.innerHTML=`<h3>🎒 Trip Snapshot</h3><p><b>Dates:</b> August 7–14, 2026</p><p><b>Home base:</b> ${DATA.trip.homeBase}</p><p><b>Travel party:</b> ${DATA.trip.party}</p><p><b>Priorities:</b> Stay together, place busy attractions on weekdays, eat well, minimize unnecessary driving, and preserve rest.</p>`;
-if(v==="companion")s.innerHTML=`<h3>🌿 Remy's Corner</h3><div class=remy>The itinerary supports the experience; it does not have to control it.</div><p class=info>During the trip, each daily page keeps route, parking, food, photos, Plan B, budget, and the reason the day matters together in one place. Family members can use the same shared link.</p>`;
+if(v==="companion")s.innerHTML=`<h3>🌿 Remy's Corner</h3><div class="brandStamp"><img src="icon-192.png" alt=""><span><strong>Adventure Companion</strong><small>Making New Traditions</small></span></div><div class=remy>The itinerary supports the experience; it does not have to control it.</div><p class=info>During the trip, each daily page keeps route, parking, food, photos, Plan B, budget, and the reason the day matters together in one place. Family members can use the same shared link.</p>`;
 $$("[data-open]").forEach(b=>b.onclick=()=>showDay(b.dataset.open));s.scrollIntoView({behavior:"smooth",block:"start"})}
 function showDay(date){const d=DATA.days.find(x=>x.date===date);if(!d)return;const s=$("#screen");s.hidden=false;s.innerHTML=`<div class=dayHead><button class=back data-back>← Week</button></div>
 <div class=dayHero><small>${d.short} · ${d.theme}</small><h3>${d.title}</h3><p>${d.why}</p><div class=dayChips><span>🚗 ${d.drive}</span><span>💵 ${d.budget}</span><span>📸 Photo moments</span></div></div>
@@ -71,4 +78,8 @@ function familyQuestionFor(date){
     "2026-08-14":"What is the one memory you want to keep forever?"
   };
   return questions[date]||"What moment from today do you want to remember?";
+}
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));
 }
