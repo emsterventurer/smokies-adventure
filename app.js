@@ -1,7 +1,7 @@
 
 const APP_BUILD={
-  version:"Commit #013.2.1",
-  label:"Milestone 2 Family Release Candidate",
+  version:"M3-01",
+  label:"Private Trip Details",
   date:"July 18, 2026"
 };
 
@@ -178,7 +178,7 @@ function phase(d){d=new Date(d.getFullYear(),d.getMonth(),d.getDate());return d<
 
 const STOP_DATA={"2026-08-07":[{"time":"Arrival","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Home base","duration":"Check-in and settle in","tip":"Unload only what you need before dinner."},{"time":"6:00 PM","icon":"🍽️","name":"Local Goat","query":"Local Goat Pigeon Forge TN","type":"Dinner reservation","duration":"About 90 minutes","tip":"Arrive a few minutes early; parking is on site."},{"time":"7:45 PM","icon":"⛲","name":"The Island in Pigeon Forge","query":"The Island in Pigeon Forge TN","type":"Evening stroll","duration":"45–75 minutes","tip":"Use the large free lot and tram if everyone is tired."},{"time":"Afterward","icon":"🍦","name":"The Island Creamery","query":"The Island Creamery Pigeon Forge TN","type":"Dessert","duration":"20–30 minutes","tip":"Keep this optional if arrival day runs long."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Set out tomorrow’s shoes and water bottles tonight."}],"2026-08-08":[{"time":"9:30 AM","icon":"🥞","name":"Five Oaks Farm Kitchen","query":"Five Oaks Farm Kitchen Sevierville TN","type":"Breakfast","duration":"60–75 minutes","tip":"A filling breakfast before the park and waterfall walk."},{"time":"11:15 AM","icon":"🌲","name":"Sugarlands Visitor Center","query":"Sugarlands Visitor Center Gatlinburg TN","type":"National park stop","duration":"35–50 minutes","tip":"Use restrooms here before the waterfall walk."},{"time":"12:05 PM","icon":"💧","name":"Cataract Falls Trailhead","query":"Cataract Falls Trailhead Gatlinburg TN","type":"Easy waterfall walk","duration":"35–50 minutes","tip":"The trail begins near Sugarlands; keep the family together."},{"time":"1:30 PM","icon":"🫖","name":"Wild Plum Tea Room","query":"Wild Plum Tea Room Gatlinburg TN","type":"Lunch reservation","duration":"75–90 minutes","tip":"This is a timed stop—leave the waterfall with margin."},{"time":"3:00 PM","icon":"🎨","name":"Great Smoky Arts and Crafts Community","query":"Great Smoky Arts and Crafts Community Gatlinburg TN","type":"Artisan loop","duration":"2–2.5 hours","tip":"Choose a few studios rather than trying to visit every one."},{"time":"6:00 PM","icon":"🍽️","name":"The Park Grill","query":"The Park Grill Gatlinburg TN","type":"Dinner target","duration":"90 minutes","tip":"Reservation is pending; keep the backup flexible."},{"time":"After dinner","icon":"🍩","name":"The Donut Friar","query":"The Donut Friar Gatlinburg TN","type":"Dessert","duration":"20–30 minutes","tip":"Park once for dinner and The Village when practical."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Expect slower Saturday traffic leaving Gatlinburg."}],"2026-08-09":[{"time":"9:30 AM","icon":"🍎","name":"Applewood Farmhouse Restaurant","query":"Applewood Farmhouse Restaurant Sevierville TN","type":"Breakfast","duration":"60–75 minutes","tip":"The Apple Barn area is close to the resort."},{"time":"10:45 AM","icon":"🛍️","name":"Apple Barn Village","query":"Apple Barn Village Sevierville TN","type":"Shops and cider mill","duration":"90 minutes","tip":"Keep purchases together so nothing is left behind."},{"time":"After lunch","icon":"🍷","name":"Apple Barn Winery","query":"Apple Barn Winery Sevierville TN","type":"Wine tasting","duration":"45–60 minutes","tip":"Choose the Wine of the Trip without rushing."},{"time":"After tasting","icon":"🥧","name":"Apple Barn Bakery","query":"Apple Barn Bakery Sevierville TN","type":"Dessert","duration":"20–30 minutes","tip":"Pick something that travels well if everyone is full."},{"time":"Afternoon","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Protected downtime","duration":"2.5 hours","tip":"This open block is intentional, not empty."},{"time":"6:00 PM","icon":"🍽️","name":"Seasons 101","query":"Seasons 101 Sevierville TN","type":"Dinner reservation","duration":"90 minutes","tip":"Allow time for downtown parking."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Finish the route back at the family home base."}],"2026-08-10":[{"time":"8:30 AM","icon":"🎢","name":"Dollywood","query":"Dollywood Pigeon Forge TN","type":"Theme park","duration":"Full day","tip":"Navigate directly to parking and arrive before opening."},{"time":"Evening","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Leave while everyone is still smiling."}],"2026-08-11":[{"time":"11:00 AM","icon":"🪨","name":"Forbidden Caverns","query":"Forbidden Caverns Sevierville TN","type":"Guided cave tour","duration":"75 minutes","tip":"Bring a light layer; caves stay cool."},{"time":"12:45 PM","icon":"🍖","name":"Delauder's BBQ","query":"Delauder's BBQ Gatlinburg TN","type":"Lunch","duration":"60–75 minutes","tip":"Check hours before departure because local schedules can vary."},{"time":"Afternoon","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Protected downtime","duration":"2.5 hours","tip":"Do not fill this block unless the family asks."},{"time":"6:15 PM","icon":"🍔","name":"Blue Moose Burgers & Wings","query":"Blue Moose Burgers and Wings Pigeon Forge TN","type":"Dinner target","duration":"75 minutes","tip":"Keep dinner relaxed before the coaster."},{"time":"8:15 PM","icon":"🎢","name":"Rocky Top Mountain Coaster","query":"Rocky Top Mountain Coaster Pigeon Forge TN","type":"Night adventure","duration":"60–90 minutes","tip":"The illuminated ride is the point—wait until after dark."},{"time":"Night","icon":"🍦","name":"Ice cream near Rocky Top","query":"ice cream near Rocky Top Mountain Coaster Pigeon Forge TN","type":"Dessert","duration":"20–30 minutes","tip":"Choose the closest easy stop based on energy."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Finish the route back at the family home base."}],"2026-08-12":[{"time":"9:00 AM","icon":"🥞","name":"Lil Black Bear Café","query":"Lil Black Bear Cafe Pigeon Forge TN","type":"Breakfast","duration":"60 minutes","tip":"Leave enough margin for the 10:30 zipline reservation."},{"time":"10:30 AM","icon":"🪂","name":"Legacy Mountain Ziplines","query":"Legacy Mountain Ziplines Sevierville TN","type":"Timed reservation","duration":"2–3 hours","tip":"Arrive at the check-in time shown in the confirmation."},{"time":"Early afternoon","icon":"🦜","name":"Parrot Mountain and Gardens","query":"Parrot Mountain and Gardens Pigeon Forge TN","type":"Animal experience","duration":"90–120 minutes","tip":"Protect time for the bird interaction and photos."},{"time":"Late afternoon","icon":"🌾","name":"The Old Mill","query":"The Old Mill Pigeon Forge TN","type":"Historic district","duration":"2–3 hours","tip":"Park once and walk the district."},{"time":"Dinner","icon":"🍽️","name":"The Old Mill Restaurant","query":"The Old Mill Restaurant Pigeon Forge TN","type":"Dinner target","duration":"90 minutes","tip":"Expect a possible wait; browse nearby while holding your place."},{"time":"After dinner","icon":"🍦","name":"Old Mill Creamery","query":"Old Mill Creamery Pigeon Forge TN","type":"Dessert","duration":"20–30 minutes","tip":"Take dessert toward the river if the evening is pleasant."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Return to resort","duration":"End of day","tip":"Finish the route back at the family home base."}],"2026-08-13":[{"time":"9:30 AM","icon":"🥞","name":"Pancake Pantry","query":"Pancake Pantry Gatlinburg TN","type":"Breakfast","duration":"60–75 minutes","tip":"Park downtown once for breakfast and the aquarium."},{"time":"10:45 AM","icon":"🐧","name":"Ripley's Aquarium of the Smokies","query":"Ripley's Aquarium of the Smokies Gatlinburg TN","type":"Ticketed attraction","duration":"2–3 hours","tip":"Have ticket links ready before entering."},{"time":"Optional afternoon","icon":"⭐","name":"Anakeesta","query":"Anakeesta Gatlinburg TN","type":"Optional adventure","duration":"2–4 hours","tip":"Use this only if weather, energy, and timing all feel right."},{"time":"Afternoon","icon":"🏙️","name":"Downtown Gatlinburg","query":"Downtown Gatlinburg TN","type":"Flexible exploration","duration":"1–2 hours","tip":"Choose low-height activities and protect dinner timing."},{"time":"6:15 PM","icon":"🍽️","name":"The Greenbrier Restaurant","query":"The Greenbrier Restaurant Gatlinburg TN","type":"Farewell reservation","duration":"2 hours","tip":"Drive separately from downtown parking and arrive relaxed."},{"time":"Night","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Final resort return","duration":"End of day","tip":"This is the last full-night return—take it in."}],"2026-08-14":[{"time":"Morning","icon":"🏨","name":"Club Wyndham Smoky Mountains","query":"Club Wyndham Smoky Mountains Pigeon Forge TN","type":"Checkout","duration":"Final room check","tip":"Photograph the room after the final sweep if useful."},{"time":"Departure","icon":"🏡","name":"Home","query":"Durham NC","type":"Drive home","duration":"Road trip","tip":"Use your preferred live navigation for traffic-aware routing."}]};
 const RESERVATION_DATA={"2026-08-07":[{"name":"Club Wyndham Smoky Mountains","icon":"🏨","status":"Confirmed","time":"Aug 7–14","confirmation":"Add confirmation #","phone":"","website":"https://www.wyndhamhotels.com/","notes":"Primary lodging and daily home base."},{"name":"Local Goat","icon":"🍽️","status":"Confirmed","time":"6:00 PM","confirmation":"Reservation confirmed","phone":"","website":"https://localgoatpf.com/","notes":"Arrival-night dinner."}],"2026-08-08":[{"name":"Wild Plum Tea Room","icon":"🫖","status":"Contacted","time":"Lunch target","confirmation":"Confirm final seating","phone":"","website":"https://wildplumtearoom.com/","notes":"Hours are limited; verify before trip."},{"name":"The Park Grill","icon":"🍽️","status":"Pending","time":"6:00 PM target","confirmation":"Reservation window not yet open","phone":"","website":"https://parkgrillgatlinburg.com/","notes":"Keep a nearby dinner backup until confirmed."}],"2026-08-09":[{"name":"Seasons 101","icon":"🍽️","status":"Confirmed","time":"6:00 PM","confirmation":"Reservation confirmed","phone":"","website":"https://seasons101.com/","notes":"Downtown Sevierville dinner."}],"2026-08-10":[{"name":"Dollywood","icon":"🎢","status":"Tickets purchased","time":"All day","confirmation":"Tickets at Work — add ticket link","phone":"","website":"https://www.dollywood.com/","notes":"Any-day tickets purchased. Preferred parking decision still open."}],"2026-08-11":[{"name":"Forbidden Caverns","icon":"🪨","status":"Planned","time":"11:00 AM target","confirmation":"Check ticket policy","phone":"","website":"https://forbiddencavern.com/","notes":"Verify operating hours before departure."},{"name":"Rocky Top Mountain Coaster","icon":"🎢","status":"Planned","time":"8:15 PM target","confirmation":"Purchase onsite or add ticket","phone":"","website":"https://www.rockytopcoaster.com/","notes":"Night ride is intentional."}],"2026-08-12":[{"name":"Legacy Mountain Ziplines","icon":"🪂","status":"Confirmed","time":"10:30 AM","confirmation":"Add confirmation #","phone":"","website":"https://legacymountainziplines.com/","notes":"Timed reservation. Confirm required check-in time."}],"2026-08-13":[{"name":"Ripley's Aquarium of the Smokies","icon":"🐧","status":"Tickets needed","time":"10:45 AM target","confirmation":"Add ticket link after purchase","phone":"","website":"https://www.ripleyaquariums.com/gatlinburg/","notes":"Weekday visit planned."},{"name":"The Greenbrier Restaurant","icon":"🍽️","status":"Confirmed","time":"6:15 PM","confirmation":"Reservation confirmed","phone":"","website":"https://greenbrierrestaurant.com/","notes":"Farewell dinner."}],"2026-08-14":[]};
-const READINESS_ITEMS=[{"id":"lodging","label":"Lodging","icon":"🏨","detail":"Wyndham stay confirmed","done":true},{"id":"dollywood","label":"Dollywood tickets","icon":"🎢","detail":"Tickets purchased","done":true},{"id":"zipline","label":"Zipline","icon":"🪂","detail":"Aug 12 at 10:30 AM","done":true},{"id":"dining","label":"Dining reservations","icon":"🍽️","detail":"Park Grill and Wild Plum still need confirmation","done":false},{"id":"aquarium","label":"Aquarium tickets","icon":"🐧","detail":"Purchase or add ticket link","done":false},{"id":"parking","label":"Parking decisions","icon":"🅿️","detail":"Decide on Dollywood preferred parking","done":false},{"id":"packing","label":"Family packing","icon":"🧳","detail":"Complete before departure","done":false},{"id":"weather","label":"Weather check","icon":"🌤️","detail":"Connect in Milestone 3","done":false},{"id":"navigation","label":"Navigation","icon":"🗺️","detail":"Waze and Google Maps ready","done":true},{"id":"budget","label":"Trip budget","icon":"💵","detail":"Daily estimates available","done":true}];
+const READINESS_ITEMS=[{"id":"lodging","label":"Lodging","icon":"🏨","detail":"Wyndham stay confirmed","done":true},{"id":"dollywood","label":"Dollywood tickets","icon":"🎢","detail":"Tickets purchased","done":true},{"id":"zipline","label":"Zipline","icon":"🪂","detail":"Aug 12 at 10:30 AM","done":true},{"id":"dining","label":"Dining reservations","icon":"🍽️","detail":"Park Grill and Wild Plum still need confirmation","done":false},{"id":"aquarium","label":"Aquarium tickets","icon":"🐧","detail":"Purchase or add ticket link","done":false},{"id":"parking","label":"Parking decisions","icon":"🅿️","detail":"Decide on Dollywood preferred parking","done":false},{"id":"packing","label":"Family packing","icon":"🧳","detail":"Complete before departure","done":false},{"id":"weather","label":"Weather check","icon":"🌤️","detail":"Connect in Milestone 3","done":false},{"id":"navigation","label":"Navigation","icon":"🗺️","detail":"Waze and Google Maps ready","done":true}];
 const DAY_DASH={
   "2026-08-07":{icon:"🧳",leave:"5:35 PM",first:"Check in at Club Wyndham",reservation:"Local Goat · 6:00 PM",sunset:"8:30 PM",pace:"Easy arrival evening",focus:"Arrive, settle in, and celebrate"},
   "2026-08-08":{icon:"🏞️",leave:"9:05 AM",first:"Five Oaks Farm Kitchen",reservation:"Wild Plum · 1:30 PM",sunset:"8:29 PM",pace:"Full but flexible",focus:"Waterfall, artisans, and local flavor"},
@@ -249,6 +249,275 @@ function smartStopsMarkup(d){
 }
 
 
+
+const PRIVATE_DETAILS_KEY="adventureCompanionPrivateDetailsV1";
+const PRIVATE_PIN_KEY="adventureCompanionPrivatePinV1";
+const PRIVATE_SESSION_KEY="adventureCompanionPrivateUnlocked";
+let privateUnlocked=sessionStorage.getItem(PRIVATE_SESSION_KEY)==="1";
+
+function escapeHtml(value){
+  return String(value??"").replace(/[&<>"']/g,ch=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[ch]));
+}
+
+function safeUrl(value){
+  const raw=String(value||"").trim();
+  if(!raw)return "";
+  try{
+    const candidate=/^https?:\/\//i.test(raw)?raw:`https://${raw}`;
+    const parsed=new URL(candidate);
+    return ["http:","https:"].includes(parsed.protocol)?parsed.href:"";
+  }catch(e){return ""}
+}
+
+function privateId(date,item,index){
+  return `${date}::${index}::${item.name}`;
+}
+
+function readPrivateDetails(){
+  try{return JSON.parse(localStorage.getItem(PRIVATE_DETAILS_KEY)||"{}")}catch(e){return {}}
+}
+
+function savePrivateDetails(data){
+  localStorage.setItem(PRIVATE_DETAILS_KEY,JSON.stringify(data));
+}
+
+function getPrivateRecord(date,item,index){
+  const all=readPrivateDetails();
+  return all[privateId(date,item,index)]||{};
+}
+
+function hasPrivatePin(){
+  return Boolean(localStorage.getItem(PRIVATE_PIN_KEY));
+}
+
+async function hashPin(pin){
+  const text=new TextEncoder().encode(`AdventureCompanion:${pin}`);
+  if(window.crypto?.subtle){
+    const hash=await crypto.subtle.digest("SHA-256",text);
+    return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+  return btoa(`AdventureCompanion:${pin}`);
+}
+
+function privateIntroMarkup(){
+  const setup=!hasPrivatePin();
+  return `<section class="privateGate">
+    <div class="privateGateIcon">🔐</div>
+    <span class="eyebrow">M3-01 · ORGANIZER SPACE</span>
+    <h2>${setup?"Set up Private Trip Details":"Unlock Private Trip Details"}</h2>
+    <p>${setup
+      ?"Create a 4–8 digit organizer PIN. Confirmation numbers and links will be saved only in this browser on this device."
+      :"Enter the organizer PIN to view or edit locally saved trip details."}</p>
+    <label class="privatePinLabel">
+      Organizer PIN
+      <input id="privatePinInput" type="password" inputmode="numeric" autocomplete="off" minlength="4" maxlength="8" placeholder="4–8 digits">
+    </label>
+    ${setup?`<label class="privatePinLabel">
+      Confirm PIN
+      <input id="privatePinConfirm" type="password" inputmode="numeric" autocomplete="off" minlength="4" maxlength="8" placeholder="Repeat PIN">
+    </label>`:""}
+    <button id="privateUnlock" class="privatePrimary" type="button">${setup?"Create private space":"Unlock"}</button>
+    <p id="privateGateMessage" class="privateMessage" aria-live="polite"></p>
+    <div class="privateNotice">
+      <strong>Local privacy, not bank-level security</strong>
+      <span>This keeps details out of the public GitHub files and out of the shared family view. Anyone with access to this browser’s storage could potentially retrieve them.</span>
+    </div>
+  </section>`;
+}
+
+function privateManagerMarkup(){
+  const all=readPrivateDetails();
+  const groups=Object.entries(RESERVATION_DATA).filter(([,items])=>items.length);
+  const savedCount=Object.keys(all).filter(k=>Object.values(all[k]||{}).some(Boolean)).length;
+  return `<section class="privateManager">
+    <div class="privateManagerHead">
+      <div>
+        <span class="eyebrow">M3-01 · PRIVATE TRIP DETAILS</span>
+        <h2>Organizer Reservation Vault</h2>
+        <p>Save confirmations, ticket links, booking-document links, phone numbers, and parking notes without publishing them in the family app.</p>
+      </div>
+      <button id="privateLock" class="privateSecondary" type="button">🔒 Lock</button>
+    </div>
+    <div class="privateSummary">
+      <article><strong>${groups.reduce((n,[,items])=>n+items.length,0)}</strong><span>reservations</span></article>
+      <article><strong>${savedCount}</strong><span>with private details</span></article>
+      <article><strong>Local</strong><span>this device only</span></article>
+    </div>
+    <div class="privateToolbar">
+      <button id="privateExpandAll" type="button">Expand all</button>
+      <button id="privateCollapseAll" type="button">Collapse all</button>
+      <button id="privateClearAll" class="dangerText" type="button">Clear private data</button>
+    </div>
+    <div class="privateGroups">${groups.map(([date,items])=>`
+      <section class="privateDayGroup">
+        <h3>${dateLabel(date)}</h3>
+        ${items.map((item,index)=>privateEditorMarkup(date,item,index)).join("")}
+      </section>`).join("")}
+    </div>
+    <div class="privateFooterNotice">
+      <strong>Important:</strong> Private details do not sync to another phone or browser. Keep your original confirmation emails as the source of truth.
+    </div>
+  </section>`;
+}
+
+function privateEditorMarkup(date,item,index){
+  const rec=getPrivateRecord(date,item,index);
+  const hasData=Object.values(rec).some(Boolean);
+  const id=privateId(date,item,index);
+  return `<details class="privateReservation" data-private-id="${escapeHtml(id)}" ${hasData?"":"open"}>
+    <summary>
+      <span class="privateReservationIcon">${item.icon}</span>
+      <span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.time)} · ${escapeHtml(item.status)}</small></span>
+      <b>${hasData?"Saved":"Add details"}</b>
+    </summary>
+    <form class="privateForm" data-private-form="${escapeHtml(id)}">
+      <input type="hidden" name="date" value="${escapeHtml(date)}">
+      <input type="hidden" name="index" value="${index}">
+      <div class="privateFormGrid">
+        <label>Confirmation number
+          <input name="confirmation" value="${escapeHtml(rec.confirmation||"")}" placeholder="Example: ABC12345" autocomplete="off">
+        </label>
+        <label>Contact phone
+          <input name="phone" type="tel" value="${escapeHtml(rec.phone||"")}" placeholder="Optional">
+        </label>
+        <label class="wide">Ticket or reservation link
+          <input name="ticketUrl" type="url" value="${escapeHtml(rec.ticketUrl||"")}" placeholder="https://…">
+        </label>
+        <label class="wide">Booking document link
+          <input name="documentUrl" type="url" value="${escapeHtml(rec.documentUrl||"")}" placeholder="Google Drive, email, or secure document link">
+        </label>
+        <label class="wide">Parking or check-in notes
+          <textarea name="parkingNotes" rows="2" placeholder="Where to park, arrival time, entrance, or check-in instructions">${escapeHtml(rec.parkingNotes||"")}</textarea>
+        </label>
+        <label class="wide">Private organizer notes
+          <textarea name="notes" rows="2" placeholder="Anything useful that should not appear in the family view">${escapeHtml(rec.notes||"")}</textarea>
+        </label>
+      </div>
+      <div class="privateFormActions">
+        <button class="privateSave" type="submit">Save details</button>
+        ${rec.ticketUrl?`<a href="${escapeHtml(safeUrl(rec.ticketUrl))}" target="_blank" rel="noopener">🎟️ Open ticket</a>`:""}
+        ${rec.documentUrl?`<a href="${escapeHtml(safeUrl(rec.documentUrl))}" target="_blank" rel="noopener">📄 Open document</a>`:""}
+        <button class="privateDelete" type="button">Remove saved details</button>
+      </div>
+      <p class="privateSaveStatus" aria-live="polite"></p>
+    </form>
+  </details>`;
+}
+
+async function handlePrivateGate(){
+  const pin=document.querySelector("#privatePinInput")?.value.trim()||"";
+  const message=document.querySelector("#privateGateMessage");
+  if(!/^\d{4,8}$/.test(pin)){
+    if(message)message.textContent="Use a 4–8 digit PIN.";
+    return;
+  }
+  if(!hasPrivatePin()){
+    const confirmPin=document.querySelector("#privatePinConfirm")?.value.trim()||"";
+    if(pin!==confirmPin){
+      if(message)message.textContent="The PINs do not match.";
+      return;
+    }
+    localStorage.setItem(PRIVATE_PIN_KEY,await hashPin(pin));
+  }else{
+    const expected=localStorage.getItem(PRIVATE_PIN_KEY);
+    if(await hashPin(pin)!==expected){
+      if(message)message.textContent="That PIN did not match.";
+      return;
+    }
+  }
+  privateUnlocked=true;
+  sessionStorage.setItem(PRIVATE_SESSION_KEY,"1");
+  renderPrivateScreen();
+}
+
+function renderPrivateScreen(){
+  const s=document.querySelector("#screen");
+  if(!s)return;
+  s.hidden=false;
+  s.innerHTML=privateUnlocked?privateManagerMarkup():privateIntroMarkup();
+  wirePrivateScreen();
+  s.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function wirePrivateScreen(){
+  document.querySelector("#privateUnlock")?.addEventListener("click",handlePrivateGate);
+  document.querySelector("#privatePinInput")?.addEventListener("keydown",e=>{
+    if(e.key==="Enter")handlePrivateGate();
+  });
+  document.querySelector("#privateLock")?.addEventListener("click",()=>{
+    privateUnlocked=false;
+    sessionStorage.removeItem(PRIVATE_SESSION_KEY);
+    renderPrivateScreen();
+  });
+  document.querySelector("#privateExpandAll")?.addEventListener("click",()=>{
+    document.querySelectorAll(".privateReservation").forEach(d=>d.open=true);
+  });
+  document.querySelector("#privateCollapseAll")?.addEventListener("click",()=>{
+    document.querySelectorAll(".privateReservation").forEach(d=>d.open=false);
+  });
+  document.querySelector("#privateClearAll")?.addEventListener("click",()=>{
+    if(confirm("Remove every locally saved confirmation, link, phone number, and private note?")){
+      localStorage.removeItem(PRIVATE_DETAILS_KEY);
+      renderPrivateScreen();
+    }
+  });
+  document.querySelectorAll("[data-private-form]").forEach(form=>{
+    form.addEventListener("submit",e=>{
+      e.preventDefault();
+      const data=new FormData(form);
+      const key=form.dataset.privateForm;
+      const all=readPrivateDetails();
+      const record={
+        confirmation:String(data.get("confirmation")||"").trim(),
+        phone:String(data.get("phone")||"").trim(),
+        ticketUrl:safeUrl(data.get("ticketUrl")),
+        documentUrl:safeUrl(data.get("documentUrl")),
+        parkingNotes:String(data.get("parkingNotes")||"").trim(),
+        notes:String(data.get("notes")||"").trim(),
+        updatedAt:new Date().toISOString()
+      };
+      all[key]=record;
+      savePrivateDetails(all);
+      const status=form.querySelector(".privateSaveStatus");
+      if(status)status.textContent="✓ Saved on this device";
+      const details=form.closest(".privateReservation");
+      const badge=details?.querySelector("summary b");
+      if(badge)badge.textContent="Saved";
+      setTimeout(()=>{if(status)status.textContent=""},2200);
+    });
+    form.querySelector(".privateDelete")?.addEventListener("click",()=>{
+      const key=form.dataset.privateForm;
+      if(confirm("Remove the saved private details for this reservation?")){
+        const all=readPrivateDetails();
+        delete all[key];
+        savePrivateDetails(all);
+        renderPrivateScreen();
+      }
+    });
+  });
+}
+
+function privateDaySummaryMarkup(date){
+  if(!privateUnlocked)return "";
+  const items=RESERVATION_DATA[date]||[];
+  const rows=items.map((item,index)=>({item,rec:getPrivateRecord(date,item,index)}))
+    .filter(x=>Object.values(x.rec).some(Boolean));
+  if(!rows.length)return "";
+  return `<section class="privateDaySummary">
+    <div class="privateDaySummaryHead"><span>🔐 Organizer details</span><button type="button" data-view="private">Manage all</button></div>
+    ${rows.map(({item,rec})=>`<article>
+      <strong>${escapeHtml(item.name)}</strong>
+      ${rec.confirmation?`<span>Confirmation: ${escapeHtml(rec.confirmation)}</span>`:""}
+      ${rec.phone?`<a href="tel:${escapeHtml(rec.phone)}">📞 Call</a>`:""}
+      ${rec.ticketUrl?`<a href="${escapeHtml(safeUrl(rec.ticketUrl))}" target="_blank" rel="noopener">🎟️ Ticket</a>`:""}
+      ${rec.documentUrl?`<a href="${escapeHtml(safeUrl(rec.documentUrl))}" target="_blank" rel="noopener">📄 Document</a>`:""}
+      ${rec.parkingNotes?`<small>${escapeHtml(rec.parkingNotes)}</small>`:""}
+    </article>`).join("")}
+  </section>`;
+}
+
 const READINESS_KEY="adventureCompanionReadiness";
 
 function statusClass(status){
@@ -266,22 +535,27 @@ function reservationMarkup(d){
       <div><span class="eyebrow">RESERVATION CENTER</span><h3>Bookings for this day</h3></div>
       <span>${items.length} item${items.length===1?"":"s"}</span>
     </div>
-    <div class="reservationCards">${items.map(item=>`
-      <article class="reservationCard">
+    <div class="reservationCards">${items.map((item,index)=>{
+      const rec=privateUnlocked?getPrivateRecord(d.date,item,index):{};
+      return `<article class="reservationCard">
         <div class="reservationTop">
           <span class="reservationIcon">${item.icon}</span>
           <div><small>${item.time}</small><h4>${item.name}</h4></div>
           <span class="reservationStatus ${statusClass(item.status)}">${item.status}</span>
         </div>
         <div class="reservationDetails">
-          <div><span>Confirmation</span><strong>${item.confirmation}</strong></div>
+          <div><span>Family view</span><strong>${item.confirmation}</strong></div>
           <p>${item.notes}</p>
+          ${privateUnlocked&&rec.confirmation?`<div class="unlockedConfirmation"><span>🔐 Confirmation</span><strong>${escapeHtml(rec.confirmation)}</strong></div>`:""}
         </div>
         <div class="reservationActions">
           ${item.phone?`<a href="tel:${item.phone}">📞 Call</a>`:""}
           ${item.website?`<a href="${item.website}" target="_blank" rel="noopener">🌐 Website</a>`:""}
+          ${privateUnlocked&&rec.ticketUrl?`<a href="${escapeHtml(safeUrl(rec.ticketUrl))}" target="_blank" rel="noopener">🎟️ Ticket</a>`:""}
+          ${privateUnlocked&&rec.documentUrl?`<a href="${escapeHtml(safeUrl(rec.documentUrl))}" target="_blank" rel="noopener">📄 Document</a>`:""}
         </div>
-      </article>`).join("")}</div>
+      </article>`}).join("")}</div>
+    <button class="privateAccessButton" data-view="private" type="button">🔐 ${privateUnlocked?"Manage private details":"Organizer private details"}</button>
   </section>`
 }
 
@@ -355,7 +629,7 @@ function dashboardMarkup(d){
       <article><small>📍 FIRST STOP</small><strong>${x.first||d.schedule[0][1]}</strong></article>
       <article><small>🎟️ KEY BOOKING</small><strong>${x.reservation||"No timed booking"}</strong></article>
       <article><small>🚗 DRIVE</small><strong>${d.drive}</strong></article>
-      <article><small>💵 DAY BUDGET</small><strong>${d.budget}</strong></article>
+      <article><small>🌤️ WEATHER</small><strong>Live forecast in M3-03</strong></article>
       <article><small>🌅 SUNSET</small><strong>${x.sunset||"Check closer to trip"}</strong></article>
     </div>
     <div class="dashboardFooter"><span>🌿 ${x.pace||"Flexible pace"}</span><span class="weatherSoon">Weather connects in Milestone 3</span></div>
@@ -378,7 +652,7 @@ if(p==="experiencing"){
 }
 if(p==="remembering")h=`<div class=big>🌳</div><h3>This adventure is part of your story.</h3><p>Gather the photos, laughter, favorite meals, and lessons you want to carry forward.</p><button class=primary id=next>🏔️ Plan Your Next Adventure</button>`;
 $("#homeCard").innerHTML=h;bindDynamic();bindCompletion()}
-function bindDynamic(){$$("[data-go]").forEach(b=>b.onclick=()=>view(b.dataset.go));$$("[data-day]").forEach(b=>b.onclick=()=>showDay(b.dataset.day));$("#next")?.addEventListener("click",()=>$("#homeCard").insertAdjacentHTML("beforeend","<p><b>New Adventure seed planted. 🌱</b></p>"))}
+function bindDynamic(){$$("[data-go]").forEach(b=>b.onclick=()=>view(b.dataset.go));$$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));$$("[data-day]").forEach(b=>b.onclick=()=>showDay(b.dataset.day));$("#next")?.addEventListener("click",()=>$("#homeCard").insertAdjacentHTML("beforeend","<p><b>New Adventure seed planted. 🌱</b></p>"))}
 function bindCompletion(){
   $$("[data-complete]").forEach(b=>b.onclick=()=>{
     const date=b.dataset.complete;
@@ -387,14 +661,16 @@ function bindCompletion(){
   });
 }
 function view(v){$$("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===v));if(v==="home"){$("#screen").hidden=true;scrollTo({top:0,behavior:"smooth"});return}const s=$("#screen");s.hidden=false;
-if(v==="week")s.innerHTML=`<div class=weekHeading><div><span class=eyebrow>MILESTONE 2</span><h3>🗓️ Our Adventure Week</h3></div><span class=weekProgress>${completedDays().length}/8 complete</span></div><p class=info>Each day opens to a dashboard plus smart stop cards with Waze, Google Maps, and stop-to-stop route links.</p><div class=familyDayGrid>${DATA.days.map(d=>{const dt=new Date(d.date+"T12:00:00"),x=DAY_DASH[d.date],done=isComplete(d.date);return `<div class="familyDayCard ${done?"completed":""}"><button data-open="${d.date}"><span class=datePill><small>${dt.toLocaleDateString(undefined,{weekday:"short"})}</small><b>${dt.getDate()}</b></span><span class=summary><strong>${done?"✓ ":""}${d.title}</strong><small>${x.icon} ${x.leave} · ${x.reservation}</small><em>${x.focus}</em></span><span class=chev>›</span></button></div>`}).join("")}</div>`;
-if(v==="reservations")s.innerHTML=`<h3>🍽️ Reservations</h3>${DATA.reservations.map(r=>`<div class=res><span><b>${r.name}</b><small>${r.date} · ${r.time}</small></span><strong class="${r.status==="Confirmed"?"confirmed":"pending"}">${r.status}</strong></div>`).join("")}`;
+if(v==="week")s.innerHTML=`<div class=weekHeading><div><span class=eyebrow>MILESTONE 3</span><h3>🗓️ Our Adventure Week</h3></div><span class=weekProgress>${completedDays().length}/8 complete</span></div><p class=info>Each day opens to a dashboard plus smart stop cards with Waze, Google Maps, and stop-to-stop route links.</p><div class=familyDayGrid>${DATA.days.map(d=>{const dt=new Date(d.date+"T12:00:00"),x=DAY_DASH[d.date],done=isComplete(d.date);return `<div class="familyDayCard ${done?"completed":""}"><button data-open="${d.date}"><span class=datePill><small>${dt.toLocaleDateString(undefined,{weekday:"short"})}</small><b>${dt.getDate()}</b></span><span class=summary><strong>${done?"✓ ":""}${d.title}</strong><small>${x.icon} ${x.leave} · ${x.reservation}</small><em>${x.focus}</em></span><span class=chev>›</span></button></div>`}).join("")}</div>`;
+if(v==="reservations")s.innerHTML=`<div class="reservationIndexHead"><div><span class="eyebrow">FAMILY VIEW</span><h3>🍽️ Reservations</h3></div><button class="privateAccessButton compact" data-view="private" type="button">🔐 Organizer details</button></div>${DATA.reservations.map(r=>`<div class=res><span><b>${r.name}</b><small>${r.date} · ${r.time}</small></span><strong class="${r.status==="Confirmed"?"confirmed":"pending"}">${r.status}</strong></div>`).join("")}`;
+if(v==="private"){renderPrivateScreen();return;}
 if(v==="traditions")s.innerHTML=`<h3>💚 Moments to Protect</h3><ul class=info>${DATA.traditions.map(t=>`<li>${t}</li>`).join("")}</ul>`;
 if(v==="trip")s.innerHTML=`<h3>🎒 Trip Snapshot</h3><p><b>Dates:</b> August 7–14, 2026</p><p><b>Home base:</b> ${DATA.trip.homeBase}</p><p><b>Travel party:</b> ${DATA.trip.party}</p><p><b>Priorities:</b> Stay together, place busy attractions on weekdays, eat well, minimize unnecessary driving, and preserve rest.</p>`;
-if(v==="companion")s.innerHTML=`<h3>🌿 Remy's Corner</h3><div class="brandStamp"><img src="icon-192.png" alt=""><span><strong>Adventure Companion</strong><small>Making New Traditions</small></span></div><div class=remy>The itinerary supports the experience; it does not have to control it.</div><p class=info>During the trip, each daily page keeps timing, stop-by-stop navigation, parking, food, photos, Plan B, budget, and the reason the day matters together in one place. Family members can use the same shared link.</p>`;
-$$("[data-open]").forEach(b=>b.onclick=()=>showDay(b.dataset.open));s.scrollIntoView({behavior:"smooth",block:"start"})}
-function showDay(date){const d=DATA.days.find(x=>x.date===date);if(!d)return;const s=$("#screen");s.hidden=false;s.innerHTML=`<div class=dayHead><button class=back data-back>← Week</button><span class=dayPosition>Day ${dayNumber(date)} of ${DATA.days.length}</span></div>\n${dashboardMarkup(d)}\n<div class=dayHero><small>${d.short} · ${d.theme}</small><h3>${d.title}</h3><p>${d.why}</p><div class=dayChips><span>🚗 ${d.drive}</span><span>💵 ${d.budget}</span><span>📸 Photo moments</span></div></div>
+if(v==="companion")s.innerHTML=`<h3>🌿 Remy's Corner</h3><div class="brandStamp"><img src="icon-192.png" alt=""><span><strong>Adventure Companion</strong><small>Making New Traditions</small></span></div><div class=remy>The itinerary supports the experience; it does not have to control it.</div><p class=info>During the trip, each daily page keeps timing, stop-by-stop navigation, parking, food, photos, Plan B, and the reason the day matters together in one place. Family members can use the same shared link.</p>`;
+$$("[data-open]").forEach(b=>b.onclick=()=>showDay(b.dataset.open));$$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));s.scrollIntoView({behavior:"smooth",block:"start"})}
+function showDay(date){const d=DATA.days.find(x=>x.date===date);if(!d)return;const s=$("#screen");s.hidden=false;s.innerHTML=`<div class=dayHead><button class=back data-back>← Week</button><span class=dayPosition>Day ${dayNumber(date)} of ${DATA.days.length}</span></div>\n${dashboardMarkup(d)}\n<div class=dayHero><small>${d.short} · ${d.theme}</small><h3>${d.title}</h3><p>${d.why}</p><div class=dayChips><span>🚗 ${d.drive}</span><span>🌤️ Weather-ready day plan</span><span>📸 Photo moments</span></div></div>
 ${reservationMarkup(d)}
+${privateDaySummaryMarkup(d.date)}
 ${smartStopsMarkup(d)}\n<div class=reservationSummary><span><b>🍽️ Food plan</b><small>${d.food}</small></span><strong>›</strong></div><div class=why><b>◆ Why this day matters</b><br>${d.why}</div><div class=timeline>${d.schedule.map(e=>`<div class=event><time>${e[0]}</time><span>${e[1]}</span></div>`).join("")}</div>
 <details open><summary>Route, driving & parking</summary><p class=info><b>Route:</b> ${d.route}<br><b>Driving:</b> ${d.drive}<br><b>Parking:</b> ${d.parking}<br><b>Crowd strategy:</b> ${d.crowds}</p></details>
 <details><summary>Foodie callout</summary><p class=info><b>Restaurant:</b> ${d.food}<br><b>Signature dishes:</b> ${d.dishes}<br><b>Dessert:</b> ${d.dessert}</p></details>
@@ -528,7 +804,7 @@ function dismissAdventureIntro(skipNextTime){
 function wireAdventureIntroFix(){
   document.querySelectorAll("button,a").forEach(el=>{
     const text=(el.textContent||"").trim().toLowerCase();
-    if(text==="enter adventure" || text==="start adventure"){
+    if(text==="enter adventure" || text==="enter our adventure" || text==="start adventure"){
       if(el.dataset.introFixed==="1")return;
       el.dataset.introFixed="1";
       el.addEventListener("click",()=>dismissAdventureIntro(false),{capture:true});

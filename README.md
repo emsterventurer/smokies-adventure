@@ -1,32 +1,31 @@
-# Adventure Companion — Commit #013.2
+# Adventure Companion — M3-01
 
-## Milestone 2 Family Release Candidate
+## Private Trip Details
 
-This build removes the nonessential **Copy Details** button from reservation cards because clipboard behavior was not reliable across test devices.
+M3-01 begins Milestone 3 by separating organizer-only reservation information from the public family itinerary.
 
 ### Included
 
-- Start Adventure welcome-screen fix from Commit #013.1
-- Optional Anakeesta stop
-- Clear private-detail placeholders
-- Reservation website buttons
-- Column-first desktop Smart Stop Cards
-- Complete daily routes
-- Trip Readiness
-- Feedback Mode
-- Offline support
-
-### Deferred to the next release
-
-A future release will add a clearer way to manage private trip details, including:
-
-- Confirmation-number links
-- Ticket links
+- Organizer Private Details screen
+- Optional 4–8 digit organizer PIN
+- Confirmation numbers
+- Ticket/reservation links
 - Booking-document links
-- A simple edit or private-data workflow
+- Contact phone numbers
+- Parking and check-in notes
+- Private organizer notes
+- Local browser storage only
+- Lock/unlock control for the current browser session
+- Private details shown within a day only while Organizer Space is unlocked
+- Budget tile removed from the family dashboard
+- Weather-ready dashboard tile added for M3-03
 
-These should not be hard-coded into a public GitHub repository.
+### Privacy model
 
-Suggested commit message:
+Private information is not placed in the public app source or GitHub repository. It is stored in the browser's local storage on the device where it is entered.
 
-`Commit #013.2 — Remove unreliable Copy Details action`
+The PIN is a casual privacy barrier, not strong encryption. Private details do not automatically sync across devices.
+
+### Suggested GitHub commit message
+
+`M3-01 — Add organizer-only private trip details`
