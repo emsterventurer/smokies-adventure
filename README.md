@@ -1,51 +1,26 @@
-# Adventure Companion — Commit #013
+# Adventure Companion — Commit #013.1
 
-## Family Release Candidate — Milestone 2 Frozen
+## Milestone 2 Bug-Fix Release
 
-Commit #013 is the final feature build for Milestone 2.
+This build addresses the findings from the Commit #013 release test.
 
-### Column-first Smart Stop Cards
+### Fixed
 
-On desktop, stop cards now read:
+- **Start Adventure** now dismisses the welcome screen.
+- **Don’t show this again** still dismisses the welcome screen and saves the preference.
+- Reservation **Copy Details** now uses a clipboard fallback when needed.
+- Copying shows a visible confirmation toast.
+- Reservation placeholders now clearly identify private details that should be added locally rather than committed publicly.
 
-1. Down the left column
-2. Then from the top of the right column
+### Added
 
-Columns are balanced automatically:
+- Optional **Anakeesta** Smart Stop Card on August 13.
+- The card is visually marked as optional and should be used only when weather, timing, and family energy are favorable.
 
-- 8 stops → 4 + 4
-- 7 stops → 4 + 3
-- 5 stops → 3 + 2
+### Freeze status
 
-On phones, stop cards remain one continuous vertical timeline.
-
-### Family-release polish
-
-- Chronological numbering remains continuous across columns
-- A visible continuation cue appears after the first desktop column
-- Final Wyndham cards are visually distinct
-- Final route message says the family is done for the day
-- Build badge identifies Commit #013
-- Milestone 2 is labeled Frozen
-
-### Feature freeze
-
-After publishing this build:
-
-- Add no new Milestone 2 features
-- Record findings with Feedback Mode
-- Fix only release blockers, bugs, and approved cosmetic defects
-- Number fixes as Commit #013.1, #013.2, and so forth
-- Tag the approved family version as `milestone-2-family-release`
-
-### Testing
-
-Use `MILESTONE_2_TEST_SCRIPT.md`, included in this package, for the complete desktop, phone, offline, navigation, reservation, persistence, and family-usability test.
-
-## Publish
-
-Upload every file to the root of the existing `smokies-adventure` repository, replacing the current files.
+Milestone 2 remains frozen. This is a bug-fix release, not a new feature milestone.
 
 Suggested commit message:
 
-`Commit #013 — Freeze Milestone 2 Family Release Candidate`
+`Commit #013.1 — Fix release-test findings`

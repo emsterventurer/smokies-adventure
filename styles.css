@@ -451,3 +451,46 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:760px;
     padding:15px;
   }
 }
+
+
+/* Commit #013.1 — release fixes */
+.optionalStop{
+  border-style:dashed;
+  border-color:rgba(118,83,11,.34);
+  background:linear-gradient(145deg,#fff9ec,#ffffff);
+}
+.optionalStop .stopOrder,
+.optionalStop .stopIcon{
+  background:#fff0cf;
+}
+.optionalStop .stopTitle h4::after{
+  content:" · Optional";
+  color:#76530b;
+  font-size:.68rem;
+  font-weight:700;
+}
+.appToast{
+  position:fixed;
+  left:50%;
+  bottom:88px;
+  transform:translate(-50%,18px);
+  opacity:0;
+  pointer-events:none;
+  z-index:99999;
+  background:#183327;
+  color:#fff;
+  padding:10px 14px;
+  border-radius:999px;
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
+  font-size:.78rem;
+  transition:.2s ease;
+}
+.appToast.show{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+.isClosing{
+  opacity:0 !important;
+  pointer-events:none !important;
+  transition:opacity .2s ease !important;
+}
