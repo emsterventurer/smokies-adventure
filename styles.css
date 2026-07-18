@@ -782,3 +782,25 @@ a[data-view="private"],
 .dailyDashboard{position:relative}
 
 .trailDot{display:none!important}
+
+
+/* M3-01/02.4 — Stop-to-stop route estimates */
+.nextRoute{
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  column-gap:7px;
+  row-gap:1px;
+}
+.nextDriveTime{
+  font-family:Arial,sans-serif;
+  font-size:.68rem;
+  font-weight:700;
+  opacity:.85;
+  white-space:nowrap;
+}
+@media(max-width:520px){
+  .nextRoute{padding-left:8px!important;padding-right:8px!important}
+  .nextDriveTime{font-size:.64rem}
+}

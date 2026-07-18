@@ -1,5 +1,5 @@
-const CACHE="adventure-companion-m3-01-02-3";
-const BUILD="M3-01/02.3";
+const CACHE="adventure-companion-m3-01-02-4";
+const BUILD="M3-01/02.4";
 const ASSETS=["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./favicon-32.png"];
 
 self.addEventListener("install",event=>{

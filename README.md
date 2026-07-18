@@ -1,23 +1,18 @@
-# Adventure Companion — M3-01/02.3
+# Adventure Companion — M3-01/02.4
 
-## Adventure Trail & Reservation Fix
-
-This build completes the requested visual and functional refinements.
+## Daily Manage Fix & Route Times
 
 ### Changes
 
-- Fixed the Manage Reservations button with a dedicated event handler
-- Added a clear return-to-Reservations action in the editor
-- Updated Travel Party to Papa, Bubbe, Emily, Jake, and Kaseryn
-- Replaced plain Adventure Trail boxes with nature-inspired stepping stones
-- Each stone now clearly says Day 1, Day 2, and so on
-- Current and completed days have distinct styling
-- Added the Adventure Companion menu on the left for desktop
-- Retained bottom navigation on phones
-- Kept the existing Daily Dashboard and its current information
-- Confirmation numbers, ticket links, documents, parking notes, contact details, notes, and statuses remain
-- Budget content remains removed
+- Fixed Manage within each day's **Bookings for this day** section
+- Added a defensive delegated click handler for dynamically rendered Manage actions
+- Added estimated normal-condition drive times to every Smart Stop Card's Next button
+- Next buttons now show the destination and estimated drive time
+- Removed the remaining day-detail budget disclosure
+- Preserved the stepping-stone Adventure Trail, desktop side menu, Daily Dashboard, and shared Reservation Manager
+
+Drive times are planning estimates and may change with traffic, parking, weather, and pedestrian-only transitions.
 
 ### Suggested commit message
 
-`M3-01/02.3 — Fix reservation manager and add stepping-stone trail`
+`M3-01/02.4 — Fix daily reservation manager and add route times`
