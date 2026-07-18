@@ -1,5 +1,5 @@
-const CACHE="adventure-companion-013-1";
-const BUILD="Commit #013.1";
+const CACHE="adventure-companion-013-2";
+const BUILD="Commit #013.2";
 const ASSETS=["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./favicon-32.png"];
 
 self.addEventListener("install",event=>{

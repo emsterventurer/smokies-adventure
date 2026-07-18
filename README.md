@@ -1,26 +1,32 @@
-# Adventure Companion — Commit #013.1
+# Adventure Companion — Commit #013.2
 
-## Milestone 2 Bug-Fix Release
+## Milestone 2 Family Release Candidate
 
-This build addresses the findings from the Commit #013 release test.
+This build removes the nonessential **Copy Details** button from reservation cards because clipboard behavior was not reliable across test devices.
 
-### Fixed
+### Included
 
-- **Start Adventure** now dismisses the welcome screen.
-- **Don’t show this again** still dismisses the welcome screen and saves the preference.
-- Reservation **Copy Details** now uses a clipboard fallback when needed.
-- Copying shows a visible confirmation toast.
-- Reservation placeholders now clearly identify private details that should be added locally rather than committed publicly.
+- Start Adventure welcome-screen fix from Commit #013.1
+- Optional Anakeesta stop
+- Clear private-detail placeholders
+- Reservation website buttons
+- Column-first desktop Smart Stop Cards
+- Complete daily routes
+- Trip Readiness
+- Feedback Mode
+- Offline support
 
-### Added
+### Deferred to the next release
 
-- Optional **Anakeesta** Smart Stop Card on August 13.
-- The card is visually marked as optional and should be used only when weather, timing, and family energy are favorable.
+A future release will add a clearer way to manage private trip details, including:
 
-### Freeze status
+- Confirmation-number links
+- Ticket links
+- Booking-document links
+- A simple edit or private-data workflow
 
-Milestone 2 remains frozen. This is a bug-fix release, not a new feature milestone.
+These should not be hard-coded into a public GitHub repository.
 
 Suggested commit message:
 
-`Commit #013.1 — Fix release-test findings`
+`Commit #013.2 — Remove unreliable Copy Details action`

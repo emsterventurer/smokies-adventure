@@ -1,7 +1,7 @@
 
 const APP_BUILD={
-  version:"Commit #013.1.1",
-  label:"Milestone 2 Bug-Fix Release",
+  version:"Commit #013.2.1",
+  label:"Milestone 2 Family Release Candidate",
   date:"July 18, 2026"
 };
 
@@ -280,7 +280,6 @@ function reservationMarkup(d){
         <div class="reservationActions">
           ${item.phone?`<a href="tel:${item.phone}">📞 Call</a>`:""}
           ${item.website?`<a href="${item.website}" target="_blank" rel="noopener">🌐 Website</a>`:""}
-          <button type="button" class="copyReservation" data-copy="${item.name} — ${item.time} — ${item.confirmation}">Copy details</button>
         </div>
       </article>`).join("")}</div>
   </section>`
@@ -325,54 +324,7 @@ function readinessMarkup(){
   </section>`;
 }
 
-function showAppToast(message){
-  let toast=document.querySelector(".appToast");
-  if(!toast){
-    toast=document.createElement("div");
-    toast.className="appToast";
-    document.body.appendChild(toast);
-  }
-  toast.textContent=message;
-  toast.classList.add("show");
-  clearTimeout(window.__appToastTimer);
-  window.__appToastTimer=setTimeout(()=>toast.classList.remove("show"),1800);
-}
-
-async function copyTextReliable(text){
-  if(navigator.clipboard && window.isSecureContext){
-    await navigator.clipboard.writeText(text);
-    return true;
-  }
-  const area=document.createElement("textarea");
-  area.value=text;
-  area.setAttribute("readonly","");
-  area.style.position="fixed";
-  area.style.opacity="0";
-  document.body.appendChild(area);
-  area.select();
-  const ok=document.execCommand("copy");
-  document.body.removeChild(area);
-  return ok;
-}
-
 function wireReleaseCandidateTools(){
-  document.querySelectorAll(".copyReservation").forEach(button=>{
-    if(button.dataset.wired==="1")return;
-    button.dataset.wired="1";
-    button.addEventListener("click",async()=>{
-      const old=button.textContent;
-      try{
-        const ok=await copyTextReliable(button.dataset.copy||"");
-        if(!ok)throw new Error("copy failed");
-        button.textContent="Copied ✓";
-        showAppToast("Reservation details copied");
-      }catch(e){
-        button.textContent="Copy unavailable";
-        showAppToast("Copy was blocked on this device");
-      }
-      setTimeout(()=>button.textContent=old,1500);
-    });
-  });
   document.querySelectorAll("[data-readiness]").forEach(box=>{
     if(box.dataset.wired==="1")return;
     box.dataset.wired="1";
