@@ -62,3 +62,34 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:760px;
 .brandStamp{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;background:rgba(255,255,255,.1);border-radius:14px}
 .brandStamp img{width:46px;height:46px;border-radius:13px}.brandStamp strong,.brandStamp small{display:block}.brandStamp small{opacity:.72;margin-top:2px}
 @media(prefers-reduced-motion:reduce){.brandSplashInner img,.brandSplashInner h1,.brandSplashInner p,.brandPromise{animation:none}}
+
+
+/* Commit #008 — Daily Dashboard & Progress Trail */
+.countdownSplit{display:grid;grid-template-columns:1fr minmax(190px,.85fr);gap:18px;align-items:center}
+.nextAdventure{text-align:left;background:#edf2eb;border:1px solid var(--line);border-radius:16px;padding:15px}
+.nextAdventure b,.nextAdventure small{display:block}.nextAdventure b{margin:7px 0;font-size:1rem}.nextAdventure small{color:var(--mut);line-height:1.4}
+.dailyDashboard{margin:10px 0 18px;text-align:left;background:linear-gradient(145deg,#fdfbf4,#edf3eb);border:1px solid rgba(41,76,58,.18);border-radius:20px;padding:17px;box-shadow:0 10px 24px rgba(24,51,39,.08)}
+.dashboardLead{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding-bottom:14px}
+.dashboardIcon{width:49px;height:49px;display:grid;place-items:center;background:white;border-radius:15px;font-size:1.6rem;box-shadow:0 5px 15px rgba(24,51,39,.08)}
+.dashboardLead h3{margin:3px 0;font-size:1.18rem}.dashboardLead p{margin:0;color:var(--mut);font-size:.83rem;line-height:1.35}
+.completeDay{border:1px solid rgba(41,76,58,.25);background:white;color:var(--f);border-radius:99px;padding:8px 11px;font-size:.72rem;white-space:nowrap}
+.completeDay.done{background:var(--f);color:white}
+.dashboardGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dashboardGrid article{background:rgba(255,255,255,.82);border:1px solid var(--line);border-radius:13px;padding:11px;min-height:79px}
+.dashboardGrid small,.dashboardGrid strong{display:block}.dashboardGrid small{font-family:Arial,sans-serif;font-size:.59rem;letter-spacing:.06em;color:var(--mut);margin-bottom:7px}.dashboardGrid strong{font-size:.82rem;line-height:1.28}
+.dashboardFooter{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:10px;color:var(--f);font-size:.75rem}
+.weatherSoon{color:var(--mut);font-style:italic;text-align:right}
+.weekHeading{display:flex;align-items:center;justify-content:space-between;gap:12px}.weekHeading h3{margin:4px 0}.weekProgress{background:#e8efe8;color:var(--f);padding:7px 10px;border-radius:99px;font-size:.75rem}
+.familyDayCard.completed{background:#edf3eb;border-color:rgba(41,76,58,.28)}
+.familyDayCard .summary em{display:block;color:var(--mut);font-size:.7rem;font-style:normal;margin-top:5px}
+.dayPosition{font-size:.76rem;color:var(--mut);padding-top:8px}
+.trailStop.complete{opacity:1}.trailStop.complete .trailDot{background:var(--f);color:white;outline:3px solid #d9e6d8}
+.trailStop.complete small{color:var(--f);font-weight:bold}
+.journeyTrail{position:relative}.journeyTrail:before{content:"";position:absolute;left:5%;right:5%;top:19px;height:3px;background:#d7dfd5;border-radius:9px;z-index:0}
+.trailStop{position:relative;z-index:1}
+@media(max-width:600px){
+  .countdownSplit{grid-template-columns:1fr}
+  .dashboardLead{grid-template-columns:auto 1fr}.completeDay{grid-column:1/-1;width:100%}
+  .dashboardGrid{grid-template-columns:1fr 1fr}
+  .dashboardFooter{align-items:flex-start;flex-direction:column}.weatherSoon{text-align:left}
+}
