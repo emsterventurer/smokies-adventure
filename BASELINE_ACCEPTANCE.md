@@ -29,20 +29,20 @@ Future development will occur in M3-03 and later milestones.
 
 ## Acceptance Checklist
 
-- [ ] GitHub Pages deployed successfully
-- [ ] Desktop testing completed
-- [ ] Mobile testing completed
-- [ ] PWA installs successfully
-- [ ] Navigation verified
-- [ ] Daily Dashboard verified
-- [ ] Smart Stop Cards verified
-- [ ] Start Cards verified
-- [ ] Reservation Manager verified
-- [ ] Drive times verified
-- [ ] Travel Party verified
-- [ ] No remaining budget references
-- [ ] Service worker updated
-- [ ] Version number updated to M3-02.5
+- [x] GitHub Pages deployed successfully
+- [x] Desktop testing completed
+- [x] Mobile testing completed
+- [x] PWA installs successfully
+- [x] Navigation verified
+- [x] Daily Dashboard verified
+- [x] Smart Stop Cards verified
+- [x] Start Cards verified
+- [x] Reservation Manager verified
+- [x] Drive times verified
+- [x] Travel Party verified
+- [x] No remaining budget references
+- [x] Service worker updated
+- [x] Version number updated to M3-02.5
 
 ---
 
