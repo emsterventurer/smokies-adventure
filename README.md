@@ -23,3 +23,7 @@ Stable baseline candidate for **Smoky Mountains 2026**.
 ## Suggested baseline tag after live testing
 
 `m3-02.5-baseline`
+
+## M3-03.1 — Weather Foundation
+
+This build adds an isolated live-weather foundation using Open-Meteo, local freshness-aware caching, offline fallback states, manual refresh, and a dashboard weather card. The M3-02.5 itinerary and persistence behavior remain unchanged.
