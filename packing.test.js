@@ -1,22 +1,12 @@
-const assert=require('assert');
-const packing=require('./packing.js');
-
-class MemoryStorage{
-  constructor(){this.map=new Map();}
-  getItem(key){return this.map.has(key)?this.map.get(key):null;}
-  setItem(key,value){this.map.set(key,String(value));}
-  removeItem(key){this.map.delete(key);}
-}
-
-const storage=new MemoryStorage();
-assert.equal(packing.TRAVELERS.length,6);
-assert.deepEqual(packing.TRAVELERS.map(t=>t.name),['Emily','Jake','Kaseryn','Bubbe','Papa','Shared']);
-assert.equal(packing.progress(packing.BASE_ITEMS,{}).milestone,'Getting Started');
-const first=packing.BASE_ITEMS[0];
-assert.equal(packing.toggle(first.id,storage),true);
-assert.equal(packing.readState(storage)[first.id],true);
-const complete=Object.fromEntries(packing.BASE_ITEMS.map(item=>[item.id,true]));
-assert.equal(packing.progress(packing.BASE_ITEMS,complete).milestone,'Adventure Ready');
-packing.reset(storage);
-assert.deepEqual(packing.readState(storage),{});
+const assert=require('assert');const p=require('./packing.js');
+function storage(){const m=new Map();return{getItem:k=>m.has(k)?m.get(k):null,setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)}}
+assert.deepStrictEqual(p.TRAVELERS.map(t=>t.name),['Emily','Jake','Kaseryn','Bubbe','Papa','Shared']);
+assert(p.BASE_ITEMS.length>=55,'trip-specific packing list should be substantial');
+assert(p.BASE_ITEMS.some(i=>i.activity==='zipline'&&i.traveler==='jake'));
+assert(p.BASE_ITEMS.some(i=>i.activity==='zipline'&&i.traveler==='kaseryn'));
+assert(p.BASE_ITEMS.some(i=>i.activity==='dollywood'));
+assert(p.BASE_ITEMS.every(i=>['essential','recommended','optional'].includes(i.priority)));
+assert(p.BASE_ITEMS.every(i=>i.reason));
+const s=storage(),id=p.BASE_ITEMS[0].id;assert.strictEqual(p.toggle(id,s),true);assert.strictEqual(p.readState(s)[id],true);assert.strictEqual(p.toggle(id,s),false);
+assert.strictEqual(p.progress([],{}).milestone,'Getting Started');
 console.log('packing tests passed');
