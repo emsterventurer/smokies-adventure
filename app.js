@@ -1,7 +1,7 @@
 
 const APP_BUILD={
-  version:"M3-04.1",
-  label:"Packing Foundation",
+  version:"M3-04.2",
+  label:"Trip-Specific Packing + Daily Weather",
   date:"July 20, 2026"
 };
 
@@ -562,11 +562,36 @@ function dashboardMarkup(d){
       <article><small>📍 FIRST STOP</small><strong>${x.first||d.schedule[0][1]}</strong></article>
       <article><small>🎟️ KEY BOOKING</small><strong>${x.reservation||"No timed booking"}</strong></article>
       <article><small>🚗 DRIVE</small><strong>${d.drive}</strong></article>
-      <article><small>🌤️ WEATHER</small><strong>Live forecast coming in M3-03</strong></article>
+      <article class="dayWeatherTile" data-day-weather="${d.date}"><small>🌤️ WEATHER</small><strong>Loading forecast…</strong><span>Sevierville / Smoky Mountains</span></article>
       <article><small>🌅 SUNSET</small><strong>${x.sunset||"Check closer to trip"}</strong></article>
     </div>
-    <div class="dashboardFooter"><span>🌿 ${x.pace||"Flexible pace"}</span><span class="weatherSoon">Weather connects in Milestone 3</span></div>
+    <div class="dashboardFooter"><span>🌿 ${x.pace||"Flexible pace"}</span><span class="weatherSoon" data-day-weather-status="${d.date}">Live forecast</span></div>
   </section>`;
+}
+
+
+let tripWeatherPromise=null;
+function dayWeatherFallback(date){
+  const tripStart=new Date('2026-08-07T12:00:00'),target=new Date(date+'T12:00:00');
+  return target-Date.now()>16*86400000?'Available within 16 days':'Forecast unavailable';
+}
+function hydrateDayWeather(){
+  const tiles=[...document.querySelectorAll('[data-day-weather]')];
+  if(!tiles.length||!window.AdventureWeather?.loadTripForecast)return;
+  if(!tripWeatherPromise)tripWeatherPromise=window.AdventureWeather.loadTripForecast({allowExpired:!navigator.onLine}).catch(()=>null);
+  tripWeatherPromise.then(result=>{
+    tiles.forEach(tile=>{
+      const date=tile.dataset.dayWeather,day=result?.data?.days?.[date];
+      const status=document.querySelector(`[data-day-weather-status="${date}"]`);
+      if(day){
+        tile.innerHTML=`<small>${day.icon} WEATHER</small><strong>${day.high}° / ${day.low}° · ${day.condition}</strong><span>${day.rainChance}% chance of rain</span>`;
+        if(status)status.textContent=result.fromCache?'Cached trip forecast':'Live trip forecast';
+      }else{
+        tile.innerHTML=`<small>🌤️ WEATHER</small><strong>${dayWeatherFallback(date)}</strong><span>Refresh closer to the adventure</span>`;
+        if(status)status.textContent='Weather window not open yet';
+      }
+    });
+  });
 }
 
 function drawPhase(d){const p=phase(d),i=phases.indexOf(p);$("#phaseBadge").textContent=meta[p][1];$$(".phases div").forEach((e,n)=>{e.className=n===i?"active":n<i?"done":""});$$(".phases i").forEach((e,n)=>e.className=n<i?"done":"");drawHome(d,p)}
@@ -584,7 +609,7 @@ if(p==="experiencing"){
   h=`${dashboardMarkup(day)}<button class=primary data-day="${day.date}">Open today's full timeline</button>`
 }
 if(p==="remembering")h=`<div class=big>🌳</div><h3>This adventure is part of your story.</h3><p>Gather the photos, laughter, favorite meals, and lessons you want to carry forward.</p><button class=primary id=next>🏔️ Plan Your Next Adventure</button>`;
-$("#homeCard").innerHTML=h;bindDynamic();bindCompletion()}
+$("#homeCard").innerHTML=h;bindDynamic();bindCompletion();hydrateDayWeather()}
 
 document.addEventListener("click",event=>{
   const manageButton=event.target.closest("[data-manage-reservations]");
@@ -629,7 +654,7 @@ if(v==="traditions")s.innerHTML=`<h3>💚 Moments to Protect</h3><ul class=info>
 if(v==="packing"){window.AdventurePacking?.render(s);}
 if(v==="trip")s.innerHTML=`<h3>🎒 Trip Snapshot</h3><p><b>Dates:</b> August 7–14, 2026</p><p><b>Home base:</b> ${DATA.trip.homeBase}</p><p><b>Travel party:</b> ${DATA.trip.party}</p><p><b>Priorities:</b> Stay together, place busy attractions on weekdays, eat well, minimize unnecessary driving, and preserve rest.</p>`;
 if(v==="companion")s.innerHTML=`<h3>🌿 Remy's Corner</h3><div class="brandStamp"><img src="icon-192.png" alt=""><span><strong>Adventure Companion</strong><small>Making New Traditions</small></span></div><div class=remy>The itinerary supports the experience; it does not have to control it.</div><p class=info>During the trip, each daily page keeps timing, stop-by-stop navigation, parking, food, photos, Plan B, and the reason the day matters together in one place. Family members can use the same shared link.</p>`;
-$$("[data-open]").forEach(b=>b.onclick=()=>showDay(b.dataset.open));$$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));bindManageReservationButtons();s.scrollIntoView({behavior:"smooth",block:"start"})}
+hydrateDayWeather();$$(`[data-open]`).forEach(b=>b.onclick=()=>showDay(b.dataset.open));$$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));bindManageReservationButtons();s.scrollIntoView({behavior:"smooth",block:"start"})}
 function showDay(date){const d=DATA.days.find(x=>x.date===date);if(!d)return;const s=$("#screen");s.hidden=false;s.innerHTML=`<div class=dayHead><button class=back data-back>← Week</button><span class=dayPosition>Day ${dayNumber(date)} of ${DATA.days.length}</span></div>\n${dashboardMarkup(d)}\n<div class=dayHero><small>${d.short} · ${d.theme}</small><h3>${d.title}</h3><p>${d.why}</p><div class=dayChips><span>🚗 ${d.drive}</span><span>🌤️ Weather-ready day plan</span><span>📸 Photo moments</span></div></div>
 ${reservationMarkup(d)}
 ${smartStopsMarkup(d)}\n<div class=reservationSummary><span><b>🍽️ Food plan</b><small>${d.food}</small></span><strong>›</strong></div><div class=why><b>◆ Why this day matters</b><br>${d.why}</div><div class=timeline>${d.schedule.map(e=>`<div class=event><time>${e[0]}</time><span>${e[1]}</span></div>`).join("")}</div>
