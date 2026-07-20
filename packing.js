@@ -4,94 +4,54 @@
   root.AdventurePacking=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(root){
   'use strict';
-
   const STORAGE_KEY='adventureCompanionPackingM3041';
   const TRAVELERS=[
-    {id:'emily',name:'Emily',icon:'👩'},
-    {id:'jake',name:'Jake',icon:'👦'},
-    {id:'kaseryn',name:'Kaseryn',icon:'👧'},
-    {id:'bubbe',name:'Bubbe',icon:'👵'},
-    {id:'papa',name:'Papa',icon:'👴'},
-    {id:'shared',name:'Shared',icon:'👨‍👩‍👧‍👦'}
+    {id:'emily',name:'Emily',icon:'👩'},{id:'jake',name:'Jake',icon:'👦'},{id:'kaseryn',name:'Kaseryn',icon:'👧'},
+    {id:'bubbe',name:'Bubbe',icon:'👵'},{id:'papa',name:'Papa',icon:'👴'},{id:'shared',name:'Shared',icon:'👨‍👩‍👧‍👦'}
   ];
   const CATEGORIES=[
-    {id:'clothing',name:'Clothing',icon:'👕'},
-    {id:'toiletries',name:'Toiletries',icon:'🧴'},
-    {id:'electronics',name:'Electronics',icon:'🔌'},
-    {id:'medications',name:'Medications',icon:'💊'},
-    {id:'documents',name:'Documents',icon:'📄'},
-    {id:'gear',name:'Adventure Gear',icon:'🥾'},
-    {id:'snacks',name:'Snacks',icon:'🥨'},
-    {id:'misc',name:'Miscellaneous',icon:'✨'}
+    {id:'clothing',name:'Clothing',icon:'👕'},{id:'toiletries',name:'Toiletries',icon:'🧴'},{id:'electronics',name:'Electronics',icon:'🔌'},
+    {id:'medications',name:'Medications',icon:'💊'},{id:'documents',name:'Documents',icon:'📄'},{id:'gear',name:'Adventure Gear',icon:'🥾'},
+    {id:'snacks',name:'Snacks',icon:'🥨'},{id:'misc',name:'Miscellaneous',icon:'✨'}
   ];
-
-  const BASE_ITEMS=[
-    ['emily','clothing','Everyday outfits'],['emily','toiletries','Personal toiletries'],['emily','electronics','Phone charger'],['emily','medications','Daily medications'],
-    ['jake','clothing','Everyday outfits'],['jake','toiletries','Personal toiletries'],['jake','electronics','Phone charger'],['jake','gear','Comfortable walking shoes'],
-    ['kaseryn','clothing','Everyday outfits'],['kaseryn','toiletries','Personal toiletries'],['kaseryn','electronics','Phone charger'],['kaseryn','gear','Comfortable walking shoes'],
-    ['bubbe','clothing','Everyday outfits'],['bubbe','toiletries','Personal toiletries'],['bubbe','medications','Daily medications'],['bubbe','gear','Comfortable walking shoes'],
-    ['papa','clothing','Everyday outfits'],['papa','toiletries','Personal toiletries'],['papa','medications','Daily medications'],['papa','gear','Comfortable walking shoes'],
-    ['shared','documents','Lodging confirmation'],['shared','documents','Tickets and reservation details'],['shared','electronics','Shared charging cables'],['shared','medications','Family first-aid kit'],['shared','snacks','Road-trip snacks'],['shared','misc','Reusable water bottles']
-  ].map((item,index)=>({id:`m3041-${index+1}`,traveler:item[0],category:item[1],label:item[2]}));
-
+  const ACTIVITIES={all:'All activities',travel:'Travel days',dollywood:'Dollywood',aquarium:'Aquarium',zipline:'Zipline',caverns:'Forbidden Caverns',coaster:'Mountain coaster',pool:'Pool time',dinner:'Dinner evenings'};
+  const PRIORITY_LABELS={essential:'Essential',recommended:'Recommended',optional:'Optional'};
+  const raw=[
+    ['emily','clothing','Everyday outfits','essential','travel','Eight-day trip basics.'],['emily','clothing','Light layer or cardigan','recommended','caverns','The cavern and mountain evenings can feel cool.'],['emily','clothing','Dinner outfit','recommended','dinner','For Local Goat, Seasons 101, and The Greenbrier.'],['emily','clothing','Swimsuit and cover-up','recommended','pool','The resort has pool time built in.'],['emily','toiletries','Personal toiletries','essential','travel','Daily personal care.'],['emily','electronics','Phone charger','essential','travel','Navigation, tickets, photos, and family contact.'],['emily','medications','Daily medications','essential','travel','Keep in your personal bag.'],['emily','gear','Comfortable walking shoes','essential','dollywood','Long walking days at Dollywood and downtown stops.'],['emily','gear','Small crossbody or day bag','recommended','dollywood','Keeps essentials secure and hands free.'],['emily','gear','Sunscreen and sunglasses','essential','dollywood','Extended outdoor time in August.'],
+    ['jake','clothing','Everyday outfits','essential','travel','Eight-day trip basics.'],['jake','clothing','Athletic clothes','essential','zipline','Secure, comfortable clothing for ziplining.'],['jake','clothing','Light layer','recommended','caverns','Forbidden Caverns stays cooler than outside.'],['jake','clothing','Swimsuit','recommended','pool','For resort pool time.'],['jake','toiletries','Personal toiletries','essential','travel','Daily personal care.'],['jake','electronics','Phone charger','essential','travel','Navigation, photos, and family contact.'],['jake','gear','Closed-toe secure shoes','essential','zipline','Required for safe ziplining.'],['jake','gear','Comfortable walking shoes','essential','dollywood','For a full park day.'],['jake','gear','Sunglasses or hat','recommended','dollywood','Sun protection outdoors.'],
+    ['kaseryn','clothing','Everyday outfits','essential','travel','Eight-day trip basics.'],['kaseryn','clothing','Athletic clothes','essential','zipline','Secure and comfortable for ziplining.'],['kaseryn','clothing','Light hoodie','recommended','caverns','Useful inside the cavern and on cooler evenings.'],['kaseryn','clothing','Swimsuit and cover-up','recommended','pool','For resort pool time.'],['kaseryn','toiletries','Personal toiletries','essential','travel','Daily personal care.'],['kaseryn','electronics','Phone charger','essential','travel','Photos and family contact.'],['kaseryn','gear','Closed-toe secure shoes','essential','zipline','Required for safe ziplining.'],['kaseryn','gear','Comfortable walking shoes','essential','dollywood','For a full park day.'],['kaseryn','gear','Small comfort item or headphones','optional','travel','Helpful during the drive or busy moments.'],
+    ['bubbe','clothing','Everyday outfits','essential','travel','Eight-day trip basics.'],['bubbe','clothing','Light layer','recommended','caverns','The cavern and evenings can be cool.'],['bubbe','clothing','Dinner outfit','recommended','dinner','For the planned restaurant evenings.'],['bubbe','clothing','Swimsuit','optional','pool','For resort pool time if desired.'],['bubbe','toiletries','Personal toiletries','essential','travel','Daily personal care.'],['bubbe','medications','Daily medications','essential','travel','Pack enough plus a small buffer.'],['bubbe','gear','Supportive walking shoes','essential','dollywood','Comfort for long attraction days.'],['bubbe','gear','Sun hat and sunglasses','recommended','dollywood','Sun protection during outdoor activities.'],
+    ['papa','clothing','Everyday outfits','essential','travel','Eight-day trip basics.'],['papa','clothing','Light layer','recommended','caverns','The cavern and evenings can be cool.'],['papa','clothing','Dinner outfit','recommended','dinner','For the planned restaurant evenings.'],['papa','clothing','Swimsuit','optional','pool','For resort pool time if desired.'],['papa','toiletries','Personal toiletries','essential','travel','Daily personal care.'],['papa','medications','Daily medications','essential','travel','Pack enough plus a small buffer.'],['papa','gear','Supportive walking shoes','essential','dollywood','Comfort for long attraction days.'],['papa','gear','Sun hat and sunglasses','recommended','dollywood','Sun protection during outdoor activities.'],
+    ['shared','documents','Lodging confirmation','essential','travel','Needed for check-in.'],['shared','documents','Tickets and reservation details','essential','travel','Dollywood, zipline, aquarium, and dining plans.'],['shared','documents','Photo IDs and insurance cards','essential','travel','Travel and emergency essentials.'],['shared','electronics','Shared charging cables and power bank','recommended','travel','Keeps navigation and ticket phones powered.'],['shared','medications','Family first-aid kit','essential','travel','For minor scrapes, headaches, or blisters.'],['shared','snacks','Road-trip snacks','recommended','travel','Makes the drive easier.'],['shared','snacks','Refillable water bottles','essential','dollywood','Hydration for outdoor attraction days.'],['shared','gear','Compact umbrellas or ponchos','recommended','dollywood','Useful for summer showers.'],['shared','gear','Waterproof phone pouch','optional','pool','Protects phones near water or in rain.'],['shared','gear','Small cooler','optional','travel','Useful for drinks and travel snacks.'],['shared','misc','Laundry bag','recommended','travel','Keeps worn clothes organized.'],['shared','misc','Car trash bags and wipes','recommended','travel','Keeps the vehicle comfortable during the trip.'],['shared','misc','Aquarium tickets ready on phone','essential','aquarium','Avoid delays at arrival.'],['shared','misc','Zipline confirmation and waivers','essential','zipline','Needed for the Aug. 12 booking.'],['shared','misc','Cave-friendly light layers','recommended','caverns','Forbidden Caverns is cooler and damp.'],['shared','misc','Coaster-ready secure pockets','recommended','coaster','Loose items should be secured before riding.']
+  ];
+  const BASE_ITEMS=raw.map((x,i)=>({id:i<26?`m3041-${i+1}`:`m3042-${i+1}`,traveler:x[0],category:x[1],label:x[2],priority:x[3],activity:x[4],reason:x[5]}));
   function getStorage(storage){return storage||root.localStorage;}
-  function readState(storage){
-    try{
-      const value=JSON.parse(getStorage(storage)?.getItem(STORAGE_KEY)||'{}');
-      return value&&typeof value==='object'?value:{};
-    }catch(error){return {};}
-  }
-  function writeState(state,storage){
-    try{getStorage(storage)?.setItem(STORAGE_KEY,JSON.stringify(state));return true;}catch(error){return false;}
-  }
+  function readState(storage){try{const value=JSON.parse(getStorage(storage)?.getItem(STORAGE_KEY)||'{}');return value&&typeof value==='object'?value:{};}catch(e){return {};}}
+  function writeState(state,storage){try{getStorage(storage)?.setItem(STORAGE_KEY,JSON.stringify(state));return true;}catch(e){return false;}}
   function isDone(id,state){return Boolean((state||{})[id]);}
   function toggle(id,storage){const state=readState(storage);state[id]=!state[id];writeState(state,storage);return state[id];}
-  function reset(storage){try{getStorage(storage)?.removeItem(STORAGE_KEY);return true;}catch(error){return false;}}
-  function progress(items,state){
-    const list=items||BASE_ITEMS,total=list.length,done=list.filter(item=>isDone(item.id,state)).length;
-    const ratio=total?done/total:0;
-    const milestone=ratio===1?'Adventure Ready':ratio>=.7?'Almost Ready':ratio>0?'Taking Shape':'Getting Started';
-    const icon=ratio===1?'💚':ratio>=.7?'🏔️':ratio>0?'🌿':'🌱';
-    return {done,total,ratio,milestone,icon};
-  }
-  function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
-
+  function reset(storage){try{getStorage(storage)?.removeItem(STORAGE_KEY);return true;}catch(e){return false;}}
+  function progress(items,state){const list=items||BASE_ITEMS,total=list.length,done=list.filter(i=>isDone(i.id,state)).length,ratio=total?done/total:0;return {done,total,ratio,milestone:ratio===1?'Adventure Ready':ratio>=.7?'Almost Ready':ratio>0?'Taking Shape':'Getting Started',icon:ratio===1?'💚':ratio>=.7?'🏔️':ratio>0?'🌿':'🌱'};}
+  function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
   function render(host){
-    if(!host)return;
-    const state=readState();
-    const overall=progress(BASE_ITEMS,state);
-    host.innerHTML=`<div class="packingHead"><div><span class="eyebrow">M3-04.1 · PACKING FOUNDATION</span><h3>🎒 Family Packing</h3><p>Start with the essentials. Trip-specific and weather-aware suggestions arrive in the next packing milestones.</p></div><button id="resetPacking" class="packingReset" type="button">Reset</button></div>
-      <section class="packingProgress" aria-label="Packing progress"><div class="packingMilestone"><span>${overall.icon}</span><div><small>${overall.done} of ${overall.total} packed</small><strong>${overall.milestone}</strong></div></div><div class="packingBar"><i style="width:${Math.round(overall.ratio*100)}%"></i></div></section>
-      <div class="travelerTabs" role="tablist">${TRAVELERS.map((traveler,index)=>`<button type="button" role="tab" aria-selected="${index===0}" class="${index===0?'active':''}" data-packing-traveler="${traveler.id}"><span>${traveler.icon}</span>${traveler.name}</button>`).join('')}</div>
-      <div id="packingLists"></div>`;
-
-    function showTraveler(travelerId){
-      const traveler=TRAVELERS.find(item=>item.id===travelerId)||TRAVELERS[0];
-      const items=BASE_ITEMS.filter(item=>item.traveler===traveler.id);
-      const current=readState();
-      const travelerProgress=progress(items,current);
-      const listHost=host.querySelector('#packingLists');
-      listHost.innerHTML=`<div class="travelerSummary"><div><span>${traveler.icon}</span><div><small>${travelerProgress.done} of ${travelerProgress.total} packed</small><strong>${traveler.name}</strong></div></div><em>${travelerProgress.icon} ${travelerProgress.milestone}</em></div>
-      ${CATEGORIES.map(category=>{
-        const categoryItems=items.filter(item=>item.category===category.id);
-        if(!categoryItems.length)return '';
-        return `<section class="packingCategory"><h4>${category.icon} ${category.name}</h4>${categoryItems.map(item=>`<label class="packingItem ${isDone(item.id,current)?'done':''}"><input type="checkbox" data-packing-id="${item.id}" ${isDone(item.id,current)?'checked':''}><span>${escapeHtml(item.label)}</span></label>`).join('')}</section>`;
-      }).join('')}`;
-      listHost.querySelectorAll('[data-packing-id]').forEach(input=>input.addEventListener('change',()=>{
-        toggle(input.dataset.packingId);
-        render(host);
-        const active=host.querySelector(`[data-packing-traveler="${traveler.id}"]`);
-        active?.click();
-      }));
+    if(!host)return;let activeTraveler='emily',activeActivity='all';
+    function paint(){
+      const state=readState(),overall=progress(BASE_ITEMS,state);
+      host.innerHTML=`<div class="packingHead"><div><span class="eyebrow">M3-04.2 · SMART PACKING</span><h3>🎒 Smoky Mountains Packing</h3><p>Prioritized for your family and connected to the adventures on your itinerary.</p></div><button id="resetPacking" class="packingReset" type="button">Reset</button></div>
+      <section class="packingProgress"><div class="packingMilestone"><span>${overall.icon}</span><div><small>${overall.done} of ${overall.total} packed</small><strong>${overall.milestone}</strong></div></div><div class="packingBar"><i style="width:${Math.round(overall.ratio*100)}%"></i></div></section>
+      <div class="activityFilter"><label for="packingActivity">Show items for</label><select id="packingActivity">${Object.entries(ACTIVITIES).map(([id,name])=>`<option value="${id}" ${id===activeActivity?'selected':''}>${name}</option>`).join('')}</select></div>
+      <div class="travelerTabs" role="tablist">${TRAVELERS.map(t=>`<button type="button" role="tab" aria-selected="${t.id===activeTraveler}" class="${t.id===activeTraveler?'active':''}" data-packing-traveler="${t.id}"><span>${t.icon}</span>${t.name}</button>`).join('')}</div><div id="packingLists"></div>`;
+      showTraveler();
+      host.querySelectorAll('[data-packing-traveler]').forEach(b=>b.addEventListener('click',()=>{activeTraveler=b.dataset.packingTraveler;paint();}));
+      host.querySelector('#packingActivity')?.addEventListener('change',e=>{activeActivity=e.target.value;paint();});
+      host.querySelector('#resetPacking')?.addEventListener('click',()=>{if(root.confirm?.('Reset every packing checkbox?')){reset();paint();}});
     }
-
-    host.querySelectorAll('[data-packing-traveler]').forEach(button=>button.addEventListener('click',()=>{
-      host.querySelectorAll('[data-packing-traveler]').forEach(item=>{item.classList.toggle('active',item===button);item.setAttribute('aria-selected',String(item===button));});
-      showTraveler(button.dataset.packingTraveler);
-    }));
-    host.querySelector('#resetPacking')?.addEventListener('click',()=>{if(root.confirm?.('Reset every packing checkbox?')){reset();render(host);}});
-    showTraveler('emily');
+    function showTraveler(){
+      const traveler=TRAVELERS.find(t=>t.id===activeTraveler)||TRAVELERS[0],all=BASE_ITEMS.filter(i=>i.traveler===traveler.id),items=all.filter(i=>activeActivity==='all'||i.activity===activeActivity),state=readState(),p=progress(all,state),listHost=host.querySelector('#packingLists');
+      listHost.innerHTML=`<div class="travelerSummary"><div><span>${traveler.icon}</span><div><small>${p.done} of ${p.total} packed</small><strong>${traveler.name}</strong></div></div><em>${p.icon} ${p.milestone}</em></div>${items.length?'':`<p class="packingEmpty">No ${traveler.name} items are assigned to this activity. Check Shared or choose All activities.</p>`}${CATEGORIES.map(c=>{const ci=items.filter(i=>i.category===c.id);if(!ci.length)return'';return `<section class="packingCategory"><h4>${c.icon} ${c.name}</h4>${ci.map(i=>`<label class="packingItem ${isDone(i.id,state)?'done':''}"><input type="checkbox" data-packing-id="${i.id}" ${isDone(i.id,state)?'checked':''}><span class="packingItemBody"><span class="packingItemTop"><b>${escapeHtml(i.label)}</b><em class="priority ${i.priority}">${PRIORITY_LABELS[i.priority]}</em></span><small>${escapeHtml(i.reason)}</small></span></label>`).join('')}</section>`;}).join('')}`;
+      listHost.querySelectorAll('[data-packing-id]').forEach(input=>input.addEventListener('change',()=>{toggle(input.dataset.packingId);paint();}));
+    }
+    paint();
   }
-
-  return {STORAGE_KEY,TRAVELERS,CATEGORIES,BASE_ITEMS,readState,writeState,toggle,reset,progress,render};
+  return {STORAGE_KEY,TRAVELERS,CATEGORIES,ACTIVITIES,BASE_ITEMS,readState,writeState,toggle,reset,progress,render};
 });
