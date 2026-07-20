@@ -1,6 +1,6 @@
-const CACHE="adventure-companion-m3-03-1";
-const BUILD="M3-03.1";
-const ASSETS=["./","./index.html","./styles.css","./app.js","./weather-service.js","./weather-ui.js","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./favicon-32.png"];
+const CACHE="adventure-companion-m3-04-1";
+const BUILD="M3-04.1";
+const ASSETS=["./","./index.html","./styles.css","./app.js","./weather-service.js","./weather-ui.js","./packing.js","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./favicon-32.png"];
 
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));

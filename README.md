@@ -27,3 +27,9 @@ Stable baseline candidate for **Smoky Mountains 2026**.
 ## M3-03.1 — Weather Foundation
 
 This build adds an isolated live-weather foundation using Open-Meteo, local freshness-aware caching, offline fallback states, manual refresh, and a dashboard weather card. The M3-02.5 itinerary and persistence behavior remain unchanged.
+
+## M3-04.1 — Packing Foundation
+- Adds Family Packing for Emily, Jake, Kaseryn, Bubbe, Papa, and shared items.
+- Saves checkbox progress locally on the device.
+- Uses encouraging readiness milestones rather than percentage alone.
+- Adds packing tests to the GitHub Actions quality workflow.
