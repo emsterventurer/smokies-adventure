@@ -1,9 +1,7 @@
-# Apply M3-04.1 — Packing Foundation
+# README FIRST — M3-04.2 Change Package
 
-Upload every item inside this folder to the `m3-04.1-packing-foundation` branch, preserving folder paths.
+Upload every file and folder in this package to the root of a new branch created from the latest `main`. Preserve `.github/workflows/quality-checks.yml` inside its folders. Existing files should be replaced where names match.
 
-Important: `.github/workflows/quality-checks.yml` must remain inside `.github/workflows/`.
+Suggested branch: `m3-04.2-trip-specific-packing-weather-fix`
 
-Suggested commit message:
-
-`feat(packing): add M3-04.1 packing foundation`
+Suggested commit: `feat(packing): add trip-specific lists and restore daily weather`

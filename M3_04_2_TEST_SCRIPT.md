@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#294c3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Adventure Companion">
+<meta name="description" content="Making New Traditions — One adventure at a time.">
+
+<meta property="og:title" content="Smoky Mountains 2026 · Adventure Companion">
+<meta property="og:description" content="Our family itinerary for eight days of mountains, food, traditions, and connection.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Adventure Companion">
+
+<meta name="adventure-companion-build" content="M3-04.2">
+<meta name="adventure-companion-build-date" content="July 20, 2026">
+
+
+
+<title>Adventure Companion · Family Premiere</title>
+<link rel="stylesheet" href="styles.css"></head>
+<body>
+
+<div id="buildTools" class="buildTools">
+  <button id="devBadge" class="devBadge" type="button" aria-label="Show current build information">
+    <span class="devDot"></span>
+    <span class="devBadgeText"><strong>M3-04.2</strong><small>Packing Foundation</small></span>
+  </button>
+
+  <button id="feedbackButton" class="feedbackButton" type="button" aria-label="Open feedback mode">📝</button>
+</div>
+
+<div id="buildPanel" class="buildPanel" hidden>
+  <div class="panelHandle"></div>
+  <div class="panelHeader">
+    <div>
+      <span class="eyebrow">DEVELOPMENT MODE</span>
+      <h3>Adventure Companion</h3>
+    </div>
+    <button id="closeBuildPanel" class="panelClose" type="button" aria-label="Close">×</button>
+  </div>
+  <dl class="buildDetails">
+    <div><dt>Version</dt><dd>M3-04.2</dd></div>
+    <div><dt>Milestone</dt><dd>Milestone 3</dd></div>
+    <div><dt>Feature</dt><dd>Live Weather Foundation</dd></div>
+    <div><dt>Updated</dt><dd>July 20, 2026</dd></div>
+  </dl>
+  <p class="buildHint">Live weather is isolated from the itinerary and remains nonblocking when offline.</p>
+</div>
+
+<div id="feedbackPanel" class="feedbackPanel" hidden>
+  <div class="panelHandle"></div>
+  <div class="panelHeader">
+    <div>
+      <span class="eyebrow">FEEDBACK MODE</span>
+      <h3>Capture what you notice</h3>
+    </div>
+    <button id="closeFeedbackPanel" class="panelClose" type="button" aria-label="Close">×</button>
+  </div>
+
+  <div class="feedbackKinds" role="group" aria-label="Feedback type">
+    <button type="button" data-kind="bug">🐞 Bug</button>
+    <button type="button" data-kind="idea">💡 Idea</button>
+    <button type="button" data-kind="confusing">🤔 Confusing</button>
+    <button type="button" data-kind="love">💚 Love it</button>
+  </div>
+
+  <label class="feedbackLabel">
+    Screen or day
+    <input id="feedbackScreen" type="text" placeholder="Example: Day 2 stop cards">
+  </label>
+
+  <label class="feedbackLabel">
+    What did you notice?
+    <textarea id="feedbackNote" rows="4" placeholder="Describe what happened or what you would change."></textarea>
+  </label>
+
+  <div class="ratingRow">
+    <span>Screen rating</span>
+    <div id="feedbackStars" class="feedbackStars" aria-label="Rate this screen">
+      <button type="button" data-rating="1">☆</button>
+      <button type="button" data-rating="2">☆</button>
+      <button type="button" data-rating="3">☆</button>
+      <button type="button" data-rating="4">☆</button>
+      <button type="button" data-rating="5">☆</button>
+    </div>
+  </div>
+
+  <div class="feedbackActions">
+    <button id="saveFeedback" class="saveFeedback" type="button">Save feedback</button>
+    <button id="viewFeedback" type="button">View saved notes</button>
+  </div>
+
+  <div id="feedbackSaved" class="feedbackSaved" hidden></div>
+</div>
+
+<div id="updateToast" class="updateToast" hidden>
+  <div>
+    <strong>Adventure Companion has an update</strong>
+    <small>A newer build is ready.</small>
+  </div>
+  <button id="refreshApp" type="button">Refresh now</button>
+  <button id="dismissUpdate" class="dismissUpdate" type="button" aria-label="Dismiss update">×</button>
+</div>
+
+
+
+</div>
+
+
+<div id="welcomeModal" class="welcomeModal" hidden>
+  <div class="welcomeBackdrop"></div>
+  <section class="welcomeSheet" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+    <div class="welcomeMark">🏔️ 🌿 💚</div>
+    <span class="eyebrow light">OUR FAMILY ADVENTURE</span>
+    <h2 id="welcomeTitle">The Smokies are calling.</h2>
+    <p>Eight days to explore, eat well, laugh often, and begin traditions worth carrying home.</p>
+    <button id="enterAdventure" class="welcomeButton" type="button">Enter our adventure</button>
+    <button id="skipWelcome" class="welcomeSkip" type="button">Skip next time</button>
+  </section>
+</div>
+
+<div class="app">
+
+<aside class="desktopSideNav" aria-label="Adventure Companion navigation">
+  <div class="sideBrand">
+    <img src="icon-192.png" alt="">
+    <span><strong>Adventure</strong><small>COMPANION</small></span>
+  </div>
+  <div class="sideMenu">
+    <button class="active" data-view="home">⌂<span>Dashboard</span></button>
+    <button data-view="week">🗓️<span>Daily Adventure</span></button>
+    <button data-view="reservations">🍽️<span>Reservations</span></button>
+    <button data-view="traditions">💚<span>Traditions</span></button>
+    <button data-view="packing">🎒<span>Family Packing</span></button>
+    <button data-view="trip">📍<span>Trip Snapshot</span></button>
+  </div>
+  <section class="sideParty">
+    <small>TRAVEL PARTY</small>
+    <span>● Papa</span>
+    <span>● Bubbe</span>
+    <span>● Emily</span>
+    <span>● Jake</span>
+    <span>● Kaseryn</span>
+  </section>
+  <blockquote>Making new traditions.</blockquote>
+</aside>
+
+<div class="desktopContent">
+<header class="hero">
+  <div class="ridge r1"></div><div class="ridge r2"></div>
+  <div class="heroText"><small>EMILY'S ADVENTURE COMPANION</small><h1>Making New Traditions</h1><p>One adventure at a time.</p><div>🏔️ 🌿 💚</div></div>
+</header>
+<main>
+<section class="top card">
+ <div><span class="eyebrow">CURRENT ADVENTURE</span><h2>Smoky Mountains 2026</h2></div>
+ <span id="phaseBadge" class="badge">Planning</span>
+ <div class="phases">
+  <div data-p="dreaming"><b>🌱</b><small>Dreaming</small></div><i></i>
+  <div data-p="planning"><b>🌿</b><small>Planning</small></div><i></i>
+  <div data-p="experiencing"><b>🏔️🌿</b><small>Experiencing</small></div><i></i>
+  <div data-p="remembering"><b>🌳</b><small>Remembering</small></div>
+ </div>
+ <div class="preview"><label>Preview date<input id="previewDate" type="date"></label><button id="today">Today</button></div>
+</section>
+
+<section class="familyWelcome">
+  <h3>Welcome to our Smoky Mountains Adventure</h3>
+  <p>Eight days of mountains, great food, family traditions, and room for a few surprises.</p>
+  <div class="tripStats">
+    <div><b>8</b><small>Adventure days</small></div>
+    <div><b>5</b><small>Travelers</small></div>
+    <div><b>1</b><small>New tradition</small></div>
+  </div>
+  <div class="familyActions">
+    <button id="shareTrip" type="button">↗ Share with family</button>
+    <button data-view="week" type="button">🗓️ See the whole week</button>
+  </div>
+</section>
+
+<section id="homeCard" class="card homeCard"></section>
+
+<section id="weatherCard" class="card weatherCard" aria-label="Live weather"></section>
+
+<section class="card journeyCard">
+  <div class="journeyHead">
+    <div><span class="eyebrow">THE JOURNEY AHEAD</span><h3>Our Adventure Trail</h3></div>
+    <span id="journeyCount" class="journeyCount">0 of 8 complete</span>
+  </div>
+  <div id="journeyTrail" class="journeyTrail"></div>
+  <button class="trailAction" data-view="week" type="button">Open the full adventure week →</button>
+</section>
+
+<section class="quick">
+ <button data-view="week">🗓️<span><strong>Daily Adventure</strong><small>Dashboard, stops & directions</small></span></button>
+ <button data-view="reservations">🍽️<span><strong>Reservations</strong><small>Confirmed & pending</small></span></button>
+ <button data-view="traditions">💚<span><strong>Traditions</strong><small>Moments to protect</small></span></button>
+ <button data-view="packing">🎒<span><strong>Family Packing</strong><small>Essentials by traveler</small></span></button>
+</section>
+<section id="screen" class="card screen" hidden></section>
+
+<section class="familyPromise">
+  <span>🏔️ Adventure</span><i></i><span>🌿 Growth</span><i></i><span>💚 Connection</span>
+</section>
+
+<p class="privacyNote">Shared family itinerary · Reservation details are visible to everyone using this browser.</p>
+</main>
+</div>
+<nav>
+<button class="active" data-view="home">⌂<small>Home</small></button>
+<button data-view="week">🗺️<small>Adventure</small></button>
+<button data-view="packing">🎒<small>Prepare</small></button>
+<button data-view="traditions">📖<small>Memories</small></button>
+<button data-view="companion">🌿<small>Companion</small></button>
+</nav>
+</div>
+<script src="weather-service.js"></script>
+<script src="packing.js"></script>
+<script src="weather-ui.js"></script>
+<script src="app.js"></script></body></html>
