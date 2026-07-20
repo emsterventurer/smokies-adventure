@@ -1,8 +1,8 @@
 
 const APP_BUILD={
-  version:"M3-02.5",
-  label:"Adventure Flow & Stable Baseline",
-  date:"July 18, 2026"
+  version:"M3-03.1",
+  label:"Weather Foundation",
+  date:"July 20, 2026"
 };
 
 const FEEDBACK_KEY="adventureCompanionFeedback";

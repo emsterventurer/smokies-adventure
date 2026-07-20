@@ -18,8 +18,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="Adventure Companion">
 
-<meta name="adventure-companion-build" content="M3-02.5">
-<meta name="adventure-companion-build-date" content="July 18, 2026">
+<meta name="adventure-companion-build" content="M3-03.1">
+<meta name="adventure-companion-build-date" content="July 20, 2026">
 
 
 
@@ -30,7 +30,7 @@
 <div id="buildTools" class="buildTools">
   <button id="devBadge" class="devBadge" type="button" aria-label="Show current build information">
     <span class="devDot"></span>
-    <span class="devBadgeText"><strong>M3-02.5</strong><small>Stable baseline candidate</small></span>
+    <span class="devBadgeText"><strong>M3-03.1</strong><small>Weather Foundation</small></span>
   </button>
 
   <button id="feedbackButton" class="feedbackButton" type="button" aria-label="Open feedback mode">📝</button>
@@ -46,12 +46,12 @@
     <button id="closeBuildPanel" class="panelClose" type="button" aria-label="Close">×</button>
   </div>
   <dl class="buildDetails">
-    <div><dt>Version</dt><dd>M3-02.5</dd></div>
+    <div><dt>Version</dt><dd>M3-03.1</dd></div>
     <div><dt>Milestone</dt><dd>Milestone 3</dd></div>
-    <div><dt>Feature</dt><dd>Daily Manage Fix & Route Times</dd></div>
-    <div><dt>Updated</dt><dd>July 18, 2026</dd></div>
+    <div><dt>Feature</dt><dd>Live Weather Foundation</dd></div>
+    <div><dt>Updated</dt><dd>July 20, 2026</dd></div>
   </dl>
-  <p class="buildHint">Stop cards appear inside each individual day on both phone and desktop.</p>
+  <p class="buildHint">Live weather is isolated from the itinerary and remains nonblocking when offline.</p>
 </div>
 
 <div id="feedbackPanel" class="feedbackPanel" hidden>
@@ -185,6 +185,8 @@
 
 <section id="homeCard" class="card homeCard"></section>
 
+<section id="weatherCard" class="card weatherCard" aria-label="Live weather"></section>
+
 <section class="card journeyCard">
   <div class="journeyHead">
     <div><span class="eyebrow">THE JOURNEY AHEAD</span><h3>Our Adventure Trail</h3></div>
@@ -217,4 +219,6 @@
 <button data-view="companion">🌿<small>Companion</small></button>
 </nav>
 </div>
+<script src="weather-service.js"></script>
+<script src="weather-ui.js"></script>
 <script src="app.js"></script></body></html>
