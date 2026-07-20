@@ -1,18 +1,21 @@
-# M3-04.1 Change Manifest
+# Build Commit #004.1 — Change Manifest
 
-## Added
-- `packing.js`
-- `packing.test.js`
-- `M3_04_1_RELEASE_NOTES.md`
-- `M3_04_1_TEST_SCRIPT.md`
+## Modified application files
 
-## Modified
 - `index.html`
 - `app.js`
 - `styles.css`
 - `service-worker.js`
-- `README.md`
 - `.github/workflows/quality-checks.yml`
 
+## Added test and release files
+
+- `dashboard-redesign.test.js`
+- `M3_04_1_DASHBOARD_RELEASE_NOTES.md`
+- `M3_04_1_DASHBOARD_TEST_SCRIPT.md`
+
 ## Package guidance
-`README_FIRST.md` and `CHANGED_FILES.md` are package instructions and may also be uploaded as project documentation if desired.
+
+- `README_FIRST.md` explains the upload sequence.
+- `CHANGED_FILES.md` is the authoritative upload manifest.
+- This package assumes the verified M3-04.2 main branch is already deployed.
