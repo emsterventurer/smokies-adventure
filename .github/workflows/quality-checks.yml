@@ -37,9 +37,19 @@ jobs:
           node --check weather-service.js
           node --check weather-ui.js
           node --check weather-service.test.js
+          node --check packing.js
+          node --check packing.test.js
+          node --check daily-weather.test.js
+          node --check dashboard-redesign.test.js
 
       - name: Run weather service tests
-        run: node weather-service.test.js
+        run: |
+          node weather-service.test.js
+          node daily-weather.test.js
+          node dashboard-redesign.test.js
+
+      - name: Run packing tests
+        run: node packing.test.js
 
       - name: Verify required application files
         shell: bash
@@ -52,6 +62,7 @@ jobs:
             manifest.webmanifest
             weather-service.js
             weather-ui.js
+            packing.js
           )
 
           for file in "${required_files[@]}"; do
@@ -79,3 +90,20 @@ jobs:
           fi
 
           echo "Weather card and script order are correct."
+
+      - name: Verify Build Commit #004.1 integrations
+        shell: bash
+        run: |
+          grep -q 'adventureSummary' app.js
+          grep -q 'adventureWeather' app.js
+          grep -q 'Adaptive Adventure' app.js
+          grep -q 'Smart Stop Cards are today' app.js
+          grep -q 'loadTripForecast' app.js
+          ! grep -q 'class=timeline' app.js
+          ! grep -q 'Route, driving & parking' app.js
+          ! grep -q 'Foodie callout' app.js
+          grep -q 'M3-04.1' app.js
+          grep -q 'Kaseryn' packing.js
+          grep -q 'Bubbe' packing.js
+          grep -q 'Papa' packing.js
+          echo "Build Commit #004.1 integration checks passed."
