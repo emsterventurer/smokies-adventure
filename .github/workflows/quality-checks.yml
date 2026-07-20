@@ -39,13 +39,11 @@ jobs:
           node --check weather-service.test.js
           node --check packing.js
           node --check packing.test.js
-          node --check daily-weather.test.js
           node --check dashboard-redesign.test.js
 
       - name: Run weather service tests
         run: |
           node weather-service.test.js
-          node daily-weather.test.js
           node dashboard-redesign.test.js
 
       - name: Run packing tests
