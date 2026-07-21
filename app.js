@@ -551,21 +551,50 @@ function wireReleaseCandidateTools(){
 function dashboardMarkup(d){
   const x=DAY_DASH[d.date]||{};
   const complete=isComplete(d.date);
-  return `<section class="dailyDashboard">
+
+  return `<section class="dailyDashboard dashboardRedesign">
     <div class="dashboardLead">
       <span class="dashboardIcon">${x.icon||"🏔️"}</span>
-      <div><span class="eyebrow">DAY ${dayNumber(d.date)} DASHBOARD</span><h3>${dateLabel(d.date)}</h3><p>${x.focus||d.theme}</p></div>
-      <button class="completeDay ${complete?"done":""}" data-complete="${d.date}" type="button" aria-pressed="${complete}">${complete?"✓ Complete":"Mark complete"}</button>
+      <div>
+        <span class="eyebrow">DAY ${dayNumber(d.date)} OF ${DATA.days.length}</span>
+        <h3>${dateLabel(d.date)}</h3>
+        <p>${x.focus||d.theme}</p>
+      </div>
+      <button class="completeDay ${complete?"done":""}"
+        data-complete="${d.date}"
+        type="button"
+        aria-pressed="${complete}">
+        ${complete?"✓ Complete":"Mark complete"}
+      </button>
     </div>
-    <div class="dashboardGrid">
-      <article><small>⏰ LEAVE BY</small><strong>${x.leave||"See timeline"}</strong></article>
-      <article><small>📍 FIRST STOP</small><strong>${x.first||d.schedule[0][1]}</strong></article>
-      <article><small>🎟️ KEY BOOKING</small><strong>${x.reservation||"No timed booking"}</strong></article>
-      <article><small>🚗 DRIVE</small><strong>${d.drive}</strong></article>
-      <article class="dayWeatherTile" data-day-weather="${d.date}"><small>🌤️ WEATHER</small><strong>Loading forecast…</strong><span>Sevierville / Smoky Mountains</span></article>
-      <article><small>🌅 SUNSET</small><strong>${x.sunset||"Check closer to trip"}</strong></article>
+
+    <div class="adventureSummary" aria-label="Today's adventure summary">
+      <article>
+        <small>⏰ LEAVE AROUND</small>
+        <strong>${x.leave||"Flexible"}</strong>
+      </article>
+      <article>
+        <small>📍 FIRST STOP</small>
+        <strong>${x.first||d.schedule[0][1]}</strong>
+      </article>
+      <article>
+        <small>🎟️ RESERVATION</small>
+        <strong>${x.reservation||"No timed booking"}</strong>
+      </article>
+      <article>
+        <small>🚗 TOTAL DRIVING</small>
+        <strong>${d.drive}</strong>
+      </article>
+      <article>
+        <small>🌅 SUNSET</small>
+        <strong>${x.sunset||"Check closer to trip"}</strong>
+      </article>
     </div>
-    <div class="dashboardFooter"><span>🌿 ${x.pace||"Flexible pace"}</span><span class="weatherSoon" data-day-weather-status="${d.date}">Live forecast</span></div>
+
+    <div class="dashboardFooter">
+      <span>🌿 ${x.pace||"Flexible pace"}</span>
+      <span>Smart Stop Cards are today's itinerary</span>
+    </div>
   </section>`;
 }
 
