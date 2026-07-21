@@ -1,19 +1,12 @@
-# README FIRST — Build Commit M3-04.3 Final Production Release
+# Adventure Companion Build M3-04.4B
 
-This package is based on the fresh merged `main` branch supplied for Build M3-04.3.
+## Upload order
+Upload the files in this package to the root of the GitHub repository, preserving the `.github/workflows` folder.
 
-## Upload method
-1. Create or open the Build M3-04.3 branch in GitHub.
-2. Upload the contents of the `smokies-adventure-main` folder, preserving folders such as `.github/workflows`.
-3. Commit the files with a message such as: `Build M3-04.3 final production release`.
-4. Open or refresh the pull request into `main`.
-5. Confirm all GitHub Actions checks pass before merging.
+1. Upload all files from this change package.
+2. Choose **Commit directly to the main branch** only if you are comfortable deploying immediately; otherwise create a branch first.
+3. Wait for GitHub Actions `quality-checks` to complete.
+4. Open the live app and hard refresh once (`Ctrl+Shift+R` on Windows).
+5. Open Build Info and confirm **M3-04.4B** and a healthy diagnostics result.
 
-## Approved changes
-- Add daily medications for Jake and Kaseryn.
-- Add a rain jacket or lightweight waterproof shell for all five travelers.
-- Preserve the exact legacy packing-item ID map and storage key.
-- Set the application identity consistently to M3-04.3, Packing & Adventure Polish, July 21, 2026.
-- Add workflow checks for the visible feature text and build date.
-
-See `CHANGED_FILES.md` and `FINAL_RELEASE_NOTES.md` for details.
+Your saved trip, packing progress, and other local app data are not removed by this update.

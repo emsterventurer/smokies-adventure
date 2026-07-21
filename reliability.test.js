@@ -18,7 +18,7 @@ assert(reliability.includes('STARTUP_TIMEOUT_MS'),"startup timeout protection is
 assert(reliability.includes('showRecovery'),"friendly recovery screen is missing");
 assert(reliability.includes('clearAppCache'),"cache recovery tool is missing");
 assert(reliability.includes('diagnosticChecks'),"diagnostic checks are missing");
-assert(worker.includes('adventure-companion-m3-04-4a'),"service worker cache identity is stale");
+assert(worker.includes('adventure-companion-m3-04-4b'),"service worker cache identity is stale");
 assert(worker.includes('./reliability.js'),"reliability.js is not cached");
 for(const file of ['app.js','index.html','reliability.js','service-worker.js']) assert(fs.statSync(file).size>0,`${file} is empty`);
 assert(workflow.includes('reliability.test.js'),"GitHub Actions does not run reliability tests");
