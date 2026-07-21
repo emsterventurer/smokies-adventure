@@ -830,3 +830,57 @@ a[data-view="private"],
 
 /* M3-04.2 — Trip-specific packing and daily weather restoration */
 .dayWeatherTile span{display:block;margin-top:5px;color:var(--mut);font-size:.72rem;line-height:1.25}.dayWeatherTile strong{line-height:1.25}.activityFilter{display:flex;align-items:center;gap:10px;margin:4px 0 13px;padding:11px 13px;border:1px solid var(--line);border-radius:14px;background:#f8f7f1}.activityFilter label{font-size:.78rem;font-weight:800;color:var(--fd)}.activityFilter select{min-width:0;flex:1;border:1px solid var(--line);border-radius:10px;background:white;padding:9px;color:var(--fd);font:inherit}.packingItemBody{display:block;min-width:0;flex:1}.packingItemTop{display:flex;gap:9px;justify-content:space-between;align-items:flex-start}.packingItemTop b{font-size:.9rem;line-height:1.3}.packingItemBody>small{display:block;margin-top:4px;color:var(--mut);line-height:1.35}.priority{flex:none;border-radius:999px;padding:3px 7px;font-size:.59rem;font-style:normal;text-transform:uppercase;letter-spacing:.04em}.priority.essential{background:#dcebdd;color:#285b35}.priority.recommended{background:#e8ecda;color:#5b6029}.priority.optional{background:#eee8df;color:#6a5948}.packingItem.done .packingItemBody>small{opacity:.7}.packingEmpty{padding:15px;border-radius:14px;background:#f4f1e8;color:var(--mut);line-height:1.45}@media(max-width:520px){.activityFilter{align-items:stretch;flex-direction:column}.packingItemTop{display:block}.priority{display:inline-block;margin-top:5px}}
+
+/* Build Commit #004.1 — Dashboard Redesign & Adventure Intelligence */
+.dashboardRedesign .dashboardLead{margin-bottom:16px}
+.adventureSummary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.adventureSummary article{min-height:92px;padding:13px;border:1px solid var(--line);border-radius:15px;background:#fff}
+.adventureSummary small{display:block;color:var(--mut);font-size:.68rem;letter-spacing:.05em;margin-bottom:7px}
+.adventureSummary strong{display:block;font-size:.95rem;line-height:1.35}
+.adventureWeather{margin-top:14px;padding:20px;border:1px solid rgba(52,91,66,.18);border-radius:22px;background:linear-gradient(145deg,#f8fbf7,#edf5ef)}
+.adventureWeatherHead{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.adventureWeatherHead h3{margin:4px 0 0}.weatherWindowStatus{font-size:.75rem;font-weight:700;color:#41614c;background:#fff;border:1px solid rgba(52,91,66,.15);border-radius:999px;padding:6px 9px;text-align:center}
+.adventureWeatherBody{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:16px;margin-top:16px}
+.weatherPrimary,.adventureOutlook{background:rgba(255,255,255,.78);border:1px solid rgba(52,91,66,.12);border-radius:16px;padding:15px}
+.weatherPrimary{display:flex;gap:12px;align-items:center}.weatherPrimaryIcon{font-size:2.7rem}.weatherPrimary strong,.weatherPrimary small{display:block}.weatherPrimary small{color:var(--mut);margin-top:5px}
+.adventureOutlook p{margin:7px 0 0;color:var(--mut);line-height:1.45}.adventureOutlook ul{margin:8px 0 0;padding-left:20px}.adventureOutlook li{margin:5px 0;line-height:1.4}
+.adaptiveAdventure{margin-top:14px;border-top:1px solid rgba(52,91,66,.16);padding-top:12px}.adaptiveAdventure summary{font-weight:750;color:var(--f);cursor:pointer;list-style-position:inside}.adaptiveAdventure div{margin-top:10px;padding:13px;border-radius:14px;background:#fff}.adaptiveAdventure p{margin:6px 0;line-height:1.5}.adaptiveAdventure small{color:var(--mut)}
+.adaptiveRecommended .weatherWindowStatus{background:#f6e3ca;color:#7b4a20}.adaptiveRecommended .adaptiveAdventure summary::after{content:" · Recommended";font-size:.75rem;color:#7b4a20}
+@media(max-width:900px){.adventureSummary{grid-template-columns:repeat(2,minmax(0,1fr))}.adventureSummary article:last-child{grid-column:1/-1}.adventureWeatherBody{grid-template-columns:1fr}}
+@media(max-width:520px){.adventureSummary{grid-template-columns:1fr 1fr}.adventureSummary article{min-height:82px}.adventureWeather{padding:16px}.adventureWeatherHead{flex-direction:column}.weatherWindowStatus{text-align:left}.weatherPrimaryIcon{font-size:2.35rem}}
+
+/* Build Commit #004.1 — Dashboard Redesign & Adventure Intelligence */
+.dashboardRedesign .dashboardLead{margin-bottom:16px}
+.adventureSummary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.adventureSummary article{min-height:92px;padding:13px;border:1px solid var(--line);border-radius:15px;background:#fff}
+.adventureSummary small{display:block;color:var(--mut);font-size:.68rem;letter-spacing:.05em;margin-bottom:7px}
+.adventureSummary strong{display:block;font-size:.95rem;line-height:1.35}
+.adventureWeather{margin-top:14px;padding:20px;border:1px solid rgba(52,91,66,.18);border-radius:22px;background:linear-gradient(145deg,#f8fbf7,#edf5ef)}
+.adventureWeatherHead{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.adventureWeatherHead h3{margin:4px 0 0}.weatherWindowStatus{font-size:.75rem;font-weight:700;color:#41614c;background:#fff;border:1px solid rgba(52,91,66,.15);border-radius:999px;padding:6px 9px;text-align:center}
+.adventureWeatherBody{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:16px;margin-top:16px}
+.weatherPrimary,.adventureOutlook{background:rgba(255,255,255,.78);border:1px solid rgba(52,91,66,.12);border-radius:16px;padding:15px}
+.weatherPrimary{display:flex;gap:12px;align-items:center}.weatherPrimaryIcon{font-size:2.7rem}.weatherPrimary strong,.weatherPrimary small{display:block}.weatherPrimary small{color:var(--mut);margin-top:5px}
+.adventureOutlook p{margin:7px 0 0;color:var(--mut);line-height:1.45}.adventureOutlook ul{margin:8px 0 0;padding-left:20px}.adventureOutlook li{margin:5px 0;line-height:1.4}
+.adaptiveAdventure{margin-top:14px;border-top:1px solid rgba(52,91,66,.16);padding-top:12px}.adaptiveAdventure summary{font-weight:750;color:var(--f);cursor:pointer;list-style-position:inside}.adaptiveAdventure div{margin-top:10px;padding:13px;border-radius:14px;background:#fff}.adaptiveAdventure p{margin:6px 0;line-height:1.5}.adaptiveAdventure small{color:var(--mut)}
+.adaptiveRecommended .weatherWindowStatus{background:#f6e3ca;color:#7b4a20}.adaptiveRecommended .adaptiveAdventure summary::after{content:" · Recommended";font-size:.75rem;color:#7b4a20}
+@media(max-width:900px){.adventureSummary{grid-template-columns:repeat(2,minmax(0,1fr))}.adventureSummary article:last-child{grid-column:1/-1}.adventureWeatherBody{grid-template-columns:1fr}}
+@media(max-width:520px){.adventureSummary{grid-template-columns:1fr 1fr}.adventureSummary article{min-height:82px}.adventureWeather{padding:16px}.adventureWeatherHead{flex-direction:column}.weatherWindowStatus{text-align:left}.weatherPrimaryIcon{font-size:2.35rem}}
+
+/* Build Commit #004.2 — Smart Stop Evolution */
+.evolvedStop .stopBody{min-width:0}
+.quickChips{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+.quickChips span{display:inline-flex;align-items:center;max-width:100%;padding:6px 9px;border:1px solid rgba(41,76,58,.14);border-radius:999px;background:#f5f8f4;color:var(--fd);font-size:.68rem;line-height:1.25;font-weight:700}
+.destinationGuide{margin:10px 0 12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0}
+.destinationGuide summary{cursor:pointer;color:var(--f);font-size:.78rem;font-weight:800;list-style-position:inside;padding:2px 0}
+.destinationGuide[open] summary{margin-bottom:10px}
+.destinationGuideBody{display:grid;gap:9px}
+.destinationGuideBody>div{padding:10px 11px;border-radius:13px;background:#f8faf7;border:1px solid rgba(41,76,58,.1)}
+.destinationGuideBody b{display:block;color:var(--fd);font-size:.74rem}
+.destinationGuideBody p{margin:4px 0 0;color:var(--mut);font-size:.74rem;line-height:1.45}
+.destinationGuideBody .remyTip{background:#eef5ef;border-color:rgba(41,76,58,.18)}
+.smartStopEvolution .stopIntro{max-width:760px}
+@media(max-width:430px){
+  .quickChips{gap:5px}.quickChips span{font-size:.64rem;padding:6px 8px}
+  .destinationGuideBody>div{padding:9px}.destinationGuideBody p{font-size:.71rem}
+}

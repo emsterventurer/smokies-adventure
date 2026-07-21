@@ -1,7 +1,7 @@
 
 const APP_BUILD={
   version:"M3-04.2",
-  label:"Trip-Specific Packing + Daily Weather",
+  label:"Smart Stop Evolution",
   date:"July 20, 2026"
 };
 
@@ -229,13 +229,68 @@ function dateLabel(date){return new Date(date+"T12:00:00").toLocaleDateString(un
 function mapsSearch(query){return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`}
 function wazeSearch(query){return `https://www.waze.com/ul?q=${encodeURIComponent(query)}&navigate=yes`}
 function googleRoute(origin,destination){return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=driving`}
+const SMART_STOP_GUIDES={
+  "Club Wyndham Smoky Mountains":{simple:true,chips:["Resort reset"],parking:"Use the resort lot nearest your assigned building and note the building number before leaving.",practical:"Refill water, charge phones, and reset for the next adventure.",photo:"Family balcony or resort-sign photo",tip:"Set out tomorrow’s shoes, layers, and water bottles before winding down."},
+  "Local Goat":{chips:["On-site lot","Celebration dinner"],parking:"Use the on-site restaurant lot and allow a few minutes for check-in.",food:"The approved itinerary highlights fried green tomatoes, bison burger, bistro steak, seasonal fish, and peanut butter pie.",photo:"Family table photo before dinner",tip:"Keep the first evening relaxed—this meal is the official start of the adventure."},
+  "The Island in Pigeon Forge":{chips:["Free lot + tram","Fountain photo"],parking:"Use the large Island parking area and the tram when helpful; follow posted signs on arrival.",food:"Dessert is optional if everyone still has energy.",photo:"Fountain show or illuminated wheel",tip:"Treat this as an optional stroll rather than a required stop."},
+  "Five Oaks Farm Kitchen":{chips:["Restaurant lot","Hearty breakfast"],parking:"Use the restaurant lot and allow enough time to keep the park day calm.",food:"Choose a hearty breakfast without overdoing it before the waterfall walk.",photo:"Rustic porch or farm-style entrance",tip:"Use breakfast to confirm layers, water, and the day’s pace."},
+  "Sugarlands Visitor Center":{chips:["Visitor-center lot","Restrooms"],parking:"Use the visitor-center lot and follow posted parking directions.",practical:"Restrooms, park information, and a final water check before the trail.",photo:"National park sign or visitor-center backdrop",tip:"Check posted trail information or ask a ranger about current conditions before walking."},
+  "Cataract Falls Trailhead":{chips:["Walk from Sugarlands","Supportive shoes"],parking:"Remain parked at Sugarlands and walk from the visitor-center area.",practical:"Wear supportive shoes; surfaces may be damp near the falls.",photo:"Waterfall view without blocking the trail",tip:"Keep this easy walk easy—turn back before it becomes tiring."},
+  "Wild Plum Tea Room":{chips:["Follow posted parking","Timed lunch"],parking:"Use the available on-site area and follow posted parking guidance.",food:"Choose the house specialty that feels most distinctive and leave room for a tea-room treat.",photo:"Garden or cottage exterior",tip:"Leave the waterfall with a generous margin because this is a timed meal."},
+  "Great Smoky Arts and Crafts Community":{chips:["Park by studio","Pick a short list"],parking:"Park at each chosen studio rather than trying to walk the full loop.",food:"Keep a drink and small snack in the car between studios.",photo:"Favorite artisan studio or handmade find",tip:"Choose a short must-see list; the goal is connection, not completion."},
+  "The Park Grill":{chips:["Downtown parking","Dinner target"],parking:"Use a nearby public parking option and allow walking time; follow live signs and posted rates.",food:"The approved itinerary highlights mountain trout, ribeye, salmon, salad bar, and blackberry cobbler.",photo:"Rustic entrance or family dinner photo",tip:"Keep the backup dinner plan ready until the reservation is confirmed."},
+  "The Donut Friar":{chips:["Keep same parking","Dessert stop"],parking:"Stay in the same downtown parking area used for dinner when practical.",food:"Choose one favorite each or split a small assortment.",photo:"The Village courtyard at night",tip:"This is a memory stop—skip it without guilt if the day has run long."},
+  "Applewood Farmhouse Restaurant":{chips:["Shared complex lot","Apple fritters"],parking:"Use the Apple Barn complex lot and leave the car parked for nearby stops.",food:"Apple fritters, apple butter, and cider are the signature start in the approved itinerary.",photo:"Farmhouse porch or orchard-style entrance",tip:"Ask for to-go packaging early if you plan to browse afterward."},
+  "Apple Barn Village":{chips:["Shared complex lot","Covered bridge"],parking:"Keep the car in the shared Apple Barn complex lot and follow posted signs.",food:"Sample cider and choose only treats that will travel well.",photo:"Covered bridge or mill-style buildings",tip:"Combine purchases in one bag so nothing is left at a shop."},
+  "Apple Barn Winery":{chips:["Walk from village","Wine of the Trip"],parking:"Walk from the shared Apple Barn complex parking area.",food:"Taste slowly and choose one family “Wine of the Trip.”",photo:"Winery sign or tasting flight",tip:"Use a designated driver and keep the tasting unrushed."},
+  "Apple Barn Bakery":{chips:["Shared complex lot","Travel-ready treat"],parking:"Remain in the Apple Barn complex lot.",food:"Pick a pastry or pie that can return to the resort if everyone is full.",photo:"Bakery case or shared dessert",tip:"One excellent treat is better than several that go uneaten."},
+  "Seasons 101":{chips:["Allow parking time","Seasonal menu"],parking:"Allow extra time for downtown Sevierville parking and follow posted signs and rates.",food:"Ask about the seasonal feature and choose the dish that feels unique to the evening.",photo:"Courthouse-square or dinner-table photo",tip:"Leave the resort with enough margin to arrive calm, not merely on time."},
+  "Dollywood":{chips:["Follow live parking signs","Full-day pacing"],parking:"Follow live signs to the available lot. Preferred parking remains a family decision, not a requirement.",food:"Choose one planned meal and one signature treat rather than grazing all day.",photo:"Entrance photo in the morning, before everyone gets tired",practical:"Refill water, use lockers strategically, and build in a mid-afternoon reset.",tip:"Start with the highest-priority attractions, then let the rest of the day breathe."},
+  "Forbidden Caverns":{chips:["On-site directions","Light layer"],parking:"Follow the attraction’s posted arrival and parking directions.",practical:"Wear closed-toe shoes and bring a light layer; cave surfaces may be damp.",photo:"Entrance sign before the tour; follow all posted photography rules.",tip:"Use the restroom before the guided tour begins."},
+  "Delauder's BBQ":{chips:["Verify before driving","Share sides"],parking:"Follow posted parking guidance and verify the stop before driving over.",food:"Order the barbecue specialty the counter recommends and share sides.",photo:"Rustic exterior or barbecue tray",tip:"Local schedules can change, so confirm this stop before leaving the caverns."},
+  "Blue Moose Burgers & Wings":{chips:["Restaurant parking","Pre-coaster meal"],parking:"Use the available restaurant parking and follow posted signs.",food:"Split wings or an appetizer if a full meal would feel heavy before riding.",photo:"Casual family dinner photo",tip:"Protect the nighttime coaster timing; do not let dinner become rushed."},
+  "Rocky Top Mountain Coaster":{chips:["Follow evening signs","Night ride"],parking:"Follow the attraction’s posted parking and evening traffic directions.",practical:"Secure loose items and follow all ride instructions.",photo:"Illuminated coaster entrance after dark",tip:"The nighttime lighting is the experience—wait until it is truly dark."},
+  "Lil Black Bear Café":{chips:["Breakfast stop","Zipline buffer"],parking:"Use the available café parking and keep breakfast timing firm.",food:"Choose a satisfying but efficient breakfast before the zipline.",photo:"Bear-themed entrance or breakfast table",tip:"Leave with a generous buffer for the 10:30 AM reservation."},
+  "Legacy Mountain Ziplines":{chips:["Use confirmation details","Closed-toe shoes"],parking:"Follow the confirmation’s arrival and parking instructions; mountain access can take longer than expected.",practical:"Closed-toe shoes, secure pockets, and required waivers completed in advance.",photo:"Harnessed group photo before the course",tip:"Use the check-in time in the confirmation—not the first zip time—as the true deadline."},
+  "Parrot Mountain and Gardens":{chips:["On-site directions","Sloped paths"],parking:"Follow on-site parking signs and expect some walking on sloped paths.",practical:"Move slowly around birds and follow staff guidance for interactions.",photo:"Bird interaction or garden overlook",tip:"Protect time for the aviary experience rather than rushing every garden path."},
+  "The Old Mill":{chips:["Park once","Historic mill photo"],parking:"Park once in the Old Mill district and walk between shops, river, dinner, and dessert when practical.",food:"Browse for local pantry items before dinner so purchases are not rushed.",photo:"Historic mill beside the river",tip:"Use the district as a slow, connected evening rather than a checklist."},
+  "The Old Mill Restaurant":{chips:["Same district parking","Possible wait"],parking:"Remain in the Old Mill district parking area when practical.",food:"Choose a classic Southern meal and share sides if portions are large.",photo:"Family dinner or mill view while waiting",tip:"Put your name in, then browse nearby instead of standing at the entrance."},
+  "Old Mill Creamery":{chips:["Walk from dinner","River dessert"],parking:"Walk from the Old Mill district parking area.",food:"Take dessert toward the river if the weather is comfortable.",photo:"Ice cream by the river",tip:"Let this become the evening’s slow-down moment."},
+  "Pancake Pantry":{chips:["Downtown parking","Signature pancakes"],parking:"Park downtown once for breakfast and the aquarium when feasible; follow posted signs and rates.",food:"Choose a signature pancake flavor and avoid over-ordering before a walking day.",photo:"Historic entrance or breakfast stack",tip:"An efficient breakfast protects the aquarium’s morning hours."},
+  "Ripley's Aquarium of the Smokies":{chips:["Downtown parking","2–3 hours"],parking:"Use a downtown parking option that also works for nearby exploration and follow posted signs and rates.",practical:"Have ticket links ready before reaching the entrance and choose a family meet-up point.",photo:"Penguin area, underwater tunnel, or exterior plaza",tip:"Visit the family’s highest-priority exhibits first, before attention fades."},
+  "Anakeesta":{chips:["Optional","Weather + energy check"],parking:"Use a downtown parking option and follow the attraction’s current boarding guidance.",practical:"Choose this only when weather, energy, timing, and height comfort all align.",photo:"Mountain overlook if visibility is good",tip:"Optional means optional—protect the farewell dinner over squeezing this in."},
+  "Downtown Gatlinburg":{chips:["Keep same parking","Firm departure time"],parking:"Keep the same downtown parking space whenever possible and follow posted signs and rates.",food:"Choose one small local treat rather than another full food stop.",photo:"Village lanes or a low-key mountain-town backdrop",tip:"Set a firm departure time for The Greenbrier."},
+  "The Greenbrier Restaurant":{chips:["Restaurant parking","Farewell meal"],parking:"Drive from downtown, follow the restaurant’s parking signs, and arrive unhurried.",food:"Treat this as the farewell meal and choose what feels celebratory.",photo:"Family photo before dinner or by the entrance",tip:"Pause for a favorite-memory toast before the meal ends."},
+  "Home":{simple:true,chips:["Live navigation"],parking:"Complete the final vehicle check before departure.",practical:"Use live navigation for traffic-aware routing and choose rest breaks as needed.",photo:"Final family photo before the drive",tip:"The drive home is part of the adventure—share favorite memories along the way."}
+};
+
+function reservationStatusFor(date,name){
+  const record=(RESERVATION_DATA[date]||[]).find(item=>item.name===name);
+  if(!record)return "";
+  return [record.status,record.time].filter(Boolean).join(" · ");
+}
+
+function smartStopGuide(stop,date){
+  const guide=SMART_STOP_GUIDES[stop.name];
+  if(!guide)return null;
+  return {...guide,reservation:reservationStatusFor(date,stop.name)};
+}
+
+function smartStopChips(stop,guide){
+  const chips=[`⏱ ${stop.duration}`];
+  if(guide?.reservation)chips.push(`🎟 ${guide.reservation}`);
+  for(const chip of guide?.chips||[]){
+    if(chips.length>=4)break;
+    chips.push(chip);
+  }
+  return chips.slice(0,4);
+}
+
 function smartStopsMarkup(d){
   const originalStops=STOP_DATA[d.date]||[];
   const startStop=START_DATA[d.date];
   if(!originalStops.length||!startStop)return "";
 
-  // Day 8 already began with a checkout card in the source itinerary. The new
-  // Start card carries that checkout guidance so the resort is not duplicated.
   const dayStops=d.date==="2026-08-14"?originalStops.slice(1):originalStops;
   const stops=[{...startStop,isStart:true},...dayStops];
   const driveTimes=[startStop.drive,...(NEXT_DRIVE_TIMES[d.date]||[])];
@@ -251,38 +306,49 @@ function smartStopsMarkup(d){
     const isReturn=stop.name==="Club Wyndham Smoky Mountains" && absoluteIndex===stops.length-1;
     const isOptional=stop.type==="Optional adventure";
     const orderLabel=stop.isStart?"Start":absoluteIndex;
-    return `<article class="stopCard ${stop.isStart?"startStop":""} ${isReturn?"returnStop":""} ${isOptional?"optionalStop":""}">
+    const guide=smartStopGuide(stop,d.date);
+    const chips=smartStopChips(stop,guide);
+    const detailRows=guide?[
+      guide.parking&&`<div><b>🅿 Parking & arrival</b><p>${escapeHtml(guide.parking)}</p></div>`,
+      guide.food&&`<div><b>🍽 Foodie pick</b><p>${escapeHtml(guide.food)}</p></div>`,
+      guide.photo&&`<div><b>📸 Best photo</b><p>${escapeHtml(guide.photo)}</p></div>`,
+      guide.practical&&`<div><b>🎒 Practical note</b><p>${escapeHtml(guide.practical)}</p></div>`,
+      guide.reservation&&`<div><b>🎟 Reservation / ticket</b><p>${escapeHtml(guide.reservation)}</p></div>`,
+      guide.tip&&`<div class="remyTip"><b>💚 Remy’s Tip</b><p>${escapeHtml(guide.tip)}</p></div>`
+    ].filter(Boolean).join(""):"";
+    const showGuide=Boolean(guide&&!guide.simple&&detailRows);
+    return `<article class="stopCard evolvedStop ${stop.isStart?"startStop":""} ${isReturn?"returnStop":""} ${isOptional?"optionalStop":""}" data-stop-name="${escapeHtml(stop.name)}">
       <div class="stopOrder"><span>${orderLabel}</span><i></i></div>
       <div class="stopBody">
         <div class="stopTitle">
           <span class="stopIcon">${stop.icon}</span>
-          <div><small>${stop.time} · ${stop.type}</small><h4>${stop.name}</h4>${stop.isStart&&d.date==="2026-08-07"?`<p class="startAddress">${HOME_ADDRESS}</p>`:""}</div>
+          <div><small>${escapeHtml(stop.time)} · ${escapeHtml(stop.type)}</small><h4>${escapeHtml(stop.name)}</h4>${stop.isStart&&d.date==="2026-08-07"?`<p class="startAddress">${escapeHtml(HOME_ADDRESS)}</p>`:""}</div>
         </div>
-        <div class="stopFacts"><span>⏱ ${stop.duration}</span><span>🌿 ${stop.tip}</span></div>
+        <div class="quickChips" aria-label="At-a-glance stop details">${chips.map(chip=>`<span>${escapeHtml(chip)}</span>`).join("")}</div>
+        ${showGuide?`<details class="destinationGuide"><summary>Explore this stop</summary><div class="destinationGuideBody">${detailRows}</div></details>`:""}
         <div class="navActions">
           <a href="${wazeSearch(stop.query)}" target="_blank" rel="noopener">🚙 Waze</a>
           <a href="${mapsSearch(stop.query)}" target="_blank" rel="noopener">📍 Google Maps</a>
-          ${next?`<a class="nextRoute" href="${route}" target="_blank" rel="noopener">Next: ${next.name}<span class="nextDriveTime">🚗 ${nextDrive}</span> →</a>`:`<span class="routeComplete">You’re done for today ✓</span>`}
+          ${next?`<a class="nextRoute" href="${route}" target="_blank" rel="noopener">Next: ${escapeHtml(next.name)}<span class="nextDriveTime">🚗 ${escapeHtml(nextDrive)}</span> →</a>`:`<span class="routeComplete">You’re done for today ✓</span>`}
         </div>
       </div>
     </article>`;
   }
 
-  return `<section class="smartStops">
+  return `<section class="smartStops smartStopEvolution">
     <div class="smartStopsHead">
-      <div><span class="eyebrow">SMART STOP CARDS</span><h3>Navigate the day</h3></div>
+      <div><span class="eyebrow">YOUR ADVENTURE ITINERARY</span><h3>Smart Stops</h3></div>
       <span>${stops.length-1} stops + start</span>
     </div>
-    <p class="stopIntro">Begin with the Start card, then read down the first column and continue at the top of the second. Drive times are planning estimates; use live navigation on the trip.</p>
+    <p class="stopIntro">Read the cards chronologically. Quick Chips show the essentials; open “Explore this stop” on major destinations for parking, food, photo, and practical guidance.</p>
     <div class="stopColumns">
       ${columns.map((column,columnIndex)=>{
         const offset=columnIndex===0?0:splitAt;
         return `<div class="stopColumn">${column.map((stop,index)=>stopCardMarkup(stop,offset+index)).join("")}</div>`;
       }).join("")}
     </div>
-  </section>`
+  </section>`;
 }
-
 
 
 const RESERVATION_OVERRIDES_KEY="adventureCompanionReservationOverridesV1";
@@ -551,101 +617,69 @@ function wireReleaseCandidateTools(){
 function dashboardMarkup(d){
   const x=DAY_DASH[d.date]||{};
   const complete=isComplete(d.date);
-
   return `<section class="dailyDashboard dashboardRedesign">
     <div class="dashboardLead">
       <span class="dashboardIcon">${x.icon||"🏔️"}</span>
-      <div>
-        <span class="eyebrow">DAY ${dayNumber(d.date)} OF ${DATA.days.length}</span>
-        <h3>${dateLabel(d.date)}</h3>
-        <p>${x.focus||d.theme}</p>
-      </div>
-      <button class="completeDay ${complete?"done":""}"
-        data-complete="${d.date}"
-        type="button"
-        aria-pressed="${complete}">
-        ${complete?"✓ Complete":"Mark complete"}
-      </button>
+      <div><span class="eyebrow">DAY ${dayNumber(d.date)} OF ${DATA.days.length}</span><h3>${dateLabel(d.date)}</h3><p>${x.focus||d.theme}</p></div>
+      <button class="completeDay ${complete?"done":""}" data-complete="${d.date}" type="button" aria-pressed="${complete}">${complete?"✓ Complete":"Mark complete"}</button>
     </div>
-
     <div class="adventureSummary" aria-label="Today's adventure summary">
-      <article>
-        <small>⏰ LEAVE AROUND</small>
-        <strong>${x.leave||"Flexible"}</strong>
-      </article>
-      <article>
-        <small>📍 FIRST STOP</small>
-        <strong>${x.first||d.schedule[0][1]}</strong>
-      </article>
-      <article>
-        <small>🎟️ RESERVATION</small>
-        <strong>${x.reservation||"No timed booking"}</strong>
-      </article>
-      <article>
-        <small>🚗 TOTAL DRIVING</small>
-        <strong>${d.drive}</strong>
-      </article>
-      <article>
-        <small>🌅 SUNSET</small>
-        <strong>${x.sunset||"Check closer to trip"}</strong>
-      </article>
-    
+      <article><small>⏰ LEAVE AROUND</small><strong>${x.leave||"Flexible"}</strong></article>
+      <article><small>📍 FIRST STOP</small><strong>${x.first||d.schedule[0][1]}</strong></article>
+      <article><small>🎟️ RESERVATION</small><strong>${x.reservation||"No timed booking"}</strong></article>
+      <article><small>🚗 TOTAL DRIVING</small><strong>${d.drive}</strong></article>
+      <article><small>🌅 SUNSET</small><strong>${x.sunset||"Check closer to trip"}</strong></article>
     </div>
- 
-  <section class="adventureWeather">
-      <div class="adventureWeatherHeader">
-        <div>
-          <span class="eyebrow">ADVENTURE INTELLIGENCE</span>
-          <h4>Weather & flexibility</h4>
-        </div>
-        <span data-day-weather-status="${d.date}">
-          Checking forecast…
-        </span>
-      </div>
-
-      <div class="adventureWeatherBody">
-        <article data-day-weather="${d.date}">
-          <small>🌦️ WEATHER</small>
-          <strong>${dayWeatherFallback(d.date)}</strong>
-          <span>Refresh closer to the adventure</span>
-        </article>
-
-        <button
-          class="adaptiveAdventure"
-          type="button"
-          data-adaptive-adventure="${d.date}">
-          View Adaptive Adventure
-        </button>
-      </div>
-    </section>
-    
-    <div class="dashboardFooter">
-      <span>🌿 ${x.pace||"Flexible pace"}</span>
-      <span>Smart Stop Cards are today's itinerary</span>
+    <div class="dashboardFooter"><span>🌿 ${x.pace||"Flexible pace"}</span><span>Smart Stop Cards are today's itinerary</span></div>
+  </section>
+  <section class="adventureWeather" data-day-weather="${d.date}" aria-label="Adventure Intelligence">
+    <div class="adventureWeatherHead">
+      <div><span class="eyebrow">ADVENTURE INTELLIGENCE</span><h3>Weather & Plan B</h3></div>
+      <span class="weatherWindowStatus" data-day-weather-status="${d.date}">Checking forecast…</span>
     </div>
+    <div class="adventureWeatherBody">
+      <div class="weatherPrimary"><span class="weatherPrimaryIcon">🌤️</span><div><strong>${dayWeatherFallback(d.date)}</strong><small>Sevierville / Smoky Mountains</small></div></div>
+      <div class="adventureOutlook"><b>Adventure outlook</b><p>We will translate the forecast into practical guidance as soon as this date enters the forecast window.</p></div>
+    </div>
+    <details class="adaptiveAdventure">
+      <summary>View Adaptive Adventure</summary>
+      <div><b>Plan B</b><p>${d.planB}</p><small>Your reservations remain the anchor unless conditions require a change.</small></div>
+    </details>
   </section>`;
 }
 
-
 let tripWeatherPromise=null;
 function dayWeatherFallback(date){
-  const tripStart=new Date('2026-08-07T12:00:00'),target=new Date(date+'T12:00:00');
-  return target-Date.now()>16*86400000?'Available within 16 days':'Forecast unavailable';
+  const target=new Date(date+'T12:00:00');
+  return target-Date.now()>16*86400000?'Forecast opens closer to the trip':'Forecast unavailable';
+}
+function adventureOutlook(day){
+  const rain=Number(day.rainChance||0),high=Number(day.high||0);
+  const notes=[];
+  if(rain>=60)notes.push('Rain may affect outdoor stops; keep the Adaptive Adventure ready.');
+  else if(rain>=30)notes.push('A passing shower is possible; the original plan still looks workable.');
+  else notes.push('Low rain risk supports the original adventure plan.');
+  if(high>=90)notes.push('Plan shade, water, and indoor breaks during the hottest hours.');
+  else if(high>=84)notes.push('Warm conditions make hydration and pacing important.');
+  else notes.push('Temperatures look comfortable for the planned pace.');
+  if(/storm|thunder/i.test(day.condition||''))notes.push('Recheck before leaving and protect timed reservations first.');
+  return notes.slice(0,3).map(note=>`<li>${note}</li>`).join('');
 }
 function hydrateDayWeather(){
-  const tiles=[...document.querySelectorAll('[data-day-weather]')];
-  if(!tiles.length||!window.AdventureWeather?.loadTripForecast)return;
+  const cards=[...document.querySelectorAll('[data-day-weather]')];
+  if(!cards.length||!window.AdventureWeather?.loadTripForecast)return;
   if(!tripWeatherPromise)tripWeatherPromise=window.AdventureWeather.loadTripForecast({allowExpired:!navigator.onLine}).catch(()=>null);
   tripWeatherPromise.then(result=>{
-    tiles.forEach(tile=>{
-      const date=tile.dataset.dayWeather,day=result?.data?.days?.[date];
-      const status=document.querySelector(`[data-day-weather-status="${date}"]`);
-      if(day){
-        tile.innerHTML=`<small>${day.icon} WEATHER</small><strong>${day.high}° / ${day.low}° · ${day.condition}</strong><span>${day.rainChance}% chance of rain</span>`;
-        if(status)status.textContent=result.fromCache?'Cached trip forecast':'Live trip forecast';
-      }else{
-        tile.innerHTML=`<small>🌤️ WEATHER</small><strong>${dayWeatherFallback(date)}</strong><span>Refresh closer to the adventure</span>`;
-        if(status)status.textContent='Weather window not open yet';
+    cards.forEach(card=>{
+      const date=card.dataset.dayWeather,day=result?.data?.days?.[date];
+      const status=card.querySelector(`[data-day-weather-status="${date}"]`);
+      const body=card.querySelector('.adventureWeatherBody');
+      if(day&&body){
+        body.innerHTML=`<div class="weatherPrimary"><span class="weatherPrimaryIcon">${day.icon}</span><div><strong>${day.high}° / ${day.low}° · ${day.condition}</strong><small>${day.rainChance}% chance of rain</small></div></div><div class="adventureOutlook"><b>Adventure outlook</b><ul>${adventureOutlook(day)}</ul></div>`;
+        if(status)status.textContent=result.fromCache?'Cached forecast':'Live forecast';
+        card.classList.toggle('adaptiveRecommended',Number(day.rainChance||0)>=50||/storm|thunder/i.test(day.condition||''));
+      }else if(status){
+        status.textContent='Forecast window not open yet';
       }
     });
   });
@@ -663,7 +697,7 @@ if(p==="planning"){
 }
 if(p==="experiencing"){
   const day=DATA.days.find(x=>x.date===localISO(d))||DATA.days[0];
-  h=`${dashboardMarkup(day)}<button class=primary data-day="${day.date}">Open today's full timeline</button>`
+  h=`${dashboardMarkup(day)}<button class=primary data-day="${day.date}">Open today's adventure</button>`
 }
 if(p==="remembering")h=`<div class=big>🌳</div><h3>This adventure is part of your story.</h3><p>Gather the photos, laughter, favorite meals, and lessons you want to carry forward.</p><button class=primary id=next>🏔️ Plan Your Next Adventure</button>`;
 $("#homeCard").innerHTML=h;bindDynamic();bindCompletion();hydrateDayWeather()}
@@ -712,18 +746,15 @@ if(v==="packing"){window.AdventurePacking?.render(s);}
 if(v==="trip")s.innerHTML=`<h3>🎒 Trip Snapshot</h3><p><b>Dates:</b> August 7–14, 2026</p><p><b>Home base:</b> ${DATA.trip.homeBase}</p><p><b>Travel party:</b> ${DATA.trip.party}</p><p><b>Priorities:</b> Stay together, place busy attractions on weekdays, eat well, minimize unnecessary driving, and preserve rest.</p>`;
 if(v==="companion")s.innerHTML=`<h3>🌿 Remy's Corner</h3><div class="brandStamp"><img src="icon-192.png" alt=""><span><strong>Adventure Companion</strong><small>Making New Traditions</small></span></div><div class=remy>The itinerary supports the experience; it does not have to control it.</div><p class=info>During the trip, each daily page keeps timing, stop-by-stop navigation, parking, food, photos, Plan B, and the reason the day matters together in one place. Family members can use the same shared link.</p>`;
 hydrateDayWeather();$$(`[data-open]`).forEach(b=>b.onclick=()=>showDay(b.dataset.open));$$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));bindManageReservationButtons();s.scrollIntoView({behavior:"smooth",block:"start"})}
-function showDay(date){const d=DATA.days.find(x=>x.date===date);if(!d)return;const s=$("#screen");s.hidden=false;s.innerHTML=`<div class=dayHead><button class=back data-back>← Week</button><span class=dayPosition>Day ${dayNumber(date)} of ${DATA.days.length}</span></div>\n${dashboardMarkup(d)}\n<div class=dayHero><small>${d.short} · ${d.theme}</small><h3>${d.title}</h3><p>${d.why}</p><div class=dayChips><span>🚗 ${d.drive}</span><span>🌤️ Weather-ready day plan</span><span>📸 Photo moments</span></div></div>
+function showDay(date){const d=DATA.days.find(x=>x.date===date);if(!d)return;const s=$("#screen");s.hidden=false;s.innerHTML=`<div class=dayHead><button class=back data-back>← Week</button><span class=dayPosition>Day ${dayNumber(date)} of ${DATA.days.length}</span></div>
+${dashboardMarkup(d)}
+<div class=dayHero><small>${d.short} · ${d.theme}</small><h3>${d.title}</h3><p>${d.why}</p><div class=dayChips><span>🚗 ${d.drive}</span><span>🌤️ Adaptive weather guidance</span><span>📍 Stops in journey order</span></div></div>
 ${reservationMarkup(d)}
 ${smartStopsMarkup(d)}
-<div class=reservationSummary><span><b>🍽️ Food plan</b><small>${d.food}</small></span><strong>›</strong></div>
 <div class=why><b>◆ Why this day matters</b><br>${d.why}</div>
-
-<details open><summary>Route, driving & parking</summary><p class=info><b>Route:</b> ${d.route}<br><b>Driving:</b> ${d.drive}<br><b>Parking:</b> ${d.parking}<br><b>Crowd strategy:</b> ${d.crowds}</p></details>
-<details><summary>Foodie callout</summary><p class=info><b>Restaurant:</b> ${d.food}<br><b>Signature dishes:</b> ${d.dishes}<br><b>Dessert:</b> ${d.dessert}</p></details>
-<details><summary>Photos & Plan B</summary><p class=info><b>Photos:</b> ${d.photos}<br><b>Plan B:</b> ${d.planB}</p></details>
 <div class=remy><b>★ Remy's recommendation</b><br>${d.remy}</div>
 <div class=familyQuestion><b>💚 Family question</b><br>${familyQuestionFor(d.date)}</div>`;
-$("[data-back]").onclick=()=>view("week");bindCompletion();bindManageReservationButtons();s.scrollIntoView({behavior:"smooth",block:"start"})}
+$("[data-back]").onclick=()=>view("week");bindCompletion();bindManageReservationButtons();hydrateDayWeather();s.scrollIntoView({behavior:"smooth",block:"start"})}
 DATA = {"trip": {"name": "Smoky Mountains 2026", "start": "2026-08-07", "end": "2026-08-14", "homeBase": "Club Wyndham Smoky Mountains", "party": "Papa, Bubbe, Emily, Jake, and Kaseryn"}, "days": [{"date": "2026-08-07", "short": "Fri 8/7", "title": "Welcome to Tennessee", "theme": "Welcome", "why": "Ease into the vacation without overplanning. The first evening is celebratory but flexible after the drive.", "budget": "$250–$325", "drive": "About 20–30 minutes total", "route": "Club Wyndham → Local Goat → The Island → Club Wyndham", "parking": "Local Goat has on-site parking. The Island has a large free lot with tram service.", "crowds": "If arrival runs late, preserve dinner and shorten or skip The Island.", "food": "Local Goat · 6:00 PM", "dishes": "Fried green tomatoes, bison burger, bistro steak, seasonal fish, peanut butter pie.", "dessert": "The Island Creamery", "photos": "Resort arrival; The Island fountain at dusk.", "planB": "Dinner only, followed by a quiet resort evening.", "remy": "Do not rush the fountains. Let this evening feel like the official start of the trip.", "schedule": [["Afternoon", "Arrive, check in, unpack, and make a quick grocery stop."], ["5:35 PM", "Leave the resort for dinner."], ["6:00 PM", "Local Goat reservation."], ["7:45 PM", "The Island fountain show, strolling, and first family photo."], ["Afterward", "Dessert at The Island Creamery, then return to the resort."]]}, {"date": "2026-08-08", "short": "Sat 8/8", "title": "Mountains, Arts & Local Flavor", "theme": "Mountains", "why": "A gentle Smokies introduction with one easy waterfall walk, local art, and a memorable dinner.", "budget": "$350–$450", "drive": "About 75–100 minutes total, depending on traffic", "route": "Club Wyndham → Five Oaks → Sugarlands → Cataract Falls → Wild Plum → Arts & Crafts → Park Grill → Donut Friar → Resort", "parking": "Sugarlands and artisan stops have free parking. Park once near Park Grill and The Village.", "crowds": "Saturday is busy, so avoid major ticketed attractions and keep the day flexible.", "food": "Wild Plum Tea Room · 1:30 PM; Park Grill pending", "dishes": "At Park Grill: mountain trout, hickory-grilled ribeye, cedar-plank salmon, salad bar, blackberry cobbler.", "dessert": "The Donut Friar after dinner", "photos": "National Park sign; Cataract Falls bridge; artisan studio; The Village at night.", "planB": "If weather limits the waterfall, spend more time at Sugarlands and the Arts & Crafts Community.", "remy": "Sit quietly by the creek for ten minutes. No phones; just listen to the water.", "schedule": [["9:30 AM", "Breakfast at Five Oaks Farm Kitchen."], ["10:45 AM", "Drive toward Great Smoky Mountains National Park."], ["11:15 AM", "Sugarlands Visitor Center and family photo at the park sign."], ["12:05 PM", "Walk to Cataract Falls and pause by the creek."], ["1:30 PM", "Wild Plum Tea Room reservation."], ["3:00 PM", "Great Smoky Arts & Crafts Community; select a few studios."], ["6:00 PM", "Park Grill target time — reservation still pending."], ["After dinner", "Walk to The Village and visit The Donut Friar."]]}, {"date": "2026-08-09", "short": "Sun 8/9", "title": "Relax, Wine & Appalachia", "theme": "Recharge", "why": "A deliberately slower day before Dollywood, built around Apple Barn flavors, wine tasting, and protected resort time.", "budget": "$325–$425", "drive": "Mostly 5–15 minute drives; roughly 35–50 minutes total", "route": "Club Wyndham → Apple Barn Village & Winery → Club Wyndham → Seasons 101 → Club Wyndham", "parking": "Large free lots at Apple Barn. Confirm downtown parking for Seasons 101.", "crowds": "Sunday is intentionally low-pressure. Stay longer only where everyone is enjoying themselves.", "food": "Seasons 101 · 6:00 PM", "dishes": "Choose from the seasonal menu and keep dinner relaxed after the tasting.", "dessert": "Apple Barn Bakery after lunch and wine tasting", "photos": "Apple Barn wagon; winery tasting; family bottle selection.", "planB": "Rain does not materially affect this day; extend indoor Apple Barn time and resort downtime.", "remy": "Let the wine tasting be leisurely. This is a vacation day, not a checklist.", "schedule": [["9:30 AM", "Breakfast at Applewood Farmhouse."], ["10:45 AM", "Explore Apple Barn Village: bakery, cider mill, shops, and creamery."], ["12:30 PM", "Light lunch in the village or nearby."], ["After lunch", "Apple Barn Winery tasting and select the Wine of the Trip."], ["After tasting", "Apple Barn Bakery dessert destination."], ["2:30–5:00 PM", "Choose Your Own Adventure afternoon at the resort."], ["6:00 PM", "Seasons 101 reservation."]]}, {"date": "2026-08-10", "short": "Mon 8/10", "title": "Dollywood Classics", "theme": "Dollywood", "why": "The busiest attraction is placed on Monday to reduce crowds and maximize rides, shows, crafts, and food.", "budget": "$750–$950", "drive": "About 10–15 minutes each way, plus parking traffic", "route": "Club Wyndham → Dollywood → Club Wyndham", "parking": "Standard parking is adequate; preferred parking may be worth it for shorter walking.", "crowds": "Arrive before opening, prioritize top rides early, and avoid overcommitting to closing time.", "food": "Flexible dining inside Dollywood", "dishes": "Cinnamon bread, barbecue, skillet meals, fresh lemonade, and one family-shared snack.", "dessert": "Dollywood cinnamon bread", "photos": "Dollywood entrance; Dollywood Express; Big Bear Mountain sign; Craftsman's Valley.", "planB": "Use indoor shows, shops, and restaurants during storms; revisit rides when weather clears.", "remy": "Leave while everyone is still smiling, not after everyone is exhausted.", "schedule": [["7:15 AM", "Quick breakfast at the condo or nearby."], ["8:30–8:45 AM", "Arrive before opening; allow time for parking and security."], ["Opening", "Big Bear Mountain first, then FireChaser Express and other priorities."], ["Late morning", "Dollywood Express, Craftsman's Valley, eagle area, and shows."], ["Lunch", "Choose based on where the family is at that moment."], ["Afternoon", "Mix rides with shows and shaded breaks."], ["Dinner", "Eat inside Dollywood or leave while everyone is still happy."], ["After meal", "Share Dollywood cinnamon bread."]]}, {"date": "2026-08-11", "short": "Tue 8/11", "title": "Hidden Wonders & Adventure Night", "theme": "Hidden Wonders", "why": "A cave, local barbecue, protected downtime, and a playful nighttime coaster make this one of the most varied days.", "budget": "$550–$700", "drive": "About 75–95 minutes total", "route": "Club Wyndham → Forbidden Caverns → Delauder's BBQ → Resort → Blue Moose → Rocky Top Coaster → Ice cream → Resort", "parking": "Free parking at Forbidden Caverns, Delauder's, Blue Moose, and the coaster.", "crowds": "Forbidden Caverns is walk-up. Arrive close to opening and keep the evening flexible.", "food": "Delauder's BBQ lunch; Blue Moose · 6:15 PM target", "dishes": "Brisket, pulled pork, smoked turkey, mac and cheese, beans, banana pudding; later wings, burgers, and salads.", "dessert": "Ice cream only after the mountain coaster", "photos": "Forbidden Caverns entrance; barbecue spread; illuminated coaster.", "planB": "If storms affect the coaster, move it to another clear evening.", "remy": "Do not feel guilty about doing nothing during the afternoon. The rest is intentional.", "schedule": [["9:30 AM", "Breakfast at a nearby café or the condo."], ["10:30 AM", "Drive to Forbidden Caverns."], ["11:00 AM–12:15 PM", "Guided cave tour."], ["12:45 PM", "Lunch at Delauder's BBQ."], ["2:15–5:00 PM", "Completely unscheduled resort afternoon."], ["6:15 PM", "Blue Moose Burgers & Wings target."], ["8:15 PM", "Rocky Top Mountain Coaster after dark."], ["After coaster", "Ice cream dessert destination."]]}, {"date": "2026-08-12", "short": "Wed 8/12", "title": "Adventure, Animals & History", "theme": "Adventure", "why": "Ziplining, animals, Smokies history, a heritage meal, and an unplugged sunset balance excitement and connection.", "budget": "$650–$825", "drive": "About 45–70 minutes total", "route": "Club Wyndham → Lil Black Bear Café → Legacy Mountain Zipline → Lunch → Parrot Mountain → Old Mill → Resort", "parking": "Use attraction lots. At Old Mill, park once and walk the district.", "crowds": "Keep Arts & Crafts off this day; Saturday already covers local artisans.", "food": "Casual lunch; Old Mill Restaurant target", "dishes": "Pot roast, chicken and dumplings or pot pie, corn chowder, fritters, and blackberry cobbler.", "dessert": "Old Mill Creamery", "photos": "Zipline launch; holding parrots; Old Mill water wheel; golden-hour river photo.", "planB": "If ziplining is weather-cancelled, expand Parrot Mountain and Old Mill time and reschedule if possible.", "remy": "Protect the sunset. It may become the most meaningful memory of the week.", "schedule": [["9:00 AM", "Breakfast at Lil Black Bear Café."], ["10:30 AM", "Legacy Mountain Zipline reservation for the kids; Emily joins only if cleared and comfortable."], ["After zipline", "Casual lunch together."], ["Early afternoon", "Parrot Mountain & Gardens."], ["Late afternoon", "Browse the Old Mill district at a relaxed pace."], ["Dinner", "Old Mill Restaurant target."], ["After dinner", "Old Mill Creamery."], ["Sunset", "Sit by the river, put phones away, and share favorite memories so far."]]}, {"date": "2026-08-13", "short": "Thu 8/13", "title": "Grand Finale", "theme": "Grand Finale", "why": "The aquarium is correctly placed on the final full weekday, followed by relaxed Gatlinburg time and a special farewell dinner.", "budget": "$700–$850", "drive": "About 55–75 minutes total, depending on Gatlinburg traffic", "route": "Club Wyndham → Gatlinburg parking → Pancake Pantry → Aquarium → optional Anakeesta/downtown → Greenbrier → Resort", "parking": "Park once downtown for breakfast, aquarium, and optional downtown time. Drive separately to The Greenbrier.", "crowds": "Arrive at the aquarium earlier in the day. Keep the afternoon relaxed and avoid height-anxiety activities.", "food": "The Greenbrier · 6:15 PM", "dishes": "Crab cakes, filet, prime rib if offered, seafood entrée, and a signature dessert.", "dessert": "Dessert at The Greenbrier", "photos": "Aquarium shark tunnel; penguins; gardens or downtown; farewell dinner photo.", "planB": "If weather affects outdoor plans, stay longer at the aquarium and enjoy downtown shops before dinner.", "remy": "At dinner, each person answers: What should become a family tradition from this trip?", "schedule": [["9:30 AM", "Breakfast at Pancake Pantry."], ["10:45 AM", "Ripley's Aquarium of the Smokies."], ["1:00 PM", "Lunch in downtown Gatlinburg."], ["2:15 PM", "Optional relaxed Anakeesta gardens/shops or downtown time; skip height-intensive attractions."], ["Late afternoon", "Return to the car and freshen up if needed."], ["6:15 PM", "The Greenbrier farewell dinner reservation."], ["After dinner", "Dessert at The Greenbrier and family tradition reflection."]]}, {"date": "2026-08-14", "short": "Fri 8/14", "title": "Heading Home", "theme": "Home", "why": "End without rushing: one last meal, one final photo, and time to begin imagining the next adventure.", "budget": "$100–$175", "drive": "Dependent on the drive home", "route": "Club Wyndham → Breakfast if needed → Home", "parking": "No special considerations.", "crowds": "Allow extra departure time for Friday traffic.", "food": "Flexible farewell breakfast", "dishes": "Choose a favorite from earlier in the trip or keep breakfast simple.", "dessert": "None scheduled", "photos": "Final family photo at the resort.", "planB": "Keep the morning light.", "remy": "Start talking about where Making New Traditions should go in 2027.", "schedule": [["Morning", "Relaxed breakfast at the condo or a favorite nearby spot."], ["Before checkout", "Pack, complete a final room check, and take one last family photo."], ["Checkout", "Depart Club Wyndham and head home already discussing the next adventure."]]}], "reservations": [{"name": "Local Goat", "date": "Fri Aug 7", "time": "6:00 PM", "status": "Confirmed"}, {"name": "Wild Plum Tea Room", "date": "Sat Aug 8", "time": "1:30 PM target", "status": "Contacted"}, {"name": "Park Grill", "date": "Sat Aug 8", "time": "6:00 PM target", "status": "Pending"}, {"name": "Seasons 101", "date": "Sun Aug 9", "time": "6:00 PM", "status": "Confirmed"}, {"name": "Legacy Mountain Zipline", "date": "Wed Aug 12", "time": "10:30 AM", "status": "Confirmed"}, {"name": "The Greenbrier", "date": "Thu Aug 13", "time": "6:15 PM", "status": "Confirmed"}], "traditions": ["Take one group photo every day.", "Sit beside the water at Cataract Falls without phones.", "Choose a local Wine of the Trip.", "Share Dollywood cinnamon bread.", "Ride the mountain coaster after dark.", "Take a photo with a parrot.", "Protect Wednesday's sunset.", "Choose one Christmas ornament that represents the trip.", "At farewell dinner, decide which tradition continues next year."]};
 const now=new Date(), inp=$("#previewDate");
 inp.value=localISO(now);
