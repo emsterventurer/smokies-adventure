@@ -1,3 +1,4 @@
+// Build 004.2 validation trigger
 
 const APP_BUILD={
   version:"M3-04.2",
