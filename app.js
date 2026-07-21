@@ -589,8 +589,36 @@ function dashboardMarkup(d){
         <small>🌅 SUNSET</small>
         <strong>${x.sunset||"Check closer to trip"}</strong>
       </article>
+    
     </div>
+ 
+  <section class="adventureWeather">
+      <div class="adventureWeatherHeader">
+        <div>
+          <span class="eyebrow">ADVENTURE INTELLIGENCE</span>
+          <h4>Weather & flexibility</h4>
+        </div>
+        <span data-day-weather-status="${d.date}">
+          Checking forecast…
+        </span>
+      </div>
 
+      <div class="adventureWeatherBody">
+        <article data-day-weather="${d.date}">
+          <small>🌦️ WEATHER</small>
+          <strong>${dayWeatherFallback(d.date)}</strong>
+          <span>Refresh closer to the adventure</span>
+        </article>
+
+        <button
+          class="adaptiveAdventure"
+          type="button"
+          data-adaptive-adventure="${d.date}">
+          View Adaptive Adventure
+        </button>
+      </div>
+    </section>
+    
     <div class="dashboardFooter">
       <span>🌿 ${x.pace||"Flexible pace"}</span>
       <span>Smart Stop Cards are today's itinerary</span>
