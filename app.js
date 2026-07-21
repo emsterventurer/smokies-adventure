@@ -714,7 +714,10 @@ if(v==="companion")s.innerHTML=`<h3>🌿 Remy's Corner</h3><div class="brandStam
 hydrateDayWeather();$$(`[data-open]`).forEach(b=>b.onclick=()=>showDay(b.dataset.open));$$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));bindManageReservationButtons();s.scrollIntoView({behavior:"smooth",block:"start"})}
 function showDay(date){const d=DATA.days.find(x=>x.date===date);if(!d)return;const s=$("#screen");s.hidden=false;s.innerHTML=`<div class=dayHead><button class=back data-back>← Week</button><span class=dayPosition>Day ${dayNumber(date)} of ${DATA.days.length}</span></div>\n${dashboardMarkup(d)}\n<div class=dayHero><small>${d.short} · ${d.theme}</small><h3>${d.title}</h3><p>${d.why}</p><div class=dayChips><span>🚗 ${d.drive}</span><span>🌤️ Weather-ready day plan</span><span>📸 Photo moments</span></div></div>
 ${reservationMarkup(d)}
-${smartStopsMarkup(d)}\n<div class=reservationSummary><span><b>🍽️ Food plan</b><small>${d.food}</small></span><strong>›</strong></div><div class=why><b>◆ Why this day matters</b><br>${d.why}</div><div class=timeline>${d.schedule.map(e=>`<div class=event><time>${e[0]}</time><span>${e[1]}</span></div>`).join("")}</div>
+${smartStopsMarkup(d)}
+<div class=reservationSummary><span><b>🍽️ Food plan</b><small>${d.food}</small></span><strong>›</strong></div>
+<div class=why><b>◆ Why this day matters</b><br>${d.why}</div>
+
 <details open><summary>Route, driving & parking</summary><p class=info><b>Route:</b> ${d.route}<br><b>Driving:</b> ${d.drive}<br><b>Parking:</b> ${d.parking}<br><b>Crowd strategy:</b> ${d.crowds}</p></details>
 <details><summary>Foodie callout</summary><p class=info><b>Restaurant:</b> ${d.food}<br><b>Signature dishes:</b> ${d.dishes}<br><b>Dessert:</b> ${d.dessert}</p></details>
 <details><summary>Photos & Plan B</summary><p class=info><b>Photos:</b> ${d.photos}<br><b>Plan B:</b> ${d.planB}</p></details>
