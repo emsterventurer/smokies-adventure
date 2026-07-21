@@ -45,42 +45,53 @@
   function reset(storage){try{getStorage(storage)?.removeItem(STORAGE_KEY);return true;}catch(e){return false;}}
   function progress(items,state){const list=items||BASE_ITEMS,total=list.length,done=list.filter(i=>isDone(i.id,state)).length,ratio=total?done/total:0;return {done,total,ratio,milestone:ratio===1?'Adventure Ready':ratio>=.7?'Almost Ready':ratio>0?'Taking Shape':'Getting Started',icon:ratio===1?'💚':ratio>=.7?'🏔️':ratio>0?'🌿':'🌱'};}
   function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+  const PARTICIPANTS=TRAVELERS.filter(t=>t.id!=='shared').map(t=>({...t,active:true}));
+  const INDIVIDUAL_CELEBRATIONS_KEY='adventureCompanionIndividualCelebrationsM3044C';
+  const FAMILY_CELEBRATION_KEY='adventureCompanionFamilyCelebrationM3044C';
+  function itemsForTraveler(id){return BASE_ITEMS.filter(i=>i.traveler===id);}
+  function travelerProgress(id,state){return progress(itemsForTraveler(id),state||readState());}
+  function readiness(state){const current=state||readState();return PARTICIPANTS.map(t=>({...t,progress:travelerProgress(t.id,current),ready:travelerProgress(t.id,current).ratio===1}));}
+  function familyReady(state){const rows=readiness(state);return rows.length>0&&rows.every(row=>row.ready);}
+  function readCelebrations(storage){try{return JSON.parse(getStorage(storage)?.getItem(INDIVIDUAL_CELEBRATIONS_KEY)||'{}')||{};}catch(e){return {};}}
+  function writeCelebrations(value,storage){try{getStorage(storage)?.setItem(INDIVIDUAL_CELEBRATIONS_KEY,JSON.stringify(value));}catch(e){}}
+  function dispatchProgress(){try{root.dispatchEvent?.(new CustomEvent('adventure:packing-progress',{detail:{readiness:readiness(),familyReady:familyReady()}}));}catch(e){}}
   function render(host){
-    if(!host)return;let activeTraveler='emily',activeActivity='all',wasComplete=progress(BASE_ITEMS,readState()).ratio===1;
+    if(!host)return;let activeTraveler='emily',activeActivity='all';
     function paint(){
       const state=readState(),overall=progress(BASE_ITEMS,state);
-      host.innerHTML=`<div class="packingHead"><div><span class="eyebrow">M3-04.3 · PACKING & ADVENTURE POLISH</span><h3>🎒 Smoky Mountains Packing</h3><p>Prioritized for your family and connected to the adventures on your itinerary.</p></div><button id="resetPacking" class="packingReset" type="button">Reset</button></div>
-      <section class="packingProgress"><div class="packingMilestone"><span class="packingIcon" aria-hidden="true">${overall.ratio===1?"🎒":overall.icon}</span><div><small>${overall.done} of ${overall.total} packed</small><strong>${overall.ratio===1?"🎒 Adventure Ready":overall.milestone}</strong></div></div><div class="packingBar"><i style="width:${Math.round(overall.ratio*100)}%"></i></div></section>
+      host.innerHTML=`<div class="packingHead"><div><span class="eyebrow">M3-04.4C · EXPERIENCE COMPLETION</span><h3>🎒 Smoky Mountains Packing</h3><p>Each adventurer earns an individual Adventure Ready celebration.</p></div><button id="resetPacking" class="packingReset" type="button">Reset</button></div>
+      <section class="packingProgress"><div class="packingMilestone"><span class="packingIcon" aria-hidden="true">${familyReady(state)?"🎒":overall.icon}</span><div><small>${overall.done} of ${overall.total} packed</small><strong>${familyReady(state)?"🎒 Everyone Adventure Ready":overall.milestone}</strong></div></div><div class="packingBar"><i style="width:${Math.round(overall.ratio*100)}%"></i></div></section>
+      <section class="packingReadinessMini" aria-label="Adventure readiness">${readiness(state).map(t=>`<span class="${t.ready?'ready':''}">${t.icon} ${t.name} ${t.ready?'✓':'· '+t.progress.done+'/'+t.progress.total}</span>`).join('')}</section>
       <div class="activityFilter"><label for="packingActivity">Show items for</label><select id="packingActivity">${Object.entries(ACTIVITIES).map(([id,name])=>`<option value="${id}" ${id===activeActivity?'selected':''}>${name}</option>`).join('')}</select></div>
       <div class="travelerTabs" role="tablist">${TRAVELERS.map(t=>`<button type="button" role="tab" aria-selected="${t.id===activeTraveler}" class="${t.id===activeTraveler?'active':''}" data-packing-traveler="${t.id}"><span>${t.icon}</span>${t.name}</button>`).join('')}</div><div id="packingLists"></div>`;
       showTraveler();
       host.querySelectorAll('[data-packing-traveler]').forEach(b=>b.addEventListener('click',()=>{activeTraveler=b.dataset.packingTraveler;paint();}));
       host.querySelector('#packingActivity')?.addEventListener('change',e=>{activeActivity=e.target.value;paint();});
-      host.querySelector('#resetPacking')?.addEventListener('click',()=>{if(root.confirm?.('Reset every packing checkbox?')){reset();paint();}});
+      host.querySelector('#resetPacking')?.addEventListener('click',()=>{if(root.confirm?.('Reset every packing checkbox and celebration?')){reset();try{localStorage.removeItem(INDIVIDUAL_CELEBRATIONS_KEY);localStorage.removeItem(FAMILY_CELEBRATION_KEY);localStorage.removeItem(CAMPFIRE_KEY);}catch(e){}paint();dispatchProgress();}});
     }
     function showTraveler(){
-      const traveler=TRAVELERS.find(t=>t.id===activeTraveler)||TRAVELERS[0],all=BASE_ITEMS.filter(i=>i.traveler===traveler.id),items=all.filter(i=>activeActivity==='all'||i.activity===activeActivity),state=readState(),p=progress(all,state),listHost=host.querySelector('#packingLists');
-      listHost.innerHTML=`<div class="travelerSummary"><div><span>${traveler.icon}</span><div><small>${p.done} of ${p.total} packed</small><strong>${traveler.name}</strong></div></div><em>${p.icon} ${p.milestone}</em></div>${items.length?'':`<p class="packingEmpty">No ${traveler.name} items are assigned to this activity. Check Shared or choose All activities.</p>`}${CATEGORIES.map(c=>{const ci=items.filter(i=>i.category===c.id);if(!ci.length)return'';return `<section class="packingCategory"><h4>${c.icon} ${c.name}</h4>${ci.map(i=>`<label class="packingItem ${isDone(i.id,state)?'done':''}"><input type="checkbox" data-packing-id="${i.id}" ${isDone(i.id,state)?'checked':''}><span class="packingItemBody"><span class="packingItemTop"><b>${escapeHtml(i.label)}</b><em class="priority ${i.priority}">${PRIORITY_LABELS[i.priority]}</em></span><small>${escapeHtml(i.reason)}</small></span></label>`).join('')}</section>`;}).join('')}`;
-      listHost.querySelectorAll('[data-packing-id]').forEach(input=>input.addEventListener('change',()=>{toggle(input.dataset.packingId);const nowComplete=progress(BASE_ITEMS,readState()).ratio===1;paint();if(nowComplete&&!wasComplete){wasComplete=true;celebrate();}else if(!nowComplete){wasComplete=false;}}));
+      const traveler=TRAVELERS.find(t=>t.id===activeTraveler)||TRAVELERS[0],all=itemsForTraveler(traveler.id),items=all.filter(i=>activeActivity==='all'||i.activity===activeActivity),state=readState(),p=progress(all,state),listHost=host.querySelector('#packingLists');
+      listHost.innerHTML=`<div class="travelerSummary"><div><span>${traveler.icon}</span><div><small>${p.done} of ${p.total} packed</small><strong>${traveler.name}</strong></div></div><em>${p.ratio===1?'🎉 Adventure Ready':p.icon+' '+p.milestone}</em></div>${items.length?'':`<p class="packingEmpty">No ${traveler.name} items are assigned to this activity. Check Shared or choose All activities.</p>`}${CATEGORIES.map(c=>{const ci=items.filter(i=>i.category===c.id);if(!ci.length)return'';return `<section class="packingCategory"><h4>${c.icon} ${c.name}</h4>${ci.map(i=>`<label class="packingItem ${isDone(i.id,state)?'done':''}"><input type="checkbox" data-packing-id="${i.id}" ${isDone(i.id,state)?'checked':''}><span class="packingItemBody"><span class="packingItemTop"><b>${escapeHtml(i.label)}</b><em class="priority ${i.priority}">${PRIORITY_LABELS[i.priority]}</em></span><small>${escapeHtml(i.reason)}</small></span></label>`).join('')}</section>`;}).join('')}`;
+      listHost.querySelectorAll('[data-packing-id]').forEach(input=>input.addEventListener('change',()=>{
+        const before=travelerProgress(activeTraveler).ratio===1;toggle(input.dataset.packingId);const after=travelerProgress(activeTraveler).ratio===1;paint();dispatchProgress();
+        if(activeTraveler!=='shared'&&!before&&after)celebrateTraveler(activeTraveler);
+        if(familyReady()&&localStorage.getItem(FAMILY_CELEBRATION_KEY)!=='true')setTimeout(celebrateFamily,500);
+      }));
     }
-    paint();
+    paint();dispatchProgress();
   }
-
-  function celebrate(){
-    try{root.localStorage?.setItem(CELEBRATION_KEY,'true');root.localStorage?.setItem(CAMPFIRE_KEY,'true');}catch(e){}
-    root.document?.querySelector('.packingCelebration')?.remove();
-    const reduced=root.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-    if(!reduced){
-      const layer=root.document.createElement('div');layer.className='confettiLayer';layer.setAttribute('aria-hidden','true');
-      const symbols=['🎉','✨','🌿','🏔️','💚'];
-      layer.innerHTML=Array.from({length:42},(_,i)=>`<i style="--x:${(i*37)%100};--delay:${(i%9)*.08}s;--spin:${(i%2?1:-1)*(180+(i%5)*90)}deg">${symbols[i%symbols.length]}</i>`).join('');
-      root.document.body.appendChild(layer);setTimeout(()=>layer.remove(),4200);
-    }
-    const modal=root.document.createElement('section');modal.className='packingCelebration';modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','packingCelebrationTitle');
-    modal.innerHTML=`<div class="packingCelebrationCard"><div class="celebrationPack" aria-hidden="true">🎒</div><span class="eyebrow">PACKING MILESTONE COMPLETE</span><h2 id="packingCelebrationTitle">Emily, you’re Adventure Ready!</h2><p>Everything for the Smoky Mountains is packed.</p><strong>You did it. Time to stop worrying and start looking forward to the adventure.</strong><div class="celebrationPromise">🏔️ Making New Traditions begins now. 🌿💚</div><p class="campfireNotice">🔥 Your first Remy’s Campfire has been unlocked.</p><button type="button">Continue to Dashboard</button></div>`;
-    root.document.body.appendChild(modal);
-    const button=modal.querySelector('button');button?.focus();
-    button?.addEventListener('click',()=>{modal.remove();root.document.querySelector('[data-view="home"]')?.click();});
+  function confetti(count=38,big=false){
+    if(root.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
+    const layer=root.document.createElement('div');layer.className='confettiLayer'+(big?' familyConfetti':'');layer.setAttribute('aria-hidden','true');
+    const symbols=['🎉','✨','🌿','🏔️','💚'];layer.innerHTML=Array.from({length:count},(_,i)=>`<i style="--x:${(i*37)%100};--delay:${(i%9)*.08}s;--spin:${(i%2?1:-1)*(180+(i%5)*90)}deg">${symbols[i%symbols.length]}</i>`).join('');
+    root.document.body.appendChild(layer);setTimeout(()=>layer.remove(),big?5000:4200);
   }
-  return {STORAGE_KEY,TRAVELERS,CATEGORIES,ACTIVITIES,BASE_ITEMS,readState,writeState,toggle,reset,progress,render,celebrate};
+  function modal(title,body,buttonText='Continue',onClose){
+    root.document?.querySelector('.packingCelebration')?.remove();const el=root.document.createElement('section');el.className='packingCelebration';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-labelledby','packingCelebrationTitle');
+    el.innerHTML=`<div class="packingCelebrationCard"><div class="celebrationPack" aria-hidden="true">🎒</div><span class="eyebrow">ADVENTURE READY MILESTONE</span><h2 id="packingCelebrationTitle">${title}</h2>${body}<button type="button">${buttonText}</button></div>`;root.document.body.appendChild(el);const btn=el.querySelector('button');btn?.focus();btn?.addEventListener('click',()=>{el.remove();onClose?.();});
+  }
+  function celebrateTraveler(id){const traveler=PARTICIPANTS.find(t=>t.id===id);if(!traveler)return;const seen=readCelebrations();if(seen[id])return;seen[id]=true;writeCelebrations(seen);confetti();modal(`${traveler.name}, you’re Adventure Ready!`,`<p>Your personal packing list is complete.</p><strong>You did it. The mountains are waiting.</strong><div class="celebrationPromise">${traveler.icon} ${traveler.name} · ✅ Adventure Ready</div>`,'Celebrate!');}
+  function celebrateFamily(){if(!familyReady()||localStorage.getItem(FAMILY_CELEBRATION_KEY)==='true')return;try{localStorage.setItem(FAMILY_CELEBRATION_KEY,'true');localStorage.setItem(CAMPFIRE_KEY,'true');}catch(e){}confetti(70,true);modal('Everyone is Adventure Ready!',`<p>Emily, Jake, Kaseryn, Bubbe, and Papa are packed.</p><strong>The planning is complete. Now let’s make new traditions.</strong><div class="celebrationPromise">🏔️🌿💚</div><p class="campfireNotice">🔥 The Journey Begins has unlocked in Remy’s Corner.</p>`,'Open Remy’s Corner',()=>root.document.querySelector('[data-view="companion"]')?.click());dispatchProgress();}
+  function celebrate(){celebrateFamily();}
+  return {STORAGE_KEY,TRAVELERS,PARTICIPANTS,CATEGORIES,ACTIVITIES,BASE_ITEMS,readState,writeState,toggle,reset,progress,travelerProgress,readiness,familyReady,render,celebrate,celebrateTraveler,celebrateFamily};
 });

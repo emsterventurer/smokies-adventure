@@ -1,12 +1,13 @@
-# Adventure Companion Build M3-04.4B
+# Adventure Companion Build M3-04.4C — Experience Completion
 
-## Upload order
-Upload the files in this package to the root of the GitHub repository, preserving the `.github/workflows` folder.
+This is a **change package only**. Upload the included files to the same paths in the repository, replacing the existing copies.
 
-1. Upload all files from this change package.
-2. Choose **Commit directly to the main branch** only if you are comfortable deploying immediately; otherwise create a branch first.
-3. Wait for GitHub Actions `quality-checks` to complete.
-4. Open the live app and hard refresh once (`Ctrl+Shift+R` on Windows).
-5. Open Build Info and confirm **M3-04.4B** and a healthy diagnostics result.
+## Recommended release process
+1. Create a new branch from the current working `main` branch.
+2. Upload every file from this package, preserving `.github/workflows/quality-checks.yml`.
+3. Commit with: `Implement Build M3-04.4C Experience Completion`.
+4. Wait for GitHub Actions to pass.
+5. Open the branch deployment or local preview and complete `VISUAL_QA_CHECKLIST.md` before merging.
+6. Merge only after the visual checks pass.
 
-Your saved trip, packing progress, and other local app data are not removed by this update.
+The build and cache identity are both `M3-04.4C`.

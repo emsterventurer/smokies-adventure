@@ -1,7 +1,7 @@
-// Build M3-04.4B · Experience & Celebration
+// Build M3-04.4C · Experience Completion
 
 const APP_BUILD={
-  version:"M3-04.4B",
+  version:"M3-04.4C",
   label:"Reliability & Diagnostics",
   date:"July 21, 2026"
 };
@@ -686,6 +686,16 @@ function hydrateDayWeather(){
   });
 }
 
+function experienceDashboardMarkup(){
+  const rows=window.AdventurePacking?.readiness?.()||[];
+  const unlocked=localStorage.getItem('adventureCompanionCampfireUnlocked')==='true';
+  return `<div class="experienceDashboardGrid">
+    <button class="experienceCard remysCornerCard" data-view="companion" type="button"><span class="experienceCardIcon">🔥</span><span><small>REMY'S CORNER</small><strong>${unlocked?'The Journey Begins is unlocked':'A thought for today'}</strong><em>Campfire stories · Adventure phase · Encouragement</em></span><b>Open →</b></button>
+    <button class="experienceCard readinessCard" data-view="packing" type="button"><span class="experienceCardIcon">🎒</span><span><small>FAMILY ADVENTURE READINESS</small><strong>${rows.filter(r=>r.ready).length} of ${rows.length} adventurers ready</strong><span class="readinessPeople">${rows.map(r=>`<i class="${r.ready?'ready':''}">${r.icon} ${r.name} ${r.ready?'✓':''}</i>`).join('')}</span></span><b>Pack →</b></button>
+  </div>`;
+}
+function renderExperienceDashboard(){const card=document.querySelector('#homeCard');if(!card)return;card.querySelector('.experienceDashboardGrid')?.remove();card.insertAdjacentHTML('beforeend',experienceDashboardMarkup());bindDynamic();}
+window.addEventListener('adventure:packing-progress',renderExperienceDashboard);
 function drawPhase(d){const p=phase(d),i=phases.indexOf(p);$("#phaseBadge").textContent=meta[p][1];$$(".phases div").forEach((e,n)=>{e.className=n===i?"active":n<i?"done":""});$$(".phases i").forEach((e,n)=>e.className=n<i?"done":"");drawHome(d,p)}
 function drawHome(d,p){let h="";
 if(p==="dreaming")h=`<div class=big>🌱</div><h3>Let the idea take root.</h3><p>Capture possibilities and what would make this adventure meaningful.</p>`;
@@ -701,7 +711,7 @@ if(p==="experiencing"){
   h=`${dashboardMarkup(day)}<button class=primary data-day="${day.date}">Open today's adventure</button>`
 }
 if(p==="remembering")h=`<div class=big>🌳</div><h3>This adventure is part of your story.</h3><p>Gather the photos, laughter, favorite meals, and lessons you want to carry forward.</p><button class=primary id=next>🏔️ Plan Your Next Adventure</button>`;
-$("#homeCard").innerHTML=h;bindDynamic();bindCompletion();hydrateDayWeather()}
+$("#homeCard").innerHTML=h;renderExperienceDashboard();bindDynamic();bindCompletion();hydrateDayWeather()}
 
 document.addEventListener("click",event=>{
   const manageButton=event.target.closest("[data-manage-reservations]");
@@ -745,7 +755,7 @@ if(v==="reservations")s.innerHTML=`<div class="reservationIndexHead simplified">
 if(v==="traditions")s.innerHTML=`<h3>💚 Moments to Protect</h3><ul class=info>${DATA.traditions.map(t=>`<li>${t}</li>`).join("")}</ul>`;
 if(v==="packing"){window.AdventurePacking?.render(s);}
 if(v==="trip")s.innerHTML=`<h3>🎒 Trip Snapshot</h3><p><b>Dates:</b> August 7–14, 2026</p><p><b>Home base:</b> ${DATA.trip.homeBase}</p><p><b>Travel party:</b> ${DATA.trip.party}</p><p><b>Priorities:</b> Stay together, place busy attractions on weekdays, eat well, minimize unnecessary driving, and preserve rest.</p>`;
-if(v==="companion"){const campfire=localStorage.getItem("adventureCompanionCampfireUnlocked")==="true";s.innerHTML=`<h3>🌿 Remy's Corner</h3><div class="brandStamp"><img src="icon-192.png" alt=""><span><strong>Adventure Companion</strong><small>Making New Traditions</small></span></div>${campfire?`<section class="campfireUnlocked"><span aria-hidden="true">🔥</span><div><small>FIRST CAMPFIRE UNLOCKED</small><h4>You crossed one of the biggest milestones before any adventure.</h4><p>Everything is packed. The trip is no longer just an idea—you are ready to begin making new traditions.</p></div></section>`:""}<div class=remy>The itinerary supports the experience; it does not have to control it.</div><p class=info>During the trip, each daily page keeps timing, stop-by-stop navigation, parking, food, photos, Plan B, and the reason the day matters together in one place. Family members can use the same shared link.</p>`;}
+if(v==="companion"){const campfire=localStorage.getItem("adventureCompanionCampfireUnlocked")==="true";s.innerHTML=`<div class="remysCornerHead"><span class="bigFire">🔥</span><div><span class="eyebrow">A PLACE TO PAUSE</span><h3>Remy’s Corner</h3><p>Celebrate effort. Preserve memories. Reduce stress.</p></div></div><section class="todayThought"><small>TODAY’S THOUGHT</small><blockquote>The itinerary supports the experience; it does not have to control it.</blockquote></section><section class="cornerPhase"><small>ADVENTURE PHASE</small><strong>🌿 Planning · The adventure is taking shape</strong></section><h4 class="campfireTitle">🔥 Campfire Stories</h4>${campfire?`<section class="campfireUnlocked"><span aria-hidden="true">🔥</span><div><small>UNLOCKED · THE JOURNEY BEGINS</small><h4>Packing is the moment a dream becomes real.</h4><p>Soon you’ll be standing together in the Smoky Mountains. Laugh often. Take pictures. Be present. These moments become memories faster than we expect.</p><em>— Remy 💚</em></div></section>`:`<section class="campfireLocked"><span>🔒</span><div><strong>The Journey Begins</strong><p>Complete every adventurer’s packing list to unlock this Campfire.</p></div></section>`}<section class="futureCampfires"><span>🔒 One Week Left</span><span>🔒 Road Trip Begins</span><span>🔒 First Sunrise</span></section>`;}
 hydrateDayWeather();$$(`[data-open]`).forEach(b=>b.onclick=()=>showDay(b.dataset.open));$$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));bindManageReservationButtons();s.scrollIntoView({behavior:"smooth",block:"start"})}
 function showDay(date){const d=DATA.days.find(x=>x.date===date);if(!d)return;const s=$("#screen");s.hidden=false;s.innerHTML=`<div class=dayHead><button class=back data-back>← Week</button><span class=dayPosition>Day ${dayNumber(date)} of ${DATA.days.length}</span></div>
 ${dashboardMarkup(d)}

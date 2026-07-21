@@ -1,105 +1,29 @@
-name: Adventure Companion Quality Checks
+# Audit Report — Build M3-04.4C
 
-on:
-  pull_request:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+## Automated results
+Passed locally:
+- JavaScript syntax: `app.js`, `packing.js`, `reliability.js`, `service-worker.js`
+- `weather-service.test.js`
+- `daily-weather.test.js`
+- `dashboard-redesign.test.js`
+- `packing.test.js`
+- `reliability.test.js`
+- `experience-polish.test.js`
+- `experience-completion.test.js`
 
-permissions:
-  contents: read
+## Static implementation audit
+Confirmed in source:
+- Remy’s Corner dashboard card and full view
+- Five active adventurer profiles
+- Per-traveler progress calculations
+- Individual completion transition and duplicate prevention
+- Family-only completion gate
+- Campfire unlock persistence
+- M3-04.4C build/cache consistency
+- GitHub Pages-compatible static implementation
 
-jobs:
-  quality-checks:
-    name: JavaScript and weather checks
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+## Manual visual status
+A browser-level visual check must still be completed on the branch preview using `VISUAL_QA_CHECKLIST.md`. The package is a release candidate and should not be merged until those checks are completed successfully.
 
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v5
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Show tool versions
-        run: |
-          node --version
-          npm --version
-
-      - name: Check JavaScript syntax
-        run: |
-          node --check app.js
-          node --check reliability.js
-          node --check service-worker.js
-          node --check weather-service.js
-          node --check weather-ui.js
-          node --check weather-service.test.js
-          node --check daily-weather.test.js
-          node --check dashboard-redesign.test.js
-          node --check packing.test.js
-          node --check reliability.test.js
-
-      - name: Run complete regression suite
-        run: |
-          node weather-service.test.js
-          node daily-weather.test.js
-          node dashboard-redesign.test.js
-          node packing.test.js
-          node reliability.test.js
-          node experience-polish.test.js
-
-      - name: Verify required application files
-        shell: bash
-        run: |
-          required_files=(
-            index.html
-            app.js
-            styles.css
-            service-worker.js
-            manifest.webmanifest
-            weather-service.js
-            weather-ui.js
-            reliability.js
-          )
-
-          for file in "${required_files[@]}"; do
-            if [[ ! -f "$file" ]]; then
-              echo "Missing required file: $file"
-              exit 1
-            fi
-          done
-
-          echo "All required application files are present."
-
-      - name: Verify weather integration
-        shell: bash
-        run: |
-          grep -q 'id="weatherCard"' index.html
-          grep -q 'src="weather-service.js"' index.html
-          grep -q 'src="weather-ui.js"' index.html
-
-          service_line=$(grep -n 'src="weather-service.js"' index.html | head -1 | cut -d: -f1)
-          ui_line=$(grep -n 'src="weather-ui.js"' index.html | head -1 | cut -d: -f1)
-
-          if [[ -z "$service_line" || -z "$ui_line" || "$service_line" -ge "$ui_line" ]]; then
-            echo "weather-service.js must load before weather-ui.js"
-            exit 1
-          fi
-
-          echo "Weather card and script order are correct."
-
-      - name: Verify critical startup protection
-        shell: bash
-        run: |
-          test $(wc -c < app.js) -gt 50000
-          grep -q 'function view(v)' app.js
-          grep -q 'function showDay(' app.js
-          grep -q 'markAppReady' app.js
-          grep -q 'src="reliability.js"' index.html
-          grep -q 'M3-04.4A' index.html
-          grep -q 'adventure-companion-m3-04-4a' service-worker.js
-          echo "Critical startup protection is present."
+## Known behavior
+`Shared` packing items contribute to the overall item counter but do not prevent individual or family Adventure Ready status, because they are not assigned to a person. This is intentional for the current participant model.

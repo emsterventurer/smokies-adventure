@@ -1,9 +1,9 @@
-// Build M3-04.4B · Friendly startup watchdog and diagnostics
+// Build M3-04.4C · Friendly startup watchdog and diagnostics
 (() => {
   "use strict";
 
-  const BUILD = "M3-04.4B";
-  const CACHE = "adventure-companion-m3-04-4b";
+  const BUILD = "M3-04.4C";
+  const CACHE = "adventure-companion-m3-04-4c";
   const STARTUP_TIMEOUT_MS = 3500;
   let appReady = false;
   let readyDetails = {};

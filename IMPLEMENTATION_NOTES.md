@@ -1,15 +1,16 @@
-# Implementation Notes — Build M3-04.4B
+# Implementation Notes
 
-## Experience polish
-Screen content now enters with a restrained transition. Buttons provide pressed-state feedback, and dynamically rendered screens move keyboard focus to their heading. The app includes stronger visible focus indicators and respects `prefers-reduced-motion`.
+## Adventurer foundation
+The packing module now exposes five active participants: Emily, Jake, Kaseryn, Bubbe and Papa. `Shared` remains a packing category but is not counted as an adventurer for individual or family completion.
 
-## Diagnostics
-Smart Stops can briefly report **Initializing…** during startup rather than showing a false failure. The grace period is 2.2 seconds. Diagnostics language now uses “ready” and “finishing setup” rather than alarming failure language for temporary startup states.
+## Individual celebrations
+Each traveler is evaluated only against their own assigned items. On the transition from incomplete to complete, that person receives confetti and a personalized Adventure Ready dialog. Completion celebrations are recorded in local storage to prevent duplicates.
 
-## Packing celebration
-The celebration triggers only when the complete family packing list moves from incomplete to complete. It includes confetti unless reduced motion is enabled, a personalized Adventure Ready dialog, and a dashboard continuation button. Completion also unlocks the first Remy's Campfire card in Remy's Corner.
+## Family celebration
+The larger family celebration triggers only after all five active adventurers are complete. It unlocks the first Campfire story and directs the user to Remy’s Corner.
 
-The existing packing storage key was preserved to protect saved progress.
+## Dashboard experience
+The Home dashboard now adds two visible cards: Remy’s Corner and Family Adventure Readiness. Readiness updates through a custom packing-progress browser event.
 
-## Adventure phase
-The active phase receives a gentle pulse animation, while reduced-motion users receive an effectively static state.
+## Future extensibility
+Participant logic is centralized through `PARTICIPANTS`, `readiness()`, `travelerProgress()` and `familyReady()`, reducing fixed-name logic in future adventure selection work.
