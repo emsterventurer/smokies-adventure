@@ -1,28 +1,11 @@
-# Commit #013.2 Regression Test
+# Changed Files — Build Commit M3-04.3 Final Production Release
 
-## Reservation cards
-
-- [ ] No Copy Details button appears.
-- [ ] Website buttons still appear where expected.
-- [ ] Private-detail placeholders remain understandable.
-- [ ] Reservation cards remain aligned on desktop and phone.
-
-## Welcome screen
-
-- [ ] On a new browser session or cleared local storage, Start Adventure closes the intro.
-- [ ] Don’t show this again closes the intro and suppresses it next time.
-
-## Anakeesta
-
-- [ ] Optional Anakeesta card appears on August 13.
-- [ ] It is visually marked as optional.
-- [ ] Navigation buttons open the correct destination.
-
-## General
-
-- [ ] Build badge says Commit #013.2.
-- [ ] All days open.
-- [ ] Progress saves.
-- [ ] Trip Readiness saves.
-- [ ] Feedback Mode works.
-- [ ] Desktop stop cards remain column-first.
+- `packing.js` — preserves the 60-item legacy ID map and appends seven approved packing items.
+- `packing.test.js` — verifies the legacy ID map, saved-progress compatibility, and all seven additions.
+- `app.js` — uses the final M3-04.3 build identity and removes the stale Build 004.2 validation comment.
+- `index.html` — displays M3-04.3, Packing & Adventure Polish, and July 21, 2026 consistently in metadata and the build panel.
+- `service-worker.js` — advances the cache and build identity to M3-04.3.
+- `.github/workflows/quality-checks.yml` — runs all repository checks and verifies version, feature text, build date, packing additions, and removal of the stale 004.2 marker.
+- `README_FIRST.md` — provides final GitHub upload instructions.
+- `FINAL_RELEASE_NOTES.md` — documents the release scope and validation.
+- `CHANGED_FILES.md` — this file.

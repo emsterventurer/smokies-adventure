@@ -1,43 +1,72 @@
-# Commit #013.1 Regression Test
+# Adventure Companion
+## Baseline Acceptance
 
-Test only the corrected areas first.
+**Project:** Adventure Companion – Smoky Mountains 2026
 
-## Welcome screen
+**Baseline Version:** M3-02.5
 
-- [ ] Open in a private/incognito browser or clear the intro preference.
-- [ ] Welcome screen appears.
-- [ ] Tap **Start Adventure**.
-- [ ] Welcome screen closes immediately.
-- [ ] App remains usable.
-- [ ] Reopen the app and confirm the intro appears again.
-- [ ] Tap **Don’t show this again**.
-- [ ] Welcome screen closes.
-- [ ] Reopen the app and confirm it no longer appears.
+**Release Name:** Adventure Companion – Smoky Mountains Family Edition
 
-## Anakeesta
+**Git Tag:** m3-02.5-baseline
 
-- [ ] Open August 13.
-- [ ] Anakeesta appears as an optional stop.
-- [ ] It is visually different from required stops.
-- [ ] It appears before the evening dinner route.
-- [ ] Waze and Google Maps open the correct destination.
-- [ ] Chronological numbering remains correct.
+**Acceptance Date:** July 18, 2026
 
-## Reservation details
+**Accepted By:** Emily de Leon
 
-- [ ] Private placeholders are understandable.
-- [ ] No real confirmation numbers are exposed publicly.
-- [ ] Tap **Copy Details**.
-- [ ] Button changes to **Copied ✓**.
-- [ ] Toast says reservation details were copied.
-- [ ] Paste into Notes to confirm the copied text is correct.
-- [ ] Repeat on phone and desktop.
+---
 
-## General regression
+## Purpose
 
-- [ ] Build badge says Commit #013.1.
-- [ ] All trip days still open.
-- [ ] Smart Stop Cards remain column-first on desktop.
-- [ ] Progress still saves.
-- [ ] Trip Readiness still saves.
-- [ ] Feedback Mode still opens and saves notes.
+This release is the approved stable baseline for the Smoky Mountains 2026 trip.
+
+No additional features should be added to this baseline after acceptance.
+
+Only critical bug fixes may be applied.
+
+Future development will occur in M3-03 and later milestones.
+
+---
+
+## Acceptance Checklist
+
+- [x] GitHub Pages deployed successfully
+- [x] Desktop testing completed
+- [x] Mobile testing completed
+- [x] PWA installs successfully
+- [x] Navigation verified
+- [x] Daily Dashboard verified
+- [x] Smart Stop Cards verified
+- [x] Start Cards verified
+- [x] Reservation Manager verified
+- [x] Drive times verified
+- [x] Travel Party verified
+- [x] No remaining budget references
+- [x] Service worker updated
+- [x] Version number updated to M3-02.5
+
+---
+
+## Known Issues
+
+None identified at the time of acceptance.
+
+---
+
+## Future Development
+
+### M3-03
+
+- Live weather
+- Packing lists
+- What to Bring Today
+- Sunrise and sunset
+- Weather alerts
+- Trip readiness
+
+---
+
+## Vision
+
+Adventure Companion began as a planning tool for the Smoky Mountains 2026 family vacation.
+
+Its long-term vision is to become a reusable travel companion for future adventures, combining itinerary planning, reservations, navigation, weather, packing, journaling, and shared family memories in one offline-capable application.
