@@ -1,7 +1,19 @@
-# README FIRST — M3-04.2 Change Package
+# README FIRST — Build Commit M3-04.3 Final Production Release
 
-Upload every file and folder in this package to the root of a new branch created from the latest `main`. Preserve `.github/workflows/quality-checks.yml` inside its folders. Existing files should be replaced where names match.
+This package is based on the fresh merged `main` branch supplied for Build M3-04.3.
 
-Suggested branch: `m3-04.2-trip-specific-packing-weather-fix`
+## Upload method
+1. Create or open the Build M3-04.3 branch in GitHub.
+2. Upload the contents of the `smokies-adventure-main` folder, preserving folders such as `.github/workflows`.
+3. Commit the files with a message such as: `Build M3-04.3 final production release`.
+4. Open or refresh the pull request into `main`.
+5. Confirm all GitHub Actions checks pass before merging.
 
-Suggested commit: `feat(packing): add trip-specific lists and restore daily weather`
+## Approved changes
+- Add daily medications for Jake and Kaseryn.
+- Add a rain jacket or lightweight waterproof shell for all five travelers.
+- Preserve the exact legacy packing-item ID map and storage key.
+- Set the application identity consistently to M3-04.3, Packing & Adventure Polish, July 21, 2026.
+- Add workflow checks for the visible feature text and build date.
+
+See `CHANGED_FILES.md` and `FINAL_RELEASE_NOTES.md` for details.
