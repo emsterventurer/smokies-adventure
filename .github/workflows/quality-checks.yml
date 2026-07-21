@@ -50,6 +50,7 @@ jobs:
           node dashboard-redesign.test.js
           node packing.test.js
           node reliability.test.js
+          node experience-polish.test.js
 
       - name: Verify required application files
         shell: bash
