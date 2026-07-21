@@ -1,19 +1,7 @@
-# Adventure Companion — Build Commit #004.1
+# README FIRST — M3-04.2 Change Package
 
-## Dashboard Redesign & Adventure Intelligence
+Upload every file and folder in this package to the root of a new branch created from the latest `main`. Preserve `.github/workflows/quality-checks.yml` inside its folders. Existing files should be replaced where names match.
 
-This is a **change package**, not a full-project replacement.
+Suggested branch: `m3-04.2-trip-specific-packing-weather-fix`
 
-Upload the files in this package to a **fresh branch created from the current verified `main` branch**. Preserve the folder path for `.github/workflows/quality-checks.yml`.
-
-Recommended commit message:
-
-`Build Commit #004.1 — Dashboard Redesign & Adventure Intelligence`
-
-Before merging:
-
-1. Confirm the Pull Request shows only the files listed in `CHANGED_FILES.md`.
-2. Open `index.html` in GitHub and confirm it begins with `<!doctype html>`.
-3. Open `app.js` and confirm it contains `adventureSummary`, `adventureWeather`, and `View Adaptive Adventure`.
-4. Wait for all GitHub Actions checks to pass.
-5. Preview several trip days on desktop and phone before merging.
+Suggested commit: `feat(packing): add trip-specific lists and restore daily weather`

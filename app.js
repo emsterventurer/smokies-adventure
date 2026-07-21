@@ -1,7 +1,8 @@
+// Build 004.2 validation trigger
 
 const APP_BUILD={
-  version:"M3-04.1",
-  label:"Dashboard Redesign & Adventure Intelligence",
+  version:"M3-04.2",
+  label:"Smart Stop Evolution",
   date:"July 20, 2026"
 };
 
@@ -229,13 +230,68 @@ function dateLabel(date){return new Date(date+"T12:00:00").toLocaleDateString(un
 function mapsSearch(query){return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`}
 function wazeSearch(query){return `https://www.waze.com/ul?q=${encodeURIComponent(query)}&navigate=yes`}
 function googleRoute(origin,destination){return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=driving`}
+const SMART_STOP_GUIDES={
+  "Club Wyndham Smoky Mountains":{simple:true,chips:["Resort reset"],parking:"Use the resort lot nearest your assigned building and note the building number before leaving.",practical:"Refill water, charge phones, and reset for the next adventure.",photo:"Family balcony or resort-sign photo",tip:"Set out tomorrow’s shoes, layers, and water bottles before winding down."},
+  "Local Goat":{chips:["On-site lot","Celebration dinner"],parking:"Use the on-site restaurant lot and allow a few minutes for check-in.",food:"The approved itinerary highlights fried green tomatoes, bison burger, bistro steak, seasonal fish, and peanut butter pie.",photo:"Family table photo before dinner",tip:"Keep the first evening relaxed—this meal is the official start of the adventure."},
+  "The Island in Pigeon Forge":{chips:["Free lot + tram","Fountain photo"],parking:"Use the large Island parking area and the tram when helpful; follow posted signs on arrival.",food:"Dessert is optional if everyone still has energy.",photo:"Fountain show or illuminated wheel",tip:"Treat this as an optional stroll rather than a required stop."},
+  "Five Oaks Farm Kitchen":{chips:["Restaurant lot","Hearty breakfast"],parking:"Use the restaurant lot and allow enough time to keep the park day calm.",food:"Choose a hearty breakfast without overdoing it before the waterfall walk.",photo:"Rustic porch or farm-style entrance",tip:"Use breakfast to confirm layers, water, and the day’s pace."},
+  "Sugarlands Visitor Center":{chips:["Visitor-center lot","Restrooms"],parking:"Use the visitor-center lot and follow posted parking directions.",practical:"Restrooms, park information, and a final water check before the trail.",photo:"National park sign or visitor-center backdrop",tip:"Check posted trail information or ask a ranger about current conditions before walking."},
+  "Cataract Falls Trailhead":{chips:["Walk from Sugarlands","Supportive shoes"],parking:"Remain parked at Sugarlands and walk from the visitor-center area.",practical:"Wear supportive shoes; surfaces may be damp near the falls.",photo:"Waterfall view without blocking the trail",tip:"Keep this easy walk easy—turn back before it becomes tiring."},
+  "Wild Plum Tea Room":{chips:["Follow posted parking","Timed lunch"],parking:"Use the available on-site area and follow posted parking guidance.",food:"Choose the house specialty that feels most distinctive and leave room for a tea-room treat.",photo:"Garden or cottage exterior",tip:"Leave the waterfall with a generous margin because this is a timed meal."},
+  "Great Smoky Arts and Crafts Community":{chips:["Park by studio","Pick a short list"],parking:"Park at each chosen studio rather than trying to walk the full loop.",food:"Keep a drink and small snack in the car between studios.",photo:"Favorite artisan studio or handmade find",tip:"Choose a short must-see list; the goal is connection, not completion."},
+  "The Park Grill":{chips:["Downtown parking","Dinner target"],parking:"Use a nearby public parking option and allow walking time; follow live signs and posted rates.",food:"The approved itinerary highlights mountain trout, ribeye, salmon, salad bar, and blackberry cobbler.",photo:"Rustic entrance or family dinner photo",tip:"Keep the backup dinner plan ready until the reservation is confirmed."},
+  "The Donut Friar":{chips:["Keep same parking","Dessert stop"],parking:"Stay in the same downtown parking area used for dinner when practical.",food:"Choose one favorite each or split a small assortment.",photo:"The Village courtyard at night",tip:"This is a memory stop—skip it without guilt if the day has run long."},
+  "Applewood Farmhouse Restaurant":{chips:["Shared complex lot","Apple fritters"],parking:"Use the Apple Barn complex lot and leave the car parked for nearby stops.",food:"Apple fritters, apple butter, and cider are the signature start in the approved itinerary.",photo:"Farmhouse porch or orchard-style entrance",tip:"Ask for to-go packaging early if you plan to browse afterward."},
+  "Apple Barn Village":{chips:["Shared complex lot","Covered bridge"],parking:"Keep the car in the shared Apple Barn complex lot and follow posted signs.",food:"Sample cider and choose only treats that will travel well.",photo:"Covered bridge or mill-style buildings",tip:"Combine purchases in one bag so nothing is left at a shop."},
+  "Apple Barn Winery":{chips:["Walk from village","Wine of the Trip"],parking:"Walk from the shared Apple Barn complex parking area.",food:"Taste slowly and choose one family “Wine of the Trip.”",photo:"Winery sign or tasting flight",tip:"Use a designated driver and keep the tasting unrushed."},
+  "Apple Barn Bakery":{chips:["Shared complex lot","Travel-ready treat"],parking:"Remain in the Apple Barn complex lot.",food:"Pick a pastry or pie that can return to the resort if everyone is full.",photo:"Bakery case or shared dessert",tip:"One excellent treat is better than several that go uneaten."},
+  "Seasons 101":{chips:["Allow parking time","Seasonal menu"],parking:"Allow extra time for downtown Sevierville parking and follow posted signs and rates.",food:"Ask about the seasonal feature and choose the dish that feels unique to the evening.",photo:"Courthouse-square or dinner-table photo",tip:"Leave the resort with enough margin to arrive calm, not merely on time."},
+  "Dollywood":{chips:["Follow live parking signs","Full-day pacing"],parking:"Follow live signs to the available lot. Preferred parking remains a family decision, not a requirement.",food:"Choose one planned meal and one signature treat rather than grazing all day.",photo:"Entrance photo in the morning, before everyone gets tired",practical:"Refill water, use lockers strategically, and build in a mid-afternoon reset.",tip:"Start with the highest-priority attractions, then let the rest of the day breathe."},
+  "Forbidden Caverns":{chips:["On-site directions","Light layer"],parking:"Follow the attraction’s posted arrival and parking directions.",practical:"Wear closed-toe shoes and bring a light layer; cave surfaces may be damp.",photo:"Entrance sign before the tour; follow all posted photography rules.",tip:"Use the restroom before the guided tour begins."},
+  "Delauder's BBQ":{chips:["Verify before driving","Share sides"],parking:"Follow posted parking guidance and verify the stop before driving over.",food:"Order the barbecue specialty the counter recommends and share sides.",photo:"Rustic exterior or barbecue tray",tip:"Local schedules can change, so confirm this stop before leaving the caverns."},
+  "Blue Moose Burgers & Wings":{chips:["Restaurant parking","Pre-coaster meal"],parking:"Use the available restaurant parking and follow posted signs.",food:"Split wings or an appetizer if a full meal would feel heavy before riding.",photo:"Casual family dinner photo",tip:"Protect the nighttime coaster timing; do not let dinner become rushed."},
+  "Rocky Top Mountain Coaster":{chips:["Follow evening signs","Night ride"],parking:"Follow the attraction’s posted parking and evening traffic directions.",practical:"Secure loose items and follow all ride instructions.",photo:"Illuminated coaster entrance after dark",tip:"The nighttime lighting is the experience—wait until it is truly dark."},
+  "Lil Black Bear Café":{chips:["Breakfast stop","Zipline buffer"],parking:"Use the available café parking and keep breakfast timing firm.",food:"Choose a satisfying but efficient breakfast before the zipline.",photo:"Bear-themed entrance or breakfast table",tip:"Leave with a generous buffer for the 10:30 AM reservation."},
+  "Legacy Mountain Ziplines":{chips:["Use confirmation details","Closed-toe shoes"],parking:"Follow the confirmation’s arrival and parking instructions; mountain access can take longer than expected.",practical:"Closed-toe shoes, secure pockets, and required waivers completed in advance.",photo:"Harnessed group photo before the course",tip:"Use the check-in time in the confirmation—not the first zip time—as the true deadline."},
+  "Parrot Mountain and Gardens":{chips:["On-site directions","Sloped paths"],parking:"Follow on-site parking signs and expect some walking on sloped paths.",practical:"Move slowly around birds and follow staff guidance for interactions.",photo:"Bird interaction or garden overlook",tip:"Protect time for the aviary experience rather than rushing every garden path."},
+  "The Old Mill":{chips:["Park once","Historic mill photo"],parking:"Park once in the Old Mill district and walk between shops, river, dinner, and dessert when practical.",food:"Browse for local pantry items before dinner so purchases are not rushed.",photo:"Historic mill beside the river",tip:"Use the district as a slow, connected evening rather than a checklist."},
+  "The Old Mill Restaurant":{chips:["Same district parking","Possible wait"],parking:"Remain in the Old Mill district parking area when practical.",food:"Choose a classic Southern meal and share sides if portions are large.",photo:"Family dinner or mill view while waiting",tip:"Put your name in, then browse nearby instead of standing at the entrance."},
+  "Old Mill Creamery":{chips:["Walk from dinner","River dessert"],parking:"Walk from the Old Mill district parking area.",food:"Take dessert toward the river if the weather is comfortable.",photo:"Ice cream by the river",tip:"Let this become the evening’s slow-down moment."},
+  "Pancake Pantry":{chips:["Downtown parking","Signature pancakes"],parking:"Park downtown once for breakfast and the aquarium when feasible; follow posted signs and rates.",food:"Choose a signature pancake flavor and avoid over-ordering before a walking day.",photo:"Historic entrance or breakfast stack",tip:"An efficient breakfast protects the aquarium’s morning hours."},
+  "Ripley's Aquarium of the Smokies":{chips:["Downtown parking","2–3 hours"],parking:"Use a downtown parking option that also works for nearby exploration and follow posted signs and rates.",practical:"Have ticket links ready before reaching the entrance and choose a family meet-up point.",photo:"Penguin area, underwater tunnel, or exterior plaza",tip:"Visit the family’s highest-priority exhibits first, before attention fades."},
+  "Anakeesta":{chips:["Optional","Weather + energy check"],parking:"Use a downtown parking option and follow the attraction’s current boarding guidance.",practical:"Choose this only when weather, energy, timing, and height comfort all align.",photo:"Mountain overlook if visibility is good",tip:"Optional means optional—protect the farewell dinner over squeezing this in."},
+  "Downtown Gatlinburg":{chips:["Keep same parking","Firm departure time"],parking:"Keep the same downtown parking space whenever possible and follow posted signs and rates.",food:"Choose one small local treat rather than another full food stop.",photo:"Village lanes or a low-key mountain-town backdrop",tip:"Set a firm departure time for The Greenbrier."},
+  "The Greenbrier Restaurant":{chips:["Restaurant parking","Farewell meal"],parking:"Drive from downtown, follow the restaurant’s parking signs, and arrive unhurried.",food:"Treat this as the farewell meal and choose what feels celebratory.",photo:"Family photo before dinner or by the entrance",tip:"Pause for a favorite-memory toast before the meal ends."},
+  "Home":{simple:true,chips:["Live navigation"],parking:"Complete the final vehicle check before departure.",practical:"Use live navigation for traffic-aware routing and choose rest breaks as needed.",photo:"Final family photo before the drive",tip:"The drive home is part of the adventure—share favorite memories along the way."}
+};
+
+function reservationStatusFor(date,name){
+  const record=(RESERVATION_DATA[date]||[]).find(item=>item.name===name);
+  if(!record)return "";
+  return [record.status,record.time].filter(Boolean).join(" · ");
+}
+
+function smartStopGuide(stop,date){
+  const guide=SMART_STOP_GUIDES[stop.name];
+  if(!guide)return null;
+  return {...guide,reservation:reservationStatusFor(date,stop.name)};
+}
+
+function smartStopChips(stop,guide){
+  const chips=[`⏱ ${stop.duration}`];
+  if(guide?.reservation)chips.push(`🎟 ${guide.reservation}`);
+  for(const chip of guide?.chips||[]){
+    if(chips.length>=4)break;
+    chips.push(chip);
+  }
+  return chips.slice(0,4);
+}
+
 function smartStopsMarkup(d){
   const originalStops=STOP_DATA[d.date]||[];
   const startStop=START_DATA[d.date];
   if(!originalStops.length||!startStop)return "";
 
-  // Day 8 already began with a checkout card in the source itinerary. The new
-  // Start card carries that checkout guidance so the resort is not duplicated.
   const dayStops=d.date==="2026-08-14"?originalStops.slice(1):originalStops;
   const stops=[{...startStop,isStart:true},...dayStops];
   const driveTimes=[startStop.drive,...(NEXT_DRIVE_TIMES[d.date]||[])];
@@ -251,38 +307,49 @@ function smartStopsMarkup(d){
     const isReturn=stop.name==="Club Wyndham Smoky Mountains" && absoluteIndex===stops.length-1;
     const isOptional=stop.type==="Optional adventure";
     const orderLabel=stop.isStart?"Start":absoluteIndex;
-    return `<article class="stopCard ${stop.isStart?"startStop":""} ${isReturn?"returnStop":""} ${isOptional?"optionalStop":""}">
+    const guide=smartStopGuide(stop,d.date);
+    const chips=smartStopChips(stop,guide);
+    const detailRows=guide?[
+      guide.parking&&`<div><b>🅿 Parking & arrival</b><p>${escapeHtml(guide.parking)}</p></div>`,
+      guide.food&&`<div><b>🍽 Foodie pick</b><p>${escapeHtml(guide.food)}</p></div>`,
+      guide.photo&&`<div><b>📸 Best photo</b><p>${escapeHtml(guide.photo)}</p></div>`,
+      guide.practical&&`<div><b>🎒 Practical note</b><p>${escapeHtml(guide.practical)}</p></div>`,
+      guide.reservation&&`<div><b>🎟 Reservation / ticket</b><p>${escapeHtml(guide.reservation)}</p></div>`,
+      guide.tip&&`<div class="remyTip"><b>💚 Remy’s Tip</b><p>${escapeHtml(guide.tip)}</p></div>`
+    ].filter(Boolean).join(""):"";
+    const showGuide=Boolean(guide&&!guide.simple&&detailRows);
+    return `<article class="stopCard evolvedStop ${stop.isStart?"startStop":""} ${isReturn?"returnStop":""} ${isOptional?"optionalStop":""}" data-stop-name="${escapeHtml(stop.name)}">
       <div class="stopOrder"><span>${orderLabel}</span><i></i></div>
       <div class="stopBody">
         <div class="stopTitle">
           <span class="stopIcon">${stop.icon}</span>
-          <div><small>${stop.time} · ${stop.type}</small><h4>${stop.name}</h4>${stop.isStart&&d.date==="2026-08-07"?`<p class="startAddress">${HOME_ADDRESS}</p>`:""}</div>
+          <div><small>${escapeHtml(stop.time)} · ${escapeHtml(stop.type)}</small><h4>${escapeHtml(stop.name)}</h4>${stop.isStart&&d.date==="2026-08-07"?`<p class="startAddress">${escapeHtml(HOME_ADDRESS)}</p>`:""}</div>
         </div>
-        <div class="stopFacts"><span>⏱ ${stop.duration}</span><span>🌿 ${stop.tip}</span></div>
+        <div class="quickChips" aria-label="At-a-glance stop details">${chips.map(chip=>`<span>${escapeHtml(chip)}</span>`).join("")}</div>
+        ${showGuide?`<details class="destinationGuide"><summary>Explore this stop</summary><div class="destinationGuideBody">${detailRows}</div></details>`:""}
         <div class="navActions">
           <a href="${wazeSearch(stop.query)}" target="_blank" rel="noopener">🚙 Waze</a>
           <a href="${mapsSearch(stop.query)}" target="_blank" rel="noopener">📍 Google Maps</a>
-          ${next?`<a class="nextRoute" href="${route}" target="_blank" rel="noopener">Next: ${next.name}<span class="nextDriveTime">🚗 ${nextDrive}</span> →</a>`:`<span class="routeComplete">You’re done for today ✓</span>`}
+          ${next?`<a class="nextRoute" href="${route}" target="_blank" rel="noopener">Next: ${escapeHtml(next.name)}<span class="nextDriveTime">🚗 ${escapeHtml(nextDrive)}</span> →</a>`:`<span class="routeComplete">You’re done for today ✓</span>`}
         </div>
       </div>
     </article>`;
   }
 
-  return `<section class="smartStops">
+  return `<section class="smartStops smartStopEvolution">
     <div class="smartStopsHead">
-      <div><span class="eyebrow">SMART STOP CARDS</span><h3>Navigate the day</h3></div>
+      <div><span class="eyebrow">YOUR ADVENTURE ITINERARY</span><h3>Smart Stops</h3></div>
       <span>${stops.length-1} stops + start</span>
     </div>
-    <p class="stopIntro">Begin with the Start card, then read down the first column and continue at the top of the second. Drive times are planning estimates; use live navigation on the trip.</p>
+    <p class="stopIntro">Read the cards chronologically. Quick Chips show the essentials; open “Explore this stop” on major destinations for parking, food, photo, and practical guidance.</p>
     <div class="stopColumns">
       ${columns.map((column,columnIndex)=>{
         const offset=columnIndex===0?0:splitAt;
         return `<div class="stopColumn">${column.map((stop,index)=>stopCardMarkup(stop,offset+index)).join("")}</div>`;
       }).join("")}
     </div>
-  </section>`
+  </section>`;
 }
-
 
 
 const RESERVATION_OVERRIDES_KEY="adventureCompanionReservationOverridesV1";

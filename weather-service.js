@@ -13,7 +13,8 @@
     freshMs:60*60*1000,
     staleMs:6*60*60*1000,
     maxMs:24*60*60*1000,
-    cacheKey:'adventureCompanionWeatherM3031'
+    cacheKey:'adventureCompanionWeatherM3031',
+    tripCacheKey:'adventureCompanionTripWeatherM3042'
   };
 
   const WEATHER_CODES={
@@ -115,5 +116,48 @@
     }
   }
 
-  return {CONFIG,WEATHER_CODES,describeCode,buildUrl,normalize,readCache,writeCache,cacheState,fetchWeather,loadWeather};
+
+  function buildTripUrl(config){
+    const c=Object.assign({},CONFIG,config||{});
+    const params=new URLSearchParams({
+      latitude:String(c.latitude),longitude:String(c.longitude),timezone:c.timezone,
+      temperature_unit:'fahrenheit',precipitation_unit:'inch',wind_speed_unit:'mph',
+      daily:'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+      forecast_days:'16'
+    });
+    return `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+  }
+
+  function normalizeTripForecast(payload,config,now){
+    const c=Object.assign({},CONFIG,config||{}),daily=payload&&payload.daily;
+    if(!daily||!Array.isArray(daily.time))throw new Error('Weather provider returned incomplete trip data.');
+    const days={};
+    daily.time.forEach((date,index)=>{
+      const condition=describeCode(daily.weather_code?.[index]);
+      days[date]={date,high:round(daily.temperature_2m_max?.[index]),low:round(daily.temperature_2m_min?.[index]),rainChance:round(daily.precipitation_probability_max?.[index]),weatherCode:Number(daily.weather_code?.[index]),condition:condition.label,icon:condition.icon};
+    });
+    return {schema:1,provider:'Open-Meteo',location:c.locationLabel,timezone:payload.timezone||c.timezone,fetchedAt:new Date(now||Date.now()).toISOString(),days};
+  }
+
+  function readTripCache(storage){
+    try{const raw=getStorage(storage)?.getItem(CONFIG.tripCacheKey);if(!raw)return null;const parsed=JSON.parse(raw);return parsed&&parsed.data&&parsed.savedAt?parsed:null;}catch(e){return null;}
+  }
+  function writeTripCache(data,storage,now){
+    try{getStorage(storage)?.setItem(CONFIG.tripCacheKey,JSON.stringify({savedAt:now||Date.now(),data}));return true;}catch(e){return false;}
+  }
+  async function fetchTripForecast(options){
+    const opts=options||{},fetcher=opts.fetcher||root.fetch;
+    if(typeof fetcher!=='function')throw new Error('Weather service requires network access.');
+    const response=await fetcher(buildTripUrl(opts.config),{headers:{Accept:'application/json'}});
+    if(!response||!response.ok)throw new Error(`Trip weather request failed${response?` (${response.status})`:''}.`);
+    return normalizeTripForecast(await response.json(),opts.config,opts.now);
+  }
+  async function loadTripForecast(options){
+    const opts=options||{},now=opts.now||Date.now(),cache=readTripCache(opts.storage),state=cacheState(cache,now);
+    if(!opts.force&&state==='fresh')return {data:cache.data,status:'fresh',fromCache:true};
+    try{const data=await fetchTripForecast(opts);writeTripCache(data,opts.storage,now);return {data,status:'live',fromCache:false};}
+    catch(error){if(cache&&state!=='expired')return {data:cache.data,status:state,fromCache:true,error};if(cache&&opts.allowExpired)return {data:cache.data,status:'expired',fromCache:true,error};throw error;}
+  }
+
+  return {CONFIG,WEATHER_CODES,describeCode,buildUrl,normalize,readCache,writeCache,cacheState,fetchWeather,loadWeather,buildTripUrl,normalizeTripForecast,readTripCache,writeTripCache,fetchTripForecast,loadTripForecast};
 });
