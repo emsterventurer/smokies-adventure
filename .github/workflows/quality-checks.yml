@@ -100,6 +100,6 @@ jobs:
           grep -q 'function showDay(' app.js
           grep -q 'markAppReady' app.js
           grep -q 'src="reliability.js"' index.html
-          grep -q 'M3-04.4A' index.html
-          grep -q 'adventure-companion-m3-04-4a' service-worker.js
+          grep -q 'M3-04.4B' index.html
+          grep -q 'adventure-companion-m3-04-4b' service-worker.js
           echo "Critical startup protection is present."
