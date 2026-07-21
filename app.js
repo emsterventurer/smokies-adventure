@@ -1,8 +1,8 @@
-// Build M3-04.3 · Packing & Adventure Polish
+// Build M3-04.4A · Reliability & Diagnostics
 
 const APP_BUILD={
-  version:"M3-04.3",
-  label:"Packing & Adventure Polish",
+  version:"M3-04.4A",
+  label:"Reliability & Diagnostics",
   date:"July 21, 2026"
 };
 
@@ -903,4 +903,11 @@ window.addEventListener("load",wireAdventureIntroFix);
 const introFixObserver=new MutationObserver(wireAdventureIntroFix);
 window.addEventListener("load",()=>{
   introFixObserver.observe(document.body,{childList:true,subtree:true});
+});
+
+// Reliability handshake: this line is intentionally last so startup failures remain detectable.
+window.AdventureReliability?.markAppReady({
+  build:APP_BUILD.version,
+  navigation:typeof view==="function",
+  dailyAdventure:typeof showDay==="function"
 });
