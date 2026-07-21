@@ -1,13 +1,15 @@
-// Build M3-04.4A · Independent startup watchdog and diagnostics
+// Build M3-04.4B · Friendly startup watchdog and diagnostics
 (() => {
   "use strict";
 
-  const BUILD = "M3-04.4A";
-  const CACHE = "adventure-companion-m3-04-4a";
+  const BUILD = "M3-04.4B";
+  const CACHE = "adventure-companion-m3-04-4b";
   const STARTUP_TIMEOUT_MS = 3500;
   let appReady = false;
   let readyDetails = {};
   let startupTimer;
+  const diagnosticsStartedAt = Date.now();
+  const SMART_STOPS_GRACE_MS = 2200;
 
   const $ = selector => document.querySelector(selector);
   const has = selector => Boolean($(selector));
@@ -23,7 +25,7 @@
       { key:"reservations", label:"Reservations", pass:has('[data-view="reservations"]'), detail:"Reservation route available" },
       { key:"packing", label:"Packing", pass:Boolean(window.PACKING || window.packingData || has('[data-view="packing"]')), detail:"Packing route/data available" },
       { key:"traditions", label:"Traditions", pass:has('[data-view="traditions"]'), detail:"Traditions route available" },
-      { key:"smartStops", label:"Smart Stops", pass:document.documentElement.innerHTML.includes("Smart Stops") || document.documentElement.innerHTML.includes("smartStops"), detail:"Smart Stop templates available" },
+      { key:"smartStops", label:"Smart Stops", pass:document.documentElement.innerHTML.includes("Smart Stops") || document.documentElement.innerHTML.includes("smartStops"), pending:Date.now()-diagnosticsStartedAt<SMART_STOPS_GRACE_MS && !(document.documentElement.innerHTML.includes("Smart Stops") || document.documentElement.innerHTML.includes("smartStops")), detail:"Route guidance and stop cards are preparing" },
       { key:"weather", label:"Weather", pass:Boolean(window.AdventureWeather || window.WeatherService || has("#weatherCard")), detail:"Weather card/service available" },
       { key:"appScript", label:"app.js loaded", pass:Boolean(appScript), detail:appScript ? "Script tag present" : "Script tag missing" },
       { key:"cache", label:"Cache version", pass:true, detail:CACHE },
@@ -34,21 +36,23 @@
   function renderDiagnostics(target = $("#diagnosticsResults")) {
     const checks = diagnosticChecks();
     const passed = checks.filter(check => check.pass).length;
+    const pending = checks.filter(check => check.pending).length;
+    const complete = passed + pending;
     if (target) {
       target.hidden = false;
       target.innerHTML = `
         <div class="diagnosticsSummary ${passed === checks.length ? "healthy" : "attention"}">
-          <strong>${passed === checks.length ? "✅" : "⚠️"} ${passed}/${checks.length} systems operational</strong>
+          <strong>${passed === checks.length ? "✅" : pending ? "⏳" : "⚠️"} ${pending ? `${complete}/${checks.length} ready or initializing` : `${passed}/${checks.length} systems ready`}</strong>
           <small>Build ${BUILD} · Cache ${CACHE}</small>
         </div>
         <div class="diagnosticsList">
-          ${checks.map(check => `<div><span>${check.pass ? "✅" : "❌"} ${check.label}</span><small>${check.detail}</small></div>`).join("")}
+          ${checks.map(check => `<div class="${check.pending ? "pending" : ""}"><span>${check.pass ? "✅" : check.pending ? "⏳" : "⚠️"} ${check.label}</span><small>${check.pending ? "Initializing… " : ""}${check.detail}</small></div>`).join("")}
         </div>
         <button class="diagnosticsRetry" type="button">Run diagnostics again</button>`;
       target.querySelector(".diagnosticsRetry")?.addEventListener("click", () => renderDiagnostics(target));
     }
     const health = $("#buildHealthStatus");
-    if (health) health.textContent = passed === checks.length ? "Healthy ✅" : `${passed}/${checks.length} checks`;
+    if (health) health.textContent = passed === checks.length ? "Ready ✅" : pending ? "Finishing setup…" : `${passed}/${checks.length} checks ready`;
     return { checks, passed, total:checks.length, healthy:passed === checks.length };
   }
 

@@ -1,7 +1,7 @@
-// Build M3-04.4A · Reliability & Diagnostics
+// Build M3-04.4B · Experience & Celebration
 
 const APP_BUILD={
-  version:"M3-04.4A",
+  version:"M3-04.4B",
   label:"Reliability & Diagnostics",
   date:"July 21, 2026"
 };
@@ -730,7 +730,7 @@ function bindCompletion(){
     showDay(date);
   });
 }
-function view(v){$$("nav button,.desktopSideNav [data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v));if(v==="home"){$("#screen").hidden=true;scrollTo({top:0,behavior:"smooth"});return}const s=$("#screen");s.hidden=false;
+function view(v){$$("nav button,.desktopSideNav [data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v));const s=$("#screen");if(v==="home"){s.classList.remove("screenEntering");s.hidden=true;scrollTo({top:0,behavior:"smooth"});$("#homeCard")?.focus?.({preventScroll:true});return}s.hidden=false;s.classList.remove("screenEntering");void s.offsetWidth;s.classList.add("screenEntering");
 if(v==="week")s.innerHTML=`<div class=weekHeading><div><span class=eyebrow>MILESTONE 3</span><h3>🗓️ Our Adventure Week</h3></div><span class=weekProgress>${completedDays().length}/8 complete</span></div><p class=info>Each day opens to a dashboard plus smart stop cards with Waze, Google Maps, and stop-to-stop route links.</p><div class=familyDayGrid>${DATA.days.map(d=>{const dt=new Date(d.date+"T12:00:00"),x=DAY_DASH[d.date],done=isComplete(d.date);return `<div class="familyDayCard ${done?"completed":""}"><button data-open="${d.date}"><span class=datePill><small>${dt.toLocaleDateString(undefined,{weekday:"short"})}</small><b>${dt.getDate()}</b></span><span class=summary><strong>${done?"✓ ":""}${d.title}</strong><small>${x.icon} ${x.leave} · ${x.reservation}</small><em>${x.focus}</em></span><span class=chev>›</span></button></div>`}).join("")}</div>`;
 if(v==="reservations")s.innerHTML=`<div class="reservationIndexHead simplified">
   <div><span class="eyebrow">TRIP RESERVATIONS</span><h3>🍽️ Reservations</h3></div>
@@ -745,7 +745,7 @@ if(v==="reservations")s.innerHTML=`<div class="reservationIndexHead simplified">
 if(v==="traditions")s.innerHTML=`<h3>💚 Moments to Protect</h3><ul class=info>${DATA.traditions.map(t=>`<li>${t}</li>`).join("")}</ul>`;
 if(v==="packing"){window.AdventurePacking?.render(s);}
 if(v==="trip")s.innerHTML=`<h3>🎒 Trip Snapshot</h3><p><b>Dates:</b> August 7–14, 2026</p><p><b>Home base:</b> ${DATA.trip.homeBase}</p><p><b>Travel party:</b> ${DATA.trip.party}</p><p><b>Priorities:</b> Stay together, place busy attractions on weekdays, eat well, minimize unnecessary driving, and preserve rest.</p>`;
-if(v==="companion")s.innerHTML=`<h3>🌿 Remy's Corner</h3><div class="brandStamp"><img src="icon-192.png" alt=""><span><strong>Adventure Companion</strong><small>Making New Traditions</small></span></div><div class=remy>The itinerary supports the experience; it does not have to control it.</div><p class=info>During the trip, each daily page keeps timing, stop-by-stop navigation, parking, food, photos, Plan B, and the reason the day matters together in one place. Family members can use the same shared link.</p>`;
+if(v==="companion"){const campfire=localStorage.getItem("adventureCompanionCampfireUnlocked")==="true";s.innerHTML=`<h3>🌿 Remy's Corner</h3><div class="brandStamp"><img src="icon-192.png" alt=""><span><strong>Adventure Companion</strong><small>Making New Traditions</small></span></div>${campfire?`<section class="campfireUnlocked"><span aria-hidden="true">🔥</span><div><small>FIRST CAMPFIRE UNLOCKED</small><h4>You crossed one of the biggest milestones before any adventure.</h4><p>Everything is packed. The trip is no longer just an idea—you are ready to begin making new traditions.</p></div></section>`:""}<div class=remy>The itinerary supports the experience; it does not have to control it.</div><p class=info>During the trip, each daily page keeps timing, stop-by-stop navigation, parking, food, photos, Plan B, and the reason the day matters together in one place. Family members can use the same shared link.</p>`;}
 hydrateDayWeather();$$(`[data-open]`).forEach(b=>b.onclick=()=>showDay(b.dataset.open));$$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));bindManageReservationButtons();s.scrollIntoView({behavior:"smooth",block:"start"})}
 function showDay(date){const d=DATA.days.find(x=>x.date===date);if(!d)return;const s=$("#screen");s.hidden=false;s.innerHTML=`<div class=dayHead><button class=back data-back>← Week</button><span class=dayPosition>Day ${dayNumber(date)} of ${DATA.days.length}</span></div>
 ${dashboardMarkup(d)}
