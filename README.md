@@ -33,3 +33,7 @@ This build adds an isolated live-weather foundation using Open-Meteo, local fres
 - Saves checkbox progress locally on the device.
 - Uses encouraging readiness milestones rather than percentage alone.
 - Adds packing tests to the GitHub Actions quality workflow.
+
+
+## M3-04.2 — Trip-Specific Packing + Daily Weather
+Adds family- and activity-specific packing guidance and restores live weather to each Daily Dashboard.
