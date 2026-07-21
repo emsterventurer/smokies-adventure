@@ -1,35 +1,19 @@
-# Audit Report — Build M3-04.4B
-
-## Result
-**PASS — release candidate approved for user testing.**
-
-## Automated verification
-All JavaScript syntax checks passed:
-- `app.js`
-- `packing.js`
-- `reliability.js`
-
-All repository tests passed:
-- `daily-weather.test.js`
-- `dashboard-redesign.test.js`
-- `experience-polish.test.js`
-- `packing.test.js`
-- `reliability.test.js`
-- `weather-service.test.js`
-
-## Functional audit
-Verified in source and tests:
-- Dashboard and primary navigation preserved.
-- Daily Adventure renderer preserved.
-- Reservations route preserved.
-- Packing renderer and saved-state key preserved.
-- Traditions route preserved.
-- Smart Stops templates preserved with initialization grace handling.
-- Weather service and daily weather tests pass.
-- Diagnostics and recovery tooling preserved.
-- Build identity is consistently M3-04.4B in HTML, app, reliability layer, and service worker.
-- Packing completion includes confetti, Adventure Ready text, personalized dialog, and Campfire unlock.
-- Keyboard focus styles and reduced-motion handling are present.
-
-## Deployment note
-A live GitHub Pages deployment was not performed from this environment. Confirm GitHub Actions and the live Build Info panel after upload.
+const fs=require('fs');
+const assert=require('assert');
+const app=fs.readFileSync('app.js','utf8');
+const packing=fs.readFileSync('packing.js','utf8');
+const styles=fs.readFileSync('styles.css','utf8');
+const reliability=fs.readFileSync('reliability.js','utf8');
+const html=fs.readFileSync('index.html','utf8');
+assert(app.includes('M3-04.4B'),'app build identity missing');
+assert(html.includes('M3-04.4B'),'HTML build identity missing');
+assert(styles.includes('screenEntering'),'screen transition missing');
+assert(styles.includes(':focus-visible'),'accessible focus style missing');
+assert(styles.includes('prefers-reduced-motion'),'reduced motion support missing');
+assert(reliability.includes('SMART_STOPS_GRACE_MS'),'Smart Stops grace period missing');
+assert(reliability.includes('Initializing'),'friendly initializing state missing');
+assert(packing.includes('confettiLayer'),'packing confetti missing');
+assert(packing.includes('Emily, you’re Adventure Ready!'),'personalized celebration missing');
+assert(packing.includes('adventureCompanionCampfireUnlocked'),'Campfire unlock missing');
+assert(app.includes('campfireUnlocked'),'Campfire card missing');
+console.log('experience polish tests passed');
