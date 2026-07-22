@@ -50,6 +50,7 @@ jobs:
       - name: Run complete regression suite
         run: |
           node version-foundation.test.js
+          node configuration-foundation.test.js
           node weather-service.test.js
           node daily-weather.test.js
           node dashboard-redesign.test.js
@@ -67,6 +68,7 @@ jobs:
             app.js
             styles.css
             service-worker.js
+            config.js
             manifest.webmanifest
             weather-service.js
             weather-ui.js
@@ -109,6 +111,6 @@ jobs:
           grep -q 'src="version.js"' index.html
           grep -q 'src="reliability.js"' index.html
           grep -q 'AdventureCompanionBuild' app.js
-          grep -q 'importScripts("./version.js")' service-worker.js
-          grep -q 'adventure-companion-m3-05-0b-build-1' version.js
+          grep -q 'importScripts("./config.js","./version.js")' service-worker.js
+          grep -q 'adventure-companion-m3-05-0b-build-2' version.js
           echo "Critical startup protection is present."

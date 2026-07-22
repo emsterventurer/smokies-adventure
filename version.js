@@ -10,11 +10,11 @@
     version:"M3-05.0B",
     milestone:"Milestone 3",
     feature:"Architecture & Version Foundation",
-    build:"Build 1",
+    build:"Build 2",
     updated:"July 22, 2026",
-    cache:"adventure-companion-m3-05-0b-build-1",
+    cache:"adventure-companion-m3-05-0b-build-2",
     eyebrow:"M3-05.0B · ARCHITECTURE & VERSION FOUNDATION",
-    description:"Centralized build information creates one reliable source of truth for the application, diagnostics, and offline cache."
+    description:"Centralized version and shared configuration provide reliable sources of truth for the application, diagnostics, weather, storage, and offline cache."
   });
 
   function applyToDocument(doc){

@@ -1,4 +1,5 @@
-// Architecture foundation: build information is owned by version.js
+// Architecture foundation: shared configuration is owned by config.js and build information by version.js
+const APP_CONFIG=window.AdventureCompanionConfig||Object.freeze({trip:{},ui:{},storage:{}});
 
 const APP_BUILD=window.AdventureCompanionBuild||Object.freeze({
   version:"Unknown build",
@@ -6,7 +7,7 @@ const APP_BUILD=window.AdventureCompanionBuild||Object.freeze({
   updated:"Unknown"
 });
 
-const FEEDBACK_KEY="adventureCompanionFeedback";
+const FEEDBACK_KEY=APP_CONFIG.storage.feedback||"adventureCompanionFeedback";
 let selectedFeedbackKind="";
 let selectedFeedbackRating=0;
 
@@ -19,7 +20,7 @@ function openPanel(panel){
 function closePanel(panel){
   if(!panel)return;
   panel.classList.remove("open");
-  setTimeout(()=>panel.hidden=true,220);
+  setTimeout(()=>panel.hidden=true,APP_CONFIG.ui.panelCloseMs??220);
 }
 
 function showUpdateToast(){
@@ -33,7 +34,7 @@ function hideUpdateToast(){
   const toast=document.querySelector("#updateToast");
   if(!toast)return;
   toast.classList.remove("show");
-  setTimeout(()=>toast.hidden=true,250);
+ setTimeout(()=>toast.hidden=true,APP_CONFIG.ui.toastCloseMs??250);
 }
 
 function activateWaitingWorker(reg){
@@ -146,7 +147,7 @@ function wireBuildTools(){
       saved.hidden=false;
       saved.innerHTML='<p class="savedConfirmation">✓ Feedback saved on this device.</p>';
     }
-    setTimeout(()=>closePanel(feedbackPanel),800);
+    setTimeout(()=>closePanel(feedbackPanel),APP_CONFIG.ui.feedbackCloseMs??800);
   });
 
   document.querySelector("#viewFeedback")?.addEventListener("click",renderSavedFeedback);
@@ -166,11 +167,11 @@ function wireBuildTools(){
 window.addEventListener("load",()=>{
   const splash=$("#brandSplash");
   setTimeout(()=>splash?.classList.add("hide"),900);
-  setTimeout(()=>splash?.remove(),1600);
+  setTimeout(()=>splash?.remove(),APP_CONFIG.ui.splashRemoveMs??1600);
 });
 
 let DATA;
-const start=new Date("2026-08-07T00:00:00"), end=new Date("2026-08-15T00:00:00"), planning=new Date("2026-07-01T00:00:00");
+const start=new Date(APP_CONFIG.trip.start||"2026-08-07T00:00:00"), end=new Date(APP_CONFIG.trip.end||"2026-08-15T00:00:00"), planning=new Date(APP_CONFIG.trip.planningStart||"2026-07-01T00:00:00");
 const phases=["dreaming","planning","experiencing","remembering"];
 const meta={dreaming:["🌱","Dreaming"],planning:["🌿","Planning"],experiencing:["🏔️🌿","Experiencing"],remembering:["🌳","Remembering"]};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
