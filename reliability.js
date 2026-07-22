@@ -2,15 +2,16 @@
 (() => {
   "use strict";
 
+  const CORE_CONFIG = window.AdventureCompanionConfig || Object.freeze({ reliability:{} });
   const BUILD_INFO = window.AdventureCompanionBuild || Object.freeze({ version:"Unknown build", cache:"adventure-companion-unknown" });
   const BUILD = BUILD_INFO.version;
   const CACHE = BUILD_INFO.cache;
-  const STARTUP_TIMEOUT_MS = 3500;
+  const STARTUP_TIMEOUT_MS = CORE_CONFIG.reliability.startupTimeoutMs ?? 3500;
   let appReady = false;
   let readyDetails = {};
   let startupTimer;
   const diagnosticsStartedAt = Date.now();
-  const SMART_STOPS_GRACE_MS = 2200;
+  const SMART_STOPS_GRACE_MS = CORE_CONFIG.reliability.smartStopsGraceMs ?? 2200;
 
   const $ = selector => document.querySelector(selector);
   const has = selector => Boolean($(selector));
@@ -123,7 +124,7 @@
       } catch (_) {
         button.textContent = "Check unavailable";
       }
-      setTimeout(() => { button.disabled = false; button.textContent = original; }, 1600);
+      setTimeout(() => { button.disabled = false; button.textContent = original; }, CORE_CONFIG.reliability.buttonResetMs ?? 1600);
     });
     BUILD_INFO.applyToDocument?.(document);
   }
