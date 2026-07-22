@@ -5,17 +5,21 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(root){
   'use strict';
 
-  const CONFIG={
-    latitude:35.8681,
-    longitude:-83.5618,
-    locationLabel:'Sevierville / Smoky Mountains',
-    timezone:'America/New_York',
-    freshMs:60*60*1000,
-    staleMs:6*60*60*1000,
-    maxMs:24*60*60*1000,
-    cacheKey:'adventureCompanionWeatherM3031',
-    tripCacheKey:'adventureCompanionTripWeatherM3042'
-  };
+const CORE_CONFIG=root.AdventureCompanionConfig || (typeof module==='object'&&module.exports?require('./config.js'):null) || {};
+const tripConfig=CORE_CONFIG.trip||{};
+const weatherConfig=CORE_CONFIG.weather||{};
+
+const CONFIG={
+  latitude:tripConfig.coordinates?.latitude??35.8681,
+  longitude:tripConfig.coordinates?.longitude??-83.5618,
+  locationLabel:tripConfig.locationLabel||'Sevierville / Smoky Mountains',
+  timezone:tripConfig.timezone||'America/New_York',
+  freshMs:weatherConfig.freshMs??60*60*1000,
+  staleMs:weatherConfig.staleMs??6*60*60*1000,
+  maxMs:weatherConfig.maxMs??24*60*60*1000,
+  cacheKey:weatherConfig.cacheKey||'adventureCompanionWeatherM3031',
+  tripCacheKey:weatherConfig.tripCacheKey||'adventureCompanionTripWeatherM3042'
+};
 
   const WEATHER_CODES={
     0:['Clear sky','☀️'],1:['Mainly clear','🌤️'],2:['Partly cloudy','⛅'],3:['Overcast','☁️'],
