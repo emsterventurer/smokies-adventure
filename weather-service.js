@@ -1,235 +1,166 @@
-<!doctype html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#294c3a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Adventure Companion">
-<meta name="description" content="Making New Traditions — One adventure at a time.">
+(function(root,factory){
+  const api=factory(root);
+  if(typeof module==='object'&&module.exports)module.exports=api;
+  root.AdventureWeather=api;
+})(typeof globalThis!=='undefined'?globalThis:this,function(root){
+  'use strict';
 
-<meta property="og:title" content="Smoky Mountains 2026 · Adventure Companion">
-<meta property="og:description" content="Our family itinerary for eight days of mountains, food, traditions, and connection.">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
+  const CORE_CONFIG=root.AdventureCompanionConfig || (typeof module==='object'&&module.exports?require('./config.js'):null) || {};
+  const tripConfig=CORE_CONFIG.trip||{};
+  const weatherConfig=CORE_CONFIG.weather||{};
+  const CONFIG={
+    latitude:tripConfig.coordinates?.latitude??35.8681,
+    longitude:tripConfig.coordinates?.longitude??-83.5618,
+    locationLabel:tripConfig.locationLabel||'Sevierville / Smoky Mountains',
+    timezone:tripConfig.timezone||'America/New_York',
+    freshMs:weatherConfig.freshMs??60*60*1000,
+    staleMs:weatherConfig.staleMs??6*60*60*1000,
+    maxMs:weatherConfig.maxMs??24*60*60*1000,
+    cacheKey:weatherConfig.cacheKey||'adventureCompanionWeatherM3031',
+    tripCacheKey:weatherConfig.tripCacheKey||'adventureCompanionTripWeatherM3042'
+  };
 
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="Adventure Companion">
+  const WEATHER_CODES={
+    0:['Clear sky','☀️'],1:['Mainly clear','🌤️'],2:['Partly cloudy','⛅'],3:['Overcast','☁️'],
+    45:['Foggy','🌫️'],48:['Rime fog','🌫️'],51:['Light drizzle','🌦️'],53:['Drizzle','🌦️'],55:['Heavy drizzle','🌧️'],
+    56:['Light freezing drizzle','🌧️'],57:['Freezing drizzle','🌧️'],61:['Light rain','🌦️'],63:['Rain','🌧️'],65:['Heavy rain','🌧️'],
+    66:['Light freezing rain','🌧️'],67:['Freezing rain','🌧️'],71:['Light snow','🌨️'],73:['Snow','🌨️'],75:['Heavy snow','❄️'],77:['Snow grains','🌨️'],
+    80:['Light showers','🌦️'],81:['Rain showers','🌧️'],82:['Heavy showers','⛈️'],85:['Light snow showers','🌨️'],86:['Heavy snow showers','❄️'],
+    95:['Thunderstorms','⛈️'],96:['Thunderstorms with hail','⛈️'],99:['Severe thunderstorms with hail','⛈️']
+  };
 
-<meta name="adventure-companion-build" content="">
-<meta name="adventure-companion-build-date" content="">
+  function describeCode(code){
+    const pair=WEATHER_CODES[Number(code)]||['Weather update','🌤️'];
+    return {label:pair[0],icon:pair[1]};
+  }
 
+  function round(value){return Number.isFinite(Number(value))?Math.round(Number(value)):null;}
 
+  function buildUrl(config){
+    const c=Object.assign({},CONFIG,config||{});
+    const params=new URLSearchParams({
+      latitude:String(c.latitude),longitude:String(c.longitude),timezone:c.timezone,
+      temperature_unit:'fahrenheit',precipitation_unit:'inch',wind_speed_unit:'mph',
+      current:'temperature_2m,apparent_temperature,weather_code,is_day',
+      hourly:'precipitation_probability',
+      daily:'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+      forecast_days:'2'
+    });
+    return `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+  }
 
-<title>Adventure Companion · Family Premiere</title>
-<link rel="stylesheet" href="styles.css">
-<script src="config.js"></script><script src="version.js"></script></head>
-<body>
+  function normalize(payload,config,now){
+    const c=Object.assign({},CONFIG,config||{});
+    if(!payload||!payload.current||!payload.daily||!Array.isArray(payload.daily.time)||!payload.daily.time.length){
+      throw new Error('Weather provider returned incomplete data.');
+    }
+    const current=payload.current,daily=payload.daily;
+    const currentTime=current.time||new Date(now||Date.now()).toISOString();
+    const dateKey=String(currentTime).slice(0,10);
+    let dailyIndex=daily.time.indexOf(dateKey);
+    if(dailyIndex<0)dailyIndex=0;
+    let rainChance=Array.isArray(daily.precipitation_probability_max)?round(daily.precipitation_probability_max[dailyIndex]):null;
+    if(rainChance===null&&payload.hourly&&Array.isArray(payload.hourly.time)&&Array.isArray(payload.hourly.precipitation_probability)){
+      const future=payload.hourly.time.map((time,i)=>({time,value:payload.hourly.precipitation_probability[i]}))
+        .filter(item=>String(item.time).slice(0,10)===dateKey&&String(item.time)>=String(currentTime));
+      if(future.length)rainChance=Math.max(...future.map(item=>Number(item.value)||0));
+    }
+    const condition=describeCode(current.weather_code);
+    return {
+      schema:1,provider:'Open-Meteo',location:c.locationLabel,timezone:payload.timezone||c.timezone,
+      observedAt:currentTime,fetchedAt:new Date(now||Date.now()).toISOString(),
+      temperature:round(current.temperature_2m),feelsLike:round(current.apparent_temperature),
+      high:round(daily.temperature_2m_max?.[dailyIndex]),low:round(daily.temperature_2m_min?.[dailyIndex]),
+      rainChance,weatherCode:Number(current.weather_code),condition:condition.label,icon:condition.icon,
+      isDay:Boolean(current.is_day),sourceUrl:'https://open-meteo.com/'
+    };
+  }
 
-<div id="buildTools" class="buildTools">
-  <button id="devBadge" class="devBadge" type="button" aria-label="Show current build information">
-    <span class="devDot"></span>
-    <span class="devBadgeText"><strong data-build-field="version">Loading…</strong><small data-build-field="feature">Build information</small></span>
-  </button>
+  function getStorage(storage){return storage||root.localStorage;}
+  function readCache(storage){
+    try{
+      const raw=getStorage(storage)?.getItem(CONFIG.cacheKey);
+      if(!raw)return null;
+      const parsed=JSON.parse(raw);
+      return parsed&&parsed.data&&parsed.savedAt?parsed:null;
+    }catch(e){return null;}
+  }
+  function writeCache(data,storage,now){
+    try{getStorage(storage)?.setItem(CONFIG.cacheKey,JSON.stringify({savedAt:now||Date.now(),data}));return true;}catch(e){return false;}
+  }
+  function cacheState(cache,now){
+    if(!cache)return 'missing';
+    const age=Math.max(0,(now||Date.now())-Number(cache.savedAt||0));
+    if(age<CONFIG.freshMs)return 'fresh';
+    if(age<CONFIG.staleMs)return 'cached';
+    if(age<CONFIG.maxMs)return 'stale';
+    return 'expired';
+  }
 
-  <button id="feedbackButton" class="feedbackButton" type="button" aria-label="Open feedback mode">📝</button>
-</div>
+  async function fetchWeather(options){
+    const opts=options||{},fetcher=opts.fetcher||root.fetch;
+    if(typeof fetcher!=='function')throw new Error('Weather service requires network access.');
+    const response=await fetcher(buildUrl(opts.config),{headers:{Accept:'application/json'}});
+    if(!response||!response.ok)throw new Error(`Weather request failed${response?` (${response.status})`:''}.`);
+    return normalize(await response.json(),opts.config,opts.now);
+  }
 
-<div id="buildPanel" class="buildPanel" hidden>
-  <div class="panelHandle"></div>
-  <div class="panelHeader">
-    <div>
-      <span class="eyebrow">DEVELOPMENT MODE</span>
-      <h3>Adventure Companion</h3>
-    </div>
-    <button id="closeBuildPanel" class="panelClose" type="button" aria-label="Close">×</button>
-  </div>
-  <dl class="buildDetails">
-    <div><dt>Version</dt><dd data-build-field="version">Loading…</dd></div>
-    <div><dt>Milestone</dt><dd data-build-field="milestone">Loading…</dd></div>
-    <div><dt>Feature</dt><dd data-build-field="feature">Loading…</dd></div>
-    <div><dt>Updated</dt><dd data-build-field="updated">Loading…</dd></div>
-    <div><dt>Cache</dt><dd id="buildCacheVersion" data-build-field="cache">Loading…</dd></div>
-    <div><dt>System</dt><dd id="buildHealthStatus">Checking…</dd></div>
-  </dl>
-  <p class="buildHint" data-build-field="description">Loading build details…</p>
-  <div class="buildPanelActions">
-    <button id="runDiagnostics" type="button">🩺 Run diagnostics</button>
-    <button id="checkForUpdates" type="button">↻ Check for updates</button>
-  </div>
-  <div id="diagnosticsResults" class="diagnosticsResults" hidden aria-live="polite"></div>
-</div>
-
-<div id="feedbackPanel" class="feedbackPanel" hidden>
-  <div class="panelHandle"></div>
-  <div class="panelHeader">
-    <div>
-      <span class="eyebrow">FEEDBACK MODE</span>
-      <h3>Capture what you notice</h3>
-    </div>
-    <button id="closeFeedbackPanel" class="panelClose" type="button" aria-label="Close">×</button>
-  </div>
-
-  <div class="feedbackKinds" role="group" aria-label="Feedback type">
-    <button type="button" data-kind="bug">🐞 Bug</button>
-    <button type="button" data-kind="idea">💡 Idea</button>
-    <button type="button" data-kind="confusing">🤔 Confusing</button>
-    <button type="button" data-kind="love">💚 Love it</button>
-  </div>
-
-  <label class="feedbackLabel">
-    Screen or day
-    <input id="feedbackScreen" type="text" placeholder="Example: Day 2 stop cards">
-  </label>
-
-  <label class="feedbackLabel">
-    What did you notice?
-    <textarea id="feedbackNote" rows="4" placeholder="Describe what happened or what you would change."></textarea>
-  </label>
-
-  <div class="ratingRow">
-    <span>Screen rating</span>
-    <div id="feedbackStars" class="feedbackStars" aria-label="Rate this screen">
-      <button type="button" data-rating="1">☆</button>
-      <button type="button" data-rating="2">☆</button>
-      <button type="button" data-rating="3">☆</button>
-      <button type="button" data-rating="4">☆</button>
-      <button type="button" data-rating="5">☆</button>
-    </div>
-  </div>
-
-  <div class="feedbackActions">
-    <button id="saveFeedback" class="saveFeedback" type="button">Save feedback</button>
-    <button id="viewFeedback" type="button">View saved notes</button>
-  </div>
-
-  <div id="feedbackSaved" class="feedbackSaved" hidden></div>
-</div>
-
-<div id="updateToast" class="updateToast" hidden>
-  <div>
-    <strong>Adventure Companion has an update</strong>
-    <small>A newer build is ready.</small>
-  </div>
-  <button id="refreshApp" type="button">Refresh now</button>
-  <button id="dismissUpdate" class="dismissUpdate" type="button" aria-label="Dismiss update">×</button>
-</div>
-
-
-
-</div>
+  async function loadWeather(options){
+    const opts=options||{},now=opts.now||Date.now(),cache=readCache(opts.storage),state=cacheState(cache,now);
+    if(!opts.force&&state==='fresh')return {data:cache.data,status:'fresh',fromCache:true};
+    try{
+      const data=await fetchWeather(opts);
+      writeCache(data,opts.storage,now);
+      return {data,status:'live',fromCache:false,previous:cache?.data||null};
+    }catch(error){
+      if(cache&&state!=='expired')return {data:cache.data,status:state,fromCache:true,error};
+      if(cache&&opts.allowExpired)return {data:cache.data,status:'expired',fromCache:true,error};
+      throw error;
+    }
+  }
 
 
-<div id="welcomeModal" class="welcomeModal" hidden>
-  <div class="welcomeBackdrop"></div>
-  <section class="welcomeSheet" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
-    <div class="welcomeMark">🏔️ 🌿 💚</div>
-    <span class="eyebrow light">OUR FAMILY ADVENTURE</span>
-    <h2 id="welcomeTitle">The Smokies are calling.</h2>
-    <p>Eight days to explore, eat well, laugh often, and begin traditions worth carrying home.</p>
-    <button id="enterAdventure" class="welcomeButton" type="button">Enter our adventure</button>
-    <button id="skipWelcome" class="welcomeSkip" type="button">Skip next time</button>
-  </section>
-</div>
+  function buildTripUrl(config){
+    const c=Object.assign({},CONFIG,config||{});
+    const params=new URLSearchParams({
+      latitude:String(c.latitude),longitude:String(c.longitude),timezone:c.timezone,
+      temperature_unit:'fahrenheit',precipitation_unit:'inch',wind_speed_unit:'mph',
+      daily:'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+      forecast_days:'16'
+    });
+    return `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+  }
 
-<div class="app">
+  function normalizeTripForecast(payload,config,now){
+    const c=Object.assign({},CONFIG,config||{}),daily=payload&&payload.daily;
+    if(!daily||!Array.isArray(daily.time))throw new Error('Weather provider returned incomplete trip data.');
+    const days={};
+    daily.time.forEach((date,index)=>{
+      const condition=describeCode(daily.weather_code?.[index]);
+      days[date]={date,high:round(daily.temperature_2m_max?.[index]),low:round(daily.temperature_2m_min?.[index]),rainChance:round(daily.precipitation_probability_max?.[index]),weatherCode:Number(daily.weather_code?.[index]),condition:condition.label,icon:condition.icon};
+    });
+    return {schema:1,provider:'Open-Meteo',location:c.locationLabel,timezone:payload.timezone||c.timezone,fetchedAt:new Date(now||Date.now()).toISOString(),days};
+  }
 
-<aside class="desktopSideNav" aria-label="Adventure Companion navigation">
-  <div class="sideBrand">
-    <img src="icon-192.png" alt="">
-    <span><strong>Adventure</strong><small>COMPANION</small></span>
-  </div>
-  <div class="sideMenu">
-    <button class="active" data-view="home">⌂<span>Dashboard</span></button>
-    <button data-view="week">🗓️<span>Daily Adventure</span></button>
-    <button data-view="reservations">🍽️<span>Reservations</span></button>
-    <button data-view="traditions">💚<span>Traditions</span></button>
-    <button data-view="packing">🎒<span>Family Packing</span></button>
-    <button data-view="trip">📍<span>Trip Snapshot</span></button>
-  </div>
-  <section class="sideParty">
-    <small>TRAVEL PARTY</small>
-    <span>● Papa</span>
-    <span>● Bubbe</span>
-    <span>● Emily</span>
-    <span>● Jake</span>
-    <span>● Kaseryn</span>
-  </section>
-  <blockquote>Making new traditions.</blockquote>
-</aside>
+  function readTripCache(storage){
+    try{const raw=getStorage(storage)?.getItem(CONFIG.tripCacheKey);if(!raw)return null;const parsed=JSON.parse(raw);return parsed&&parsed.data&&parsed.savedAt?parsed:null;}catch(e){return null;}
+  }
+  function writeTripCache(data,storage,now){
+    try{getStorage(storage)?.setItem(CONFIG.tripCacheKey,JSON.stringify({savedAt:now||Date.now(),data}));return true;}catch(e){return false;}
+  }
+  async function fetchTripForecast(options){
+    const opts=options||{},fetcher=opts.fetcher||root.fetch;
+    if(typeof fetcher!=='function')throw new Error('Weather service requires network access.');
+    const response=await fetcher(buildTripUrl(opts.config),{headers:{Accept:'application/json'}});
+    if(!response||!response.ok)throw new Error(`Trip weather request failed${response?` (${response.status})`:''}.`);
+    return normalizeTripForecast(await response.json(),opts.config,opts.now);
+  }
+  async function loadTripForecast(options){
+    const opts=options||{},now=opts.now||Date.now(),cache=readTripCache(opts.storage),state=cacheState(cache,now);
+    if(!opts.force&&state==='fresh')return {data:cache.data,status:'fresh',fromCache:true};
+    try{const data=await fetchTripForecast(opts);writeTripCache(data,opts.storage,now);return {data,status:'live',fromCache:false};}
+    catch(error){if(cache&&state!=='expired')return {data:cache.data,status:state,fromCache:true,error};if(cache&&opts.allowExpired)return {data:cache.data,status:'expired',fromCache:true,error};throw error;}
+  }
 
-<div class="desktopContent">
-<header class="hero">
-  <div class="ridge r1"></div><div class="ridge r2"></div>
-  <div class="heroText"><small>EMILY'S ADVENTURE COMPANION</small><h1>Making New Traditions</h1><p>One adventure at a time.</p><div>🏔️ 🌿 💚</div></div>
-</header>
-<main>
-<section class="top card">
- <div><span class="eyebrow">CURRENT ADVENTURE</span><h2>Smoky Mountains 2026</h2></div>
- <span id="phaseBadge" class="badge">Planning</span>
- <div class="phases">
-  <div data-p="dreaming"><b>🌱</b><small>Dreaming</small></div><i></i>
-  <div data-p="planning"><b>🌿</b><small>Planning</small></div><i></i>
-  <div data-p="experiencing"><b>🏔️🌿</b><small>Experiencing</small></div><i></i>
-  <div data-p="remembering"><b>🌳</b><small>Remembering</small></div>
- </div>
- <div class="preview"><label>Preview date<input id="previewDate" type="date"></label><button id="today">Today</button></div>
-</section>
-
-<section class="familyWelcome">
-  <h3>Welcome to our Smoky Mountains Adventure</h3>
-  <p>Eight days of mountains, great food, family traditions, and room for a few surprises.</p>
-  <div class="tripStats">
-    <div><b>8</b><small>Adventure days</small></div>
-    <div><b>5</b><small>Travelers</small></div>
-    <div><b>1</b><small>New tradition</small></div>
-  </div>
-  <div class="familyActions">
-    <button id="shareTrip" type="button">↗ Share with family</button>
-    <button data-view="week" type="button">🗓️ See the whole week</button>
-  </div>
-</section>
-
-<section id="homeCard" class="card homeCard"></section>
-
-<section id="weatherCard" class="card weatherCard" aria-label="Live weather"></section>
-
-<section class="card journeyCard">
-  <div class="journeyHead">
-    <div><span class="eyebrow">THE JOURNEY AHEAD</span><h3>Our Adventure Trail</h3></div>
-    <span id="journeyCount" class="journeyCount">0 of 8 complete</span>
-  </div>
-  <div id="journeyTrail" class="journeyTrail"></div>
-  <button class="trailAction" data-view="week" type="button">Open the full adventure week →</button>
-</section>
-
-<section class="quick">
- <button data-view="week">🗓️<span><strong>Daily Adventure</strong><small>Dashboard, stops & directions</small></span></button>
- <button data-view="reservations">🍽️<span><strong>Reservations</strong><small>Confirmed & pending</small></span></button>
- <button data-view="traditions">💚<span><strong>Traditions</strong><small>Moments to protect</small></span></button>
- <button data-view="packing">🎒<span><strong>Family Packing</strong><small>Essentials by traveler</small></span></button>
-</section>
-<section id="screen" class="card screen" hidden></section>
-
-<section class="familyPromise">
-  <span>🏔️ Adventure</span><i></i><span>🌿 Growth</span><i></i><span>💚 Connection</span>
-</section>
-
-<p class="privacyNote">Shared family itinerary · Reservation details are visible to everyone using this browser.</p>
-</main>
-</div>
-<nav>
-<button class="active" data-view="home">⌂<small>Home</small></button>
-<button data-view="week">🗺️<small>Adventure</small></button>
-<button data-view="packing">🎒<small>Prepare</small></button>
-<button data-view="traditions">📖<small>Memories</small></button>
-<button data-view="companion">🌿<small>Companion</small></button>
-</nav>
-</div>
-<script src="reliability.js"></script>
-<script src="weather-service.js"></script>
-<script src="packing.js"></script>
-<script src="weather-ui.js"></script>
-<script src="app.js"></script></body></html>
+  return {CONFIG,WEATHER_CODES,describeCode,buildUrl,normalize,readCache,writeCache,cacheState,fetchWeather,loadWeather,buildTripUrl,normalizeTripForecast,readTripCache,writeTripCache,fetchTripForecast,loadTripForecast};
+});
