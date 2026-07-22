@@ -50,6 +50,7 @@ jobs:
       - name: Run complete regression suite
         run: |
           node version-foundation.test.js
+          node configuration-foundation.test.js
           node weather-service.test.js
           node daily-weather.test.js
           node dashboard-redesign.test.js
@@ -67,6 +68,7 @@ jobs:
             app.js
             styles.css
             service-worker.js
+            config.js
             manifest.webmanifest
             weather-service.js
             weather-ui.js
