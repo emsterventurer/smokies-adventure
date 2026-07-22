@@ -59,7 +59,8 @@
     if(!host)return;let activeTraveler='emily',activeActivity='all';
     function paint(){
       const state=readState(),overall=progress(BASE_ITEMS,state);
-      host.innerHTML=`<div class="packingHead"><div><span class="eyebrow">M3-04.4C · EXPERIENCE COMPLETION</span><h3>🎒 Smoky Mountains Packing</h3><p>Each adventurer earns an individual Adventure Ready celebration.</p></div><button id="resetPacking" class="packingReset" type="button">Reset</button></div>
+      const buildEyebrow=root.AdventureCompanionBuild?.eyebrow||"ADVENTURE COMPANION";
+      host.innerHTML=`<div class="packingHead"><div><span class="eyebrow">${buildEyebrow}</span><h3>🎒 Smoky Mountains Packing</h3><p>Each adventurer earns an individual Adventure Ready celebration.</p></div><button id="resetPacking" class="packingReset" type="button">Reset</button></div>
       <section class="packingProgress"><div class="packingMilestone"><span class="packingIcon" aria-hidden="true">${familyReady(state)?"🎒":overall.icon}</span><div><small>${overall.done} of ${overall.total} packed</small><strong>${familyReady(state)?"🎒 Everyone Adventure Ready":overall.milestone}</strong></div></div><div class="packingBar"><i style="width:${Math.round(overall.ratio*100)}%"></i></div></section>
       <section class="packingReadinessMini" aria-label="Adventure readiness">${readiness(state).map(t=>`<span class="${t.ready?'ready':''}">${t.icon} ${t.name} ${t.ready?'✓':'· '+t.progress.done+'/'+t.progress.total}</span>`).join('')}</section>
       <div class="activityFilter"><label for="packingActivity">Show items for</label><select id="packingActivity">${Object.entries(ACTIVITIES).map(([id,name])=>`<option value="${id}" ${id===activeActivity?'selected':''}>${name}</option>`).join('')}</select></div>
