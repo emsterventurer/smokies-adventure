@@ -1,9 +1,10 @@
-// Build M3-04.4C · Friendly startup watchdog and diagnostics
+// Friendly startup watchdog and diagnostics
 (() => {
   "use strict";
 
-  const BUILD = "M3-04.4C";
-  const CACHE = "adventure-companion-m3-04-4c";
+  const BUILD_INFO = window.AdventureCompanionBuild || Object.freeze({ version:"Unknown build", cache:"adventure-companion-unknown" });
+  const BUILD = BUILD_INFO.version;
+  const CACHE = BUILD_INFO.cache;
   const STARTUP_TIMEOUT_MS = 3500;
   let appReady = false;
   let readyDetails = {};
@@ -124,8 +125,7 @@
       }
       setTimeout(() => { button.disabled = false; button.textContent = original; }, 1600);
     });
-    const cache = $("#buildCacheVersion");
-    if (cache) cache.textContent = BUILD;
+    BUILD_INFO.applyToDocument?.(document);
   }
 
   function markAppReady(details = {}) {

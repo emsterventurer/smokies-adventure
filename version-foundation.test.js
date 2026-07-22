@@ -1,0 +1,23 @@
+const fs=require("fs");
+const assert=require("assert");
+const build=require("./version.js");
+const html=fs.readFileSync("index.html","utf8");
+const app=fs.readFileSync("app.js","utf8");
+const reliability=fs.readFileSync("reliability.js","utf8");
+const packing=fs.readFileSync("packing.js","utf8");
+const worker=fs.readFileSync("service-worker.js","utf8");
+
+assert.equal(build.version,"M3-05.0B");
+assert.equal(build.build,"Build 1");
+assert.equal(build.cache,"adventure-companion-m3-05-0b-build-1");
+assert(Object.isFrozen(build),"build information must be immutable");
+assert(html.includes('src="version.js"'),"version.js script tag is missing");
+assert(html.indexOf('src="version.js"')<html.indexOf('src="reliability.js"'),"version.js must load before reliability.js");
+assert(html.includes('data-build-field="version"'),"version display is not data driven");
+assert(!html.includes('content="M3-04.4C"'),"legacy build meta remains hard-coded");
+assert(app.includes('window.AdventureCompanionBuild'),"app.js does not consume centralized build information");
+assert(reliability.includes('window.AdventureCompanionBuild'),"reliability.js does not consume centralized build information");
+assert(packing.includes('AdventureCompanionBuild?.eyebrow'),"packing.js does not consume centralized build information");
+assert(worker.includes('importScripts("./version.js")'),"service worker does not consume centralized build information");
+assert(worker.includes('BUILD_INFO.cache'),"service worker cache is not derived from central build information");
+console.log("version foundation tests passed");

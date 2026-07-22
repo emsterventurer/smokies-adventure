@@ -5,11 +5,14 @@ const html=fs.readFileSync("index.html","utf8");
 const reliability=fs.readFileSync("reliability.js","utf8");
 const worker=fs.readFileSync("service-worker.js","utf8");
 const workflow=fs.readFileSync(".github/workflows/quality-checks.yml","utf8");
+const version=fs.readFileSync("version.js","utf8");
 
 assert(app.length>50000,"app.js must not be empty or truncated");
 assert(app.includes('function view(v)'),"critical navigation function is missing");
 assert(app.includes('function showDay('),"Daily Adventure renderer is missing");
 assert(app.includes('markAppReady'),"app.js must complete the reliability handshake");
+assert(html.includes('src="version.js"'),"central version foundation is not loaded");
+assert(html.indexOf('src="version.js"')<html.indexOf('src="reliability.js"'),"version.js must load before reliability.js");
 assert(html.includes('src="reliability.js"'),"independent reliability watchdog is not loaded");
 assert(html.indexOf('src="reliability.js"')<html.indexOf('src="app.js"'),"reliability.js must load before app.js");
 assert(html.includes('id="runDiagnostics"'),"diagnostics control is missing");
@@ -18,8 +21,11 @@ assert(reliability.includes('STARTUP_TIMEOUT_MS'),"startup timeout protection is
 assert(reliability.includes('showRecovery'),"friendly recovery screen is missing");
 assert(reliability.includes('clearAppCache'),"cache recovery tool is missing");
 assert(reliability.includes('diagnosticChecks'),"diagnostic checks are missing");
-assert(worker.includes('adventure-companion-m3-04-4c'),"service worker cache identity is stale");
+assert(worker.includes('importScripts("./version.js")'),"service worker must consume centralized build information");
+assert(version.includes('adventure-companion-m3-05-0b-build-1'),"central cache identity is stale");
+assert(worker.includes('./version.js'),"version.js is not cached");
 assert(worker.includes('./reliability.js'),"reliability.js is not cached");
-for(const file of ['app.js','index.html','reliability.js','service-worker.js']) assert(fs.statSync(file).size>0,`${file} is empty`);
+for(const file of ['version.js','app.js','index.html','reliability.js','service-worker.js']) assert(fs.statSync(file).size>0,`${file} is empty`);
 assert(workflow.includes('reliability.test.js'),"GitHub Actions does not run reliability tests");
+assert(workflow.includes('version-foundation.test.js'),"GitHub Actions does not run version foundation tests");
 console.log("reliability and diagnostics tests passed");

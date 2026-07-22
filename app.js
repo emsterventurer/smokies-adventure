@@ -1,10 +1,10 @@
-// Build M3-04.4C · Experience Completion
+// Architecture foundation: build information is owned by version.js
 
-const APP_BUILD={
-  version:"M3-04.4C",
-  label:"Reliability & Diagnostics",
-  date:"July 21, 2026"
-};
+const APP_BUILD=window.AdventureCompanionBuild||Object.freeze({
+  version:"Unknown build",
+  feature:"Build information unavailable",
+  updated:"Unknown"
+});
 
 const FEEDBACK_KEY="adventureCompanionFeedback";
 let selectedFeedbackKind="";
