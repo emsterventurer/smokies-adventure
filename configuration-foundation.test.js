@@ -1,120 +1,35 @@
-name: Adventure Companion Quality Checks
+const assert=require('assert');
+const fs=require('fs');
+const path=require('path');
 
-on:
-  pull_request:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+const root=__dirname;
+const config=require('./config.js');
+const weather=require('./weather-service.js');
 
-permissions:
-  contents: read
+assert(Object.isFrozen(config),'Core configuration should be frozen');
+assert(Object.isFrozen(config.trip),'Trip configuration should be frozen');
+assert.strictEqual(config.trip.locationLabel,'Sevierville / Smoky Mountains');
+assert.strictEqual(config.trip.timezone,'America/New_York');
+assert.deepStrictEqual(config.trip.coordinates,{latitude:35.8681,longitude:-83.5618});
+assert.strictEqual(weather.CONFIG.latitude,config.trip.coordinates.latitude);
+assert.strictEqual(weather.CONFIG.longitude,config.trip.coordinates.longitude);
+assert.strictEqual(weather.CONFIG.freshMs,config.weather.freshMs);
+assert.strictEqual(weather.CONFIG.cacheKey,config.weather.cacheKey);
 
-jobs:
-  quality-checks:
-    name: JavaScript and weather checks
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const configLine=index.split('\n').findIndex(line=>line.includes('src="config.js"'));
+const versionLine=index.split('\n').findIndex(line=>line.includes('src="version.js"'));
+const reliabilityLine=index.split('\n').findIndex(line=>line.includes('src="reliability.js"'));
+assert(configLine>=0,'index.html should load config.js');
+assert(configLine<=versionLine,'config.js should load before version.js');
+assert(configLine<reliabilityLine,'config.js should load before reliability.js');
 
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v5
+const serviceWorker=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
+assert(serviceWorker.includes('importScripts("./config.js","./version.js")'));
+assert(serviceWorker.includes('"./config.js"'));
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
+const version=require('./version.js');
+assert.strictEqual(version.build,'Build 2');
+assert.strictEqual(version.cache,'adventure-companion-m3-05-0b-build-2');
 
-      - name: Show tool versions
-        run: |
-          node --version
-          npm --version
-
-      - name: Check JavaScript syntax
-        run: |
-          node --check config.js
-          node --check version.js
-          node --check app.js
-          node --check reliability.js
-          node --check service-worker.js
-          node --check weather-service.js
-          node --check weather-ui.js
-          node --check weather-service.test.js
-          node --check daily-weather.test.js
-          node --check dashboard-redesign.test.js
-          node --check packing.test.js
-          node --check reliability.test.js
-          node --check experience-polish.test.js
-          node --check experience-completion.test.js
-          node --check version-foundation.test.js
-          node --check configuration-foundation.test.js
-
-      - name: Run complete regression suite
-        run: |
-          node version-foundation.test.js
-          node configuration-foundation.test.js
-          node weather-service.test.js
-          node daily-weather.test.js
-          node dashboard-redesign.test.js
-          node packing.test.js
-          node reliability.test.js
-          node experience-polish.test.js
-          node experience-completion.test.js
-
-      - name: Verify required application files
-        shell: bash
-        run: |
-          required_files=(
-            index.html
-            config.js
-            version.js
-            app.js
-            styles.css
-            service-worker.js
-            manifest.webmanifest
-            weather-service.js
-            weather-ui.js
-            reliability.js
-          )
-
-          for file in "${required_files[@]}"; do
-            if [[ ! -f "$file" ]]; then
-              echo "Missing required file: $file"
-              exit 1
-            fi
-          done
-
-          echo "All required application files are present."
-
-      - name: Verify weather integration
-        shell: bash
-        run: |
-          grep -q 'id="weatherCard"' index.html
-          grep -q 'src="weather-service.js"' index.html
-          grep -q 'src="weather-ui.js"' index.html
-
-          service_line=$(grep -n 'src="weather-service.js"' index.html | head -1 | cut -d: -f1)
-          ui_line=$(grep -n 'src="weather-ui.js"' index.html | head -1 | cut -d: -f1)
-
-          if [[ -z "$service_line" || -z "$ui_line" || "$service_line" -ge "$ui_line" ]]; then
-            echo "weather-service.js must load before weather-ui.js"
-            exit 1
-          fi
-
-          echo "Weather card and script order are correct."
-
-      - name: Verify critical startup protection
-        shell: bash
-        run: |
-          test $(wc -c < app.js) -gt 50000
-          grep -q 'function view(v)' app.js
-          grep -q 'function showDay(' app.js
-          grep -q 'markAppReady' app.js
-          grep -q 'src="config.js"' index.html
-          grep -q 'src="version.js"' index.html
-          grep -q 'src="reliability.js"' index.html
-          grep -q 'AdventureCompanionConfig' app.js
-          grep -q 'AdventureCompanionBuild' app.js
-          grep -q 'importScripts("./config.js","./version.js")' service-worker.js
-          grep -q 'adventure-companion-m3-05-0b-build-2' version.js
-          echo "Critical startup protection is present."
+console.log('configuration-foundation.test.js passed');
