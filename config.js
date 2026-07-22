@@ -1,32 +1,54 @@
-const fs=require("fs");
-const assert=require("assert");
-const app=fs.readFileSync("app.js","utf8");
-const html=fs.readFileSync("index.html","utf8");
-const reliability=fs.readFileSync("reliability.js","utf8");
-const worker=fs.readFileSync("service-worker.js","utf8");
-const workflow=fs.readFileSync(".github/workflows/quality-checks.yml","utf8");
-const version=fs.readFileSync("version.js","utf8");
+(function(root,factory){
+  "use strict";
+  const config=factory();
+  root.AdventureCompanionConfig=config;
+  if(typeof module==="object"&&module.exports)module.exports=config;
+})(typeof globalThis!=="undefined"?globalThis:this,function(){
+  "use strict";
 
-assert(app.length>50000,"app.js must not be empty or truncated");
-assert(app.includes('function view(v)'),"critical navigation function is missing");
-assert(app.includes('function showDay('),"Daily Adventure renderer is missing");
-assert(app.includes('markAppReady'),"app.js must complete the reliability handshake");
-assert(html.includes('src="version.js"'),"central version foundation is not loaded");
-assert(html.indexOf('src="version.js"')<html.indexOf('src="reliability.js"'),"version.js must load before reliability.js");
-assert(html.includes('src="reliability.js"'),"independent reliability watchdog is not loaded");
-assert(html.indexOf('src="reliability.js"')<html.indexOf('src="app.js"'),"reliability.js must load before app.js");
-assert(html.includes('id="runDiagnostics"'),"diagnostics control is missing");
-assert(html.includes('id="buildHealthStatus"'),"build health status is missing");
-assert(reliability.includes('STARTUP_TIMEOUT_MS'),"startup timeout protection is missing");
-assert(reliability.includes('showRecovery'),"friendly recovery screen is missing");
-assert(reliability.includes('clearAppCache'),"cache recovery tool is missing");
-assert(reliability.includes('diagnosticChecks'),"diagnostic checks are missing");
-assert(worker.includes('importScripts("./config.js","./version.js")'),"service worker must consume centralized build information");
-assert(version.includes('adventure-companion-m3-05-0b-build-2'),"central cache identity is stale");
-assert(worker.includes('./version.js'),"version.js is not cached");
-assert(worker.includes('./reliability.js'),"reliability.js is not cached");
-for(const file of ['config.js','version.js','app.js','index.html','reliability.js','service-worker.js']) assert(fs.statSync(file).size>0,`${file} is empty`);
-assert(workflow.includes('reliability.test.js'),"GitHub Actions does not run reliability tests");
-assert(workflow.includes('version-foundation.test.js'),"GitHub Actions does not run version foundation tests");
-assert(workflow.includes('configuration-foundation.test.js'),"GitHub Actions does not run configuration foundation tests");
-console.log("reliability and diagnostics tests passed");
+  const config={
+    trip:{
+      start:"2026-08-07T00:00:00",
+      end:"2026-08-15T00:00:00",
+      planningStart:"2026-07-01T00:00:00",
+      timezone:"America/New_York",
+      locationLabel:"Sevierville / Smoky Mountains",
+      coordinates:Object.freeze({latitude:35.8681,longitude:-83.5618})
+    },
+    weather:{
+      freshMs:60*60*1000,
+      staleMs:6*60*60*1000,
+      maxMs:24*60*60*1000,
+      cacheKey:"adventureCompanionWeatherM3031",
+      tripCacheKey:"adventureCompanionTripWeatherM3042"
+    },
+    reliability:{
+      startupTimeoutMs:3500,
+      smartStopsGraceMs:2200,
+      buttonResetMs:1600
+    },
+    ui:{
+      panelCloseMs:220,
+      toastCloseMs:250,
+      feedbackCloseMs:800,
+      splashHideMs:900,
+      splashRemoveMs:1600
+    },
+    storage:{
+      feedback:"adventureCompanionFeedback",
+      packing:"adventureCompanionPackingM3041",
+      packingCelebrated:"adventureCompanionPackingCelebratedM3044B",
+      campfireUnlocked:"adventureCompanionCampfireUnlocked",
+      individualCelebrations:"adventureCompanionIndividualCelebrationsM3044C",
+      familyCelebration:"adventureCompanionFamilyCelebrationM3044C"
+    },
+    features:{
+      diagnostics:true,
+      weather:true,
+      packingCelebrations:true
+    }
+  };
+
+  Object.values(config).forEach(section=>Object.freeze(section));
+  return Object.freeze(config);
+});
