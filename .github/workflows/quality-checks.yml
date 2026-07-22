@@ -112,5 +112,5 @@ jobs:
           grep -q 'src="reliability.js"' index.html
           grep -q 'AdventureCompanionBuild' app.js
           grep -q 'importScripts("./version.js")' service-worker.js
-          grep -q 'adventure-companion-m3-05-0b-build-1' version.js
+          grep -q 'adventure-companion-m3-05-0b-build-2' version.js
           echo "Critical startup protection is present."
