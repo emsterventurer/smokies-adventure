@@ -32,6 +32,7 @@ jobs:
 
       - name: Check JavaScript syntax
         run: |
+          node --check config.js
           node --check version.js
           node --check app.js
           node --check reliability.js
@@ -46,10 +47,12 @@ jobs:
           node --check experience-polish.test.js
           node --check experience-completion.test.js
           node --check version-foundation.test.js
+          node --check configuration-foundation.test.js
 
       - name: Run complete regression suite
         run: |
           node version-foundation.test.js
+          node configuration-foundation.test.js
           node weather-service.test.js
           node daily-weather.test.js
           node dashboard-redesign.test.js
@@ -63,6 +66,7 @@ jobs:
         run: |
           required_files=(
             index.html
+            config.js
             version.js
             app.js
             styles.css
@@ -106,9 +110,11 @@ jobs:
           grep -q 'function view(v)' app.js
           grep -q 'function showDay(' app.js
           grep -q 'markAppReady' app.js
+          grep -q 'src="config.js"' index.html
           grep -q 'src="version.js"' index.html
           grep -q 'src="reliability.js"' index.html
+          grep -q 'AdventureCompanionConfig' app.js
           grep -q 'AdventureCompanionBuild' app.js
-          grep -q 'importScripts("./version.js")' service-worker.js
-          grep -q 'adventure-companion-m3-05-0b-build-1' version.js
+          grep -q 'importScripts("./config.js","./version.js")' service-worker.js
+          grep -q 'adventure-companion-m3-05-0b-build-2' version.js
           echo "Critical startup protection is present."
