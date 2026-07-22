@@ -4,9 +4,10 @@
   root.AdventurePacking=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(root){
   'use strict';
-  const STORAGE_KEY='adventureCompanionPackingM3041';
-  const CELEBRATION_KEY='adventureCompanionPackingCelebratedM3044B';
-  const CAMPFIRE_KEY='adventureCompanionCampfireUnlocked';
+  const CORE_CONFIG=root.AdventureCompanionConfig||{storage:{}};
+  const STORAGE_KEY=CORE_CONFIG.storage.packing||'adventureCompanionPackingM3041';
+  const CELEBRATION_KEY=CORE_CONFIG.storage.packingCelebrated||'adventureCompanionPackingCelebratedM3044B';
+  const CAMPFIRE_KEY=CORE_CONFIG.storage.campfireUnlocked||'adventureCompanionCampfireUnlocked';
   const TRAVELERS=[
     {id:'emily',name:'Emily',icon:'👩'},{id:'jake',name:'Jake',icon:'👦'},{id:'kaseryn',name:'Kaseryn',icon:'👧'},
     {id:'bubbe',name:'Bubbe',icon:'👵'},{id:'papa',name:'Papa',icon:'👴'},{id:'shared',name:'Shared',icon:'👨‍👩‍👧‍👦'}
@@ -46,8 +47,8 @@
   function progress(items,state){const list=items||BASE_ITEMS,total=list.length,done=list.filter(i=>isDone(i.id,state)).length,ratio=total?done/total:0;return {done,total,ratio,milestone:ratio===1?'Adventure Ready':ratio>=.7?'Almost Ready':ratio>0?'Taking Shape':'Getting Started',icon:ratio===1?'💚':ratio>=.7?'🏔️':ratio>0?'🌿':'🌱'};}
   function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
   const PARTICIPANTS=TRAVELERS.filter(t=>t.id!=='shared').map(t=>({...t,active:true}));
-  const INDIVIDUAL_CELEBRATIONS_KEY='adventureCompanionIndividualCelebrationsM3044C';
-  const FAMILY_CELEBRATION_KEY='adventureCompanionFamilyCelebrationM3044C';
+  const INDIVIDUAL_CELEBRATIONS_KEY=CORE_CONFIG.storage.individualCelebrations||'adventureCompanionIndividualCelebrationsM3044C';
+  const FAMILY_CELEBRATION_KEY=CORE_CONFIG.storage.familyCelebration||'adventureCompanionFamilyCelebrationM3044C';
   function itemsForTraveler(id){return BASE_ITEMS.filter(i=>i.traveler===id);}
   function travelerProgress(id,state){return progress(itemsForTraveler(id),state||readState());}
   function readiness(state){const current=state||readState();return PARTICIPANTS.map(t=>({...t,progress:travelerProgress(t.id,current),ready:travelerProgress(t.id,current).ratio===1}));}

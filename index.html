@@ -1,235 +1,155 @@
-<!doctype html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#294c3a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Adventure Companion">
-<meta name="description" content="Making New Traditions — One adventure at a time.">
+// Friendly startup watchdog and diagnostics
+(() => {
+  "use strict";
 
-<meta property="og:title" content="Smoky Mountains 2026 · Adventure Companion">
-<meta property="og:description" content="Our family itinerary for eight days of mountains, food, traditions, and connection.">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
+  const CORE_CONFIG = window.AdventureCompanionConfig || Object.freeze({ reliability:{} });
+  const BUILD_INFO = window.AdventureCompanionBuild || Object.freeze({ version:"Unknown build", cache:"adventure-companion-unknown" });
+  const BUILD = BUILD_INFO.version;
+  const CACHE = BUILD_INFO.cache;
+  const STARTUP_TIMEOUT_MS = CORE_CONFIG.reliability.startupTimeoutMs ?? 3500;
+  let appReady = false;
+  let readyDetails = {};
+  let startupTimer;
+  const diagnosticsStartedAt = Date.now();
+  const SMART_STOPS_GRACE_MS = CORE_CONFIG.reliability.smartStopsGraceMs ?? 2200;
 
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="Adventure Companion">
+  const $ = selector => document.querySelector(selector);
+  const has = selector => Boolean($(selector));
 
-<meta name="adventure-companion-build" content="">
-<meta name="adventure-companion-build-date" content="">
+  function diagnosticChecks() {
+    const navButtons = document.querySelectorAll("[data-view]");
+    const appScript = [...document.scripts].find(script => /(^|\/)app\.js(?:\?|$)/.test(script.src));
+    return [
+      { key:"startup", label:"Application startup", pass:appReady, detail:appReady ? "Initialized" : "Waiting for app.js" },
+      { key:"navigation", label:"Navigation", pass:navButtons.length >= 5 && readyDetails.navigation === true, detail:`${navButtons.length} navigation controls found` },
+      { key:"dashboard", label:"Dashboard", pass:has("#homeCard") && has("#journeyTrail"), detail:"Home and journey regions available" },
+      { key:"dailyAdventure", label:"Daily Adventure", pass:readyDetails.dailyAdventure === true && has("#screen"), detail:"Day renderer and screen region available" },
+      { key:"reservations", label:"Reservations", pass:has('[data-view="reservations"]'), detail:"Reservation route available" },
+      { key:"packing", label:"Packing", pass:Boolean(window.PACKING || window.packingData || has('[data-view="packing"]')), detail:"Packing route/data available" },
+      { key:"traditions", label:"Traditions", pass:has('[data-view="traditions"]'), detail:"Traditions route available" },
+      { key:"smartStops", label:"Smart Stops", pass:document.documentElement.innerHTML.includes("Smart Stops") || document.documentElement.innerHTML.includes("smartStops"), pending:Date.now()-diagnosticsStartedAt<SMART_STOPS_GRACE_MS && !(document.documentElement.innerHTML.includes("Smart Stops") || document.documentElement.innerHTML.includes("smartStops")), detail:"Route guidance and stop cards are preparing" },
+      { key:"weather", label:"Weather", pass:Boolean(window.AdventureWeather || window.WeatherService || has("#weatherCard")), detail:"Weather card/service available" },
+      { key:"appScript", label:"app.js loaded", pass:Boolean(appScript), detail:appScript ? "Script tag present" : "Script tag missing" },
+      { key:"cache", label:"Cache version", pass:true, detail:CACHE },
+      { key:"build", label:"Build identity", pass:document.querySelector('meta[name="adventure-companion-build"]')?.content === BUILD, detail:BUILD }
+    ];
+  }
 
+  function renderDiagnostics(target = $("#diagnosticsResults")) {
+    const checks = diagnosticChecks();
+    const passed = checks.filter(check => check.pass).length;
+    const pending = checks.filter(check => check.pending).length;
+    const complete = passed + pending;
+    if (target) {
+      target.hidden = false;
+      target.innerHTML = `
+        <div class="diagnosticsSummary ${passed === checks.length ? "healthy" : "attention"}">
+          <strong>${passed === checks.length ? "✅" : pending ? "⏳" : "⚠️"} ${pending ? `${complete}/${checks.length} ready or initializing` : `${passed}/${checks.length} systems ready`}</strong>
+          <small>Build ${BUILD} · Cache ${CACHE}</small>
+        </div>
+        <div class="diagnosticsList">
+          ${checks.map(check => `<div class="${check.pending ? "pending" : ""}"><span>${check.pass ? "✅" : check.pending ? "⏳" : "⚠️"} ${check.label}</span><small>${check.pending ? "Initializing… " : ""}${check.detail}</small></div>`).join("")}
+        </div>
+        <button class="diagnosticsRetry" type="button">Run diagnostics again</button>`;
+      target.querySelector(".diagnosticsRetry")?.addEventListener("click", () => renderDiagnostics(target));
+    }
+    const health = $("#buildHealthStatus");
+    if (health) health.textContent = passed === checks.length ? "Ready ✅" : pending ? "Finishing setup…" : `${passed}/${checks.length} checks ready`;
+    return { checks, passed, total:checks.length, healthy:passed === checks.length };
+  }
 
+  function removeRecovery() {
+    $("#startupRecovery")?.remove();
+    document.body.classList.remove("startupFailureOpen");
+  }
 
-<title>Adventure Companion · Family Premiere</title>
-<link rel="stylesheet" href="styles.css">
-<script src="version.js"></script></head>
-<body>
+  function showRecovery() {
+    if (appReady || $("#startupRecovery")) return;
+    const panel = document.createElement("section");
+    panel.id = "startupRecovery";
+    panel.className = "startupRecovery";
+    panel.setAttribute("role", "alertdialog");
+    panel.setAttribute("aria-modal", "true");
+    panel.innerHTML = `
+      <div class="startupRecoveryCard">
+        <div class="startupRecoveryMark">🏔️ 🌿 💚</div>
+        <span class="eyebrow">QUICK TUNE-UP NEEDED</span>
+        <h2>Adventure Companion didn’t finish starting.</h2>
+        <p>Your trip information is still safe. A critical script may not have loaded, or the browser may be using an older cached copy.</p>
+        <div class="startupRecoveryActions">
+          <button data-recovery="retry" type="button">↻ Try again</button>
+          <button data-recovery="diagnostics" type="button">🩺 View diagnostics</button>
+          <button data-recovery="cache" type="button">🧹 Clear app cache</button>
+        </div>
+        <div id="startupDiagnostics" class="diagnosticsResults" hidden></div>
+        <small class="startupBuild">Build ${BUILD} · ${CACHE}</small>
+      </div>`;
+    document.body.appendChild(panel);
+    document.body.classList.add("startupFailureOpen");
+    panel.querySelector('[data-recovery="retry"]')?.addEventListener("click", () => location.reload());
+    panel.querySelector('[data-recovery="diagnostics"]')?.addEventListener("click", () => renderDiagnostics($("#startupDiagnostics")));
+    panel.querySelector('[data-recovery="cache"]')?.addEventListener("click", clearAppCache);
+  }
 
-<div id="buildTools" class="buildTools">
-  <button id="devBadge" class="devBadge" type="button" aria-label="Show current build information">
-    <span class="devDot"></span>
-    <span class="devBadgeText"><strong data-build-field="version">Loading…</strong><small data-build-field="feature">Build information</small></span>
-  </button>
+  async function clearAppCache() {
+    const button = document.querySelector('[data-recovery="cache"]');
+    if (button) { button.disabled = true; button.textContent = "Clearing…"; }
+    try {
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(registration => registration.unregister()));
+      }
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.filter(key => key.startsWith("adventure-companion-")).map(key => caches.delete(key)));
+      }
+      location.reload();
+    } catch (error) {
+      if (button) { button.disabled = false; button.textContent = "Couldn’t clear automatically"; }
+      alert("Please refresh with Ctrl+Shift+R. Your saved trip and packing progress have not been deleted.");
+    }
+  }
 
-  <button id="feedbackButton" class="feedbackButton" type="button" aria-label="Open feedback mode">📝</button>
-</div>
+  function wireTools() {
+    $("#runDiagnostics")?.addEventListener("click", () => renderDiagnostics());
+    $("#checkForUpdates")?.addEventListener("click", async event => {
+      const button = event.currentTarget;
+      const original = button.textContent;
+      button.disabled = true;
+      button.textContent = "Checking…";
+      try {
+        const registration = await navigator.serviceWorker?.getRegistration();
+        await registration?.update();
+        button.textContent = "Checked ✓";
+      } catch (_) {
+        button.textContent = "Check unavailable";
+      }
+      setTimeout(() => { button.disabled = false; button.textContent = original; }, CORE_CONFIG.reliability.buttonResetMs ?? 1600);
+    });
+    BUILD_INFO.applyToDocument?.(document);
+  }
 
-<div id="buildPanel" class="buildPanel" hidden>
-  <div class="panelHandle"></div>
-  <div class="panelHeader">
-    <div>
-      <span class="eyebrow">DEVELOPMENT MODE</span>
-      <h3>Adventure Companion</h3>
-    </div>
-    <button id="closeBuildPanel" class="panelClose" type="button" aria-label="Close">×</button>
-  </div>
-  <dl class="buildDetails">
-    <div><dt>Version</dt><dd data-build-field="version">Loading…</dd></div>
-    <div><dt>Milestone</dt><dd data-build-field="milestone">Loading…</dd></div>
-    <div><dt>Feature</dt><dd data-build-field="feature">Loading…</dd></div>
-    <div><dt>Updated</dt><dd data-build-field="updated">Loading…</dd></div>
-    <div><dt>Cache</dt><dd id="buildCacheVersion" data-build-field="cache">Loading…</dd></div>
-    <div><dt>System</dt><dd id="buildHealthStatus">Checking…</dd></div>
-  </dl>
-  <p class="buildHint" data-build-field="description">Loading build details…</p>
-  <div class="buildPanelActions">
-    <button id="runDiagnostics" type="button">🩺 Run diagnostics</button>
-    <button id="checkForUpdates" type="button">↻ Check for updates</button>
-  </div>
-  <div id="diagnosticsResults" class="diagnosticsResults" hidden aria-live="polite"></div>
-</div>
+  function markAppReady(details = {}) {
+    appReady = true;
+    readyDetails = { ...readyDetails, ...details };
+    clearTimeout(startupTimer);
+    removeRecovery();
+    document.documentElement.dataset.appReady = "true";
+    window.dispatchEvent(new CustomEvent("adventurecompanion:ready", { detail:{ build:BUILD, ...readyDetails } }));
+    setTimeout(() => renderDiagnostics(), 0);
+  }
 
-<div id="feedbackPanel" class="feedbackPanel" hidden>
-  <div class="panelHandle"></div>
-  <div class="panelHeader">
-    <div>
-      <span class="eyebrow">FEEDBACK MODE</span>
-      <h3>Capture what you notice</h3>
-    </div>
-    <button id="closeFeedbackPanel" class="panelClose" type="button" aria-label="Close">×</button>
-  </div>
+  window.AdventureReliability = Object.freeze({
+    build:BUILD,
+    cache:CACHE,
+    markAppReady,
+    runDiagnostics:renderDiagnostics,
+    clearAppCache,
+    getStatus:() => ({ appReady, ...renderDiagnostics(document.createElement("div")) })
+  });
 
-  <div class="feedbackKinds" role="group" aria-label="Feedback type">
-    <button type="button" data-kind="bug">🐞 Bug</button>
-    <button type="button" data-kind="idea">💡 Idea</button>
-    <button type="button" data-kind="confusing">🤔 Confusing</button>
-    <button type="button" data-kind="love">💚 Love it</button>
-  </div>
-
-  <label class="feedbackLabel">
-    Screen or day
-    <input id="feedbackScreen" type="text" placeholder="Example: Day 2 stop cards">
-  </label>
-
-  <label class="feedbackLabel">
-    What did you notice?
-    <textarea id="feedbackNote" rows="4" placeholder="Describe what happened or what you would change."></textarea>
-  </label>
-
-  <div class="ratingRow">
-    <span>Screen rating</span>
-    <div id="feedbackStars" class="feedbackStars" aria-label="Rate this screen">
-      <button type="button" data-rating="1">☆</button>
-      <button type="button" data-rating="2">☆</button>
-      <button type="button" data-rating="3">☆</button>
-      <button type="button" data-rating="4">☆</button>
-      <button type="button" data-rating="5">☆</button>
-    </div>
-  </div>
-
-  <div class="feedbackActions">
-    <button id="saveFeedback" class="saveFeedback" type="button">Save feedback</button>
-    <button id="viewFeedback" type="button">View saved notes</button>
-  </div>
-
-  <div id="feedbackSaved" class="feedbackSaved" hidden></div>
-</div>
-
-<div id="updateToast" class="updateToast" hidden>
-  <div>
-    <strong>Adventure Companion has an update</strong>
-    <small>A newer build is ready.</small>
-  </div>
-  <button id="refreshApp" type="button">Refresh now</button>
-  <button id="dismissUpdate" class="dismissUpdate" type="button" aria-label="Dismiss update">×</button>
-</div>
-
-
-
-</div>
-
-
-<div id="welcomeModal" class="welcomeModal" hidden>
-  <div class="welcomeBackdrop"></div>
-  <section class="welcomeSheet" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
-    <div class="welcomeMark">🏔️ 🌿 💚</div>
-    <span class="eyebrow light">OUR FAMILY ADVENTURE</span>
-    <h2 id="welcomeTitle">The Smokies are calling.</h2>
-    <p>Eight days to explore, eat well, laugh often, and begin traditions worth carrying home.</p>
-    <button id="enterAdventure" class="welcomeButton" type="button">Enter our adventure</button>
-    <button id="skipWelcome" class="welcomeSkip" type="button">Skip next time</button>
-  </section>
-</div>
-
-<div class="app">
-
-<aside class="desktopSideNav" aria-label="Adventure Companion navigation">
-  <div class="sideBrand">
-    <img src="icon-192.png" alt="">
-    <span><strong>Adventure</strong><small>COMPANION</small></span>
-  </div>
-  <div class="sideMenu">
-    <button class="active" data-view="home">⌂<span>Dashboard</span></button>
-    <button data-view="week">🗓️<span>Daily Adventure</span></button>
-    <button data-view="reservations">🍽️<span>Reservations</span></button>
-    <button data-view="traditions">💚<span>Traditions</span></button>
-    <button data-view="packing">🎒<span>Family Packing</span></button>
-    <button data-view="trip">📍<span>Trip Snapshot</span></button>
-  </div>
-  <section class="sideParty">
-    <small>TRAVEL PARTY</small>
-    <span>● Papa</span>
-    <span>● Bubbe</span>
-    <span>● Emily</span>
-    <span>● Jake</span>
-    <span>● Kaseryn</span>
-  </section>
-  <blockquote>Making new traditions.</blockquote>
-</aside>
-
-<div class="desktopContent">
-<header class="hero">
-  <div class="ridge r1"></div><div class="ridge r2"></div>
-  <div class="heroText"><small>EMILY'S ADVENTURE COMPANION</small><h1>Making New Traditions</h1><p>One adventure at a time.</p><div>🏔️ 🌿 💚</div></div>
-</header>
-<main>
-<section class="top card">
- <div><span class="eyebrow">CURRENT ADVENTURE</span><h2>Smoky Mountains 2026</h2></div>
- <span id="phaseBadge" class="badge">Planning</span>
- <div class="phases">
-  <div data-p="dreaming"><b>🌱</b><small>Dreaming</small></div><i></i>
-  <div data-p="planning"><b>🌿</b><small>Planning</small></div><i></i>
-  <div data-p="experiencing"><b>🏔️🌿</b><small>Experiencing</small></div><i></i>
-  <div data-p="remembering"><b>🌳</b><small>Remembering</small></div>
- </div>
- <div class="preview"><label>Preview date<input id="previewDate" type="date"></label><button id="today">Today</button></div>
-</section>
-
-<section class="familyWelcome">
-  <h3>Welcome to our Smoky Mountains Adventure</h3>
-  <p>Eight days of mountains, great food, family traditions, and room for a few surprises.</p>
-  <div class="tripStats">
-    <div><b>8</b><small>Adventure days</small></div>
-    <div><b>5</b><small>Travelers</small></div>
-    <div><b>1</b><small>New tradition</small></div>
-  </div>
-  <div class="familyActions">
-    <button id="shareTrip" type="button">↗ Share with family</button>
-    <button data-view="week" type="button">🗓️ See the whole week</button>
-  </div>
-</section>
-
-<section id="homeCard" class="card homeCard"></section>
-
-<section id="weatherCard" class="card weatherCard" aria-label="Live weather"></section>
-
-<section class="card journeyCard">
-  <div class="journeyHead">
-    <div><span class="eyebrow">THE JOURNEY AHEAD</span><h3>Our Adventure Trail</h3></div>
-    <span id="journeyCount" class="journeyCount">0 of 8 complete</span>
-  </div>
-  <div id="journeyTrail" class="journeyTrail"></div>
-  <button class="trailAction" data-view="week" type="button">Open the full adventure week →</button>
-</section>
-
-<section class="quick">
- <button data-view="week">🗓️<span><strong>Daily Adventure</strong><small>Dashboard, stops & directions</small></span></button>
- <button data-view="reservations">🍽️<span><strong>Reservations</strong><small>Confirmed & pending</small></span></button>
- <button data-view="traditions">💚<span><strong>Traditions</strong><small>Moments to protect</small></span></button>
- <button data-view="packing">🎒<span><strong>Family Packing</strong><small>Essentials by traveler</small></span></button>
-</section>
-<section id="screen" class="card screen" hidden></section>
-
-<section class="familyPromise">
-  <span>🏔️ Adventure</span><i></i><span>🌿 Growth</span><i></i><span>💚 Connection</span>
-</section>
-
-<p class="privacyNote">Shared family itinerary · Reservation details are visible to everyone using this browser.</p>
-</main>
-</div>
-<nav>
-<button class="active" data-view="home">⌂<small>Home</small></button>
-<button data-view="week">🗺️<small>Adventure</small></button>
-<button data-view="packing">🎒<small>Prepare</small></button>
-<button data-view="traditions">📖<small>Memories</small></button>
-<button data-view="companion">🌿<small>Companion</small></button>
-</nav>
-</div>
-<script src="reliability.js"></script>
-<script src="weather-service.js"></script>
-<script src="packing.js"></script>
-<script src="weather-ui.js"></script>
-<script src="app.js"></script></body></html>
+  document.addEventListener("DOMContentLoaded", () => {
+    wireTools();
+    startupTimer = setTimeout(showRecovery, STARTUP_TIMEOUT_MS);
+  });
+})();

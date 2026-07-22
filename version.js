@@ -1,38 +1,50 @@
-(function(root,factory){
-  "use strict";
-  const build=factory();
-  root.AdventureCompanionBuild=build;
-  if(typeof module==="object"&&module.exports)module.exports=build;
-})(typeof globalThis!=="undefined"?globalThis:this,function(){
-  "use strict";
+importScripts("./config.js","./version.js");
 
-  const build=Object.freeze({
-    version:"M3-05.0B",
-    milestone:"Milestone 3",
-    feature:"Architecture & Version Foundation",
-    build:"Build 1",
-    updated:"July 22, 2026",
-    cache:"adventure-companion-m3-05-0b-build-1",
-    eyebrow:"M3-05.0B · ARCHITECTURE & VERSION FOUNDATION",
-    description:"Centralized build information creates one reliable source of truth for the application, diagnostics, and offline cache."
-  });
+const BUILD_INFO=self.AdventureCompanionBuild;
+const CACHE=BUILD_INFO.cache;
+const BUILD=BUILD_INFO.version;
+const ASSETS=["./","./index.html","./styles.css","./config.js","./version.js","./reliability.js","./app.js","./weather-service.js","./weather-ui.js","./packing.js","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./favicon-32.png"];
 
-  function applyToDocument(doc){
-    if(!doc)return;
-    const buildMeta=doc.querySelector('meta[name="adventure-companion-build"]');
-    const dateMeta=doc.querySelector('meta[name="adventure-companion-build-date"]');
-    if(buildMeta)buildMeta.content=build.version;
-    if(dateMeta)dateMeta.content=build.updated;
-    doc.querySelectorAll("[data-build-field]").forEach(node=>{
-      const value=build[node.dataset.buildField];
-      if(value!==undefined)node.textContent=value;
-    });
+self.addEventListener("install",event=>{
+  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));
+});
+
+self.addEventListener("message",event=>{
+  if(event.data?.type==="SKIP_WAITING") self.skipWaiting();
+});
+
+self.addEventListener("activate",event=>{
+  event.waitUntil(
+    caches.keys()
+      .then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key))))
+      .then(()=>self.clients.claim())
+  );
+});
+
+self.addEventListener("fetch",event=>{
+  if(event.request.mode==="navigate"){
+    event.respondWith(
+      fetch(event.request)
+        .then(response=>{
+          const copy=response.clone();
+          caches.open(CACHE).then(cache=>cache.put("./index.html",copy));
+          return response;
+        })
+        .catch(()=>caches.match("./index.html"))
+    );
+    return;
   }
 
-  if(typeof document!=="undefined"){
-    applyToDocument(document);
-    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>applyToDocument(document),{once:true});
-  }
-
-  return Object.freeze({...build,applyToDocument});
+  event.respondWith(
+    caches.match(event.request).then(cached=>{
+      const network=fetch(event.request).then(response=>{
+        if(response && response.status===200){
+          const copy=response.clone();
+          caches.open(CACHE).then(cache=>cache.put(event.request,copy));
+        }
+        return response;
+      }).catch(()=>cached);
+      return cached || network;
+    })
+  );
 });
