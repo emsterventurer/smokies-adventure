@@ -5,6 +5,7 @@ const {
   SIGNAL_STATES,
   PRIORITY_TIERS,
   createFallbackState,
+  normalizeContext,
   createSignal,
   createFocusCandidate,
   selectDailyFocus,
@@ -98,7 +99,7 @@ function runTests() {
   testCreateSignal();
   testDailyFocusSelection();
   testQuietStateSelection();
-
+  testContextNormalization();
   console.log("Adventure Brain foundation tests passed.");
 
 }
@@ -155,4 +156,29 @@ function testQuietStateSelection() {
     null
   );
 }
+
+function testContextNormalization() {
+  const context = normalizeContext({
+    phase: {
+      id: "planning",
+      state: SIGNAL_STATES.AVAILABLE,
+    },
+  });
+
+  assert.strictEqual(
+    context.phase.id,
+    "planning"
+  );
+
+  assert.strictEqual(
+    context.weather.state,
+    SIGNAL_STATES.UNKNOWN
+  );
+
+  assert.strictEqual(
+    context.packing.state,
+    SIGNAL_STATES.UNKNOWN
+  );
+}
+
 runTests();

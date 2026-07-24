@@ -55,7 +55,80 @@
       },
     };
   }
-    function createSignal({
+  
+    function normalizeContext(context = {}) {
+    return {
+      now: {
+        state:
+          context.now?.state ??
+          SIGNAL_STATES.UNKNOWN,
+        value: context.now?.value ?? null,
+      },
+
+      trip: {
+        state:
+          context.trip?.state ??
+          SIGNAL_STATES.UNKNOWN,
+        value: context.trip?.value ?? null,
+      },
+
+      phase: {
+        state:
+          context.phase?.state ??
+          SIGNAL_STATES.UNKNOWN,
+        id: context.phase?.id ?? null,
+      },
+
+      weather: {
+        state:
+          context.weather?.state ??
+          SIGNAL_STATES.UNKNOWN,
+        value: context.weather?.value ?? null,
+      },
+
+      itinerary: {
+        state:
+          context.itinerary?.state ??
+          SIGNAL_STATES.UNKNOWN,
+        value:
+          context.itinerary?.value ?? null,
+      },
+
+      packing: {
+        state:
+          context.packing?.state ??
+          SIGNAL_STATES.UNKNOWN,
+        value:
+          context.packing?.value ?? null,
+      },
+
+      reservations: {
+        state:
+          context.reservations?.state ??
+          SIGNAL_STATES.UNKNOWN,
+        value:
+          context.reservations?.value ?? null,
+      },
+
+      familyReadiness: {
+        state:
+          context.familyReadiness?.state ??
+          SIGNAL_STATES.UNKNOWN,
+        value:
+          context.familyReadiness?.value ?? null,
+      },
+
+      campfire: {
+        state:
+          context.campfire?.state ??
+          SIGNAL_STATES.UNKNOWN,
+        value:
+          context.campfire?.value ?? null,
+      },
+    };
+  }
+  
+  function createSignal({
     id,
     category,
     state = SIGNAL_STATES.UNKNOWN,
@@ -112,7 +185,9 @@
 
     return validCandidates[0] ?? null;
   }
-  function evaluate(context = {}) {
+function evaluate(context = {}) {
+    const normalizedContext = normalizeContext(context);
+
     const state = createFallbackState("evaluation-complete");
 
     state.status = {
@@ -121,23 +196,21 @@
       evaluatedAt: new Date().toISOString(),
     };
 
-    if (context.phase) {
-      state.phase = {
-        id: context.phase.id ?? null,
-        state:
-          context.phase.state ?? SIGNAL_STATES.UNKNOWN,
-      };
-    }
+       state.phase = {
+      id: normalizedContext.phase.id,
+      state: normalizedContext.phase.state,
+    };
 
     return state;
   }
-      return Object.freeze({
+   return Object.freeze({
     SIGNAL_STATES,
     PRIORITY_TIERS,
     createFallbackState,
+    normalizeContext,
     createSignal,
     createFocusCandidate,
     selectDailyFocus,
     evaluate,
-  });
+});
 });
