@@ -63,12 +63,35 @@ function testCustomFallbackReason() {
 
   assert.strictEqual(state.status.reason, "evaluation-error");
 }
+function testEvaluation() {
+  const state = require("./adventure-brain.js").evaluate({
+    phase: {
+      id: "planning",
+      state: SIGNAL_STATES.AVAILABLE,
+    },
+  });
 
+  assert.strictEqual(
+    state.status.state,
+    SIGNAL_STATES.AVAILABLE
+  );
+
+  assert.strictEqual(
+    state.status.reason,
+    "evaluation-complete"
+  );
+
+  assert.strictEqual(
+    state.phase.id,
+    "planning"
+  );
+}
 function runTests() {
   testSignalStates();
   testPriorityTiers();
   testFallbackState();
   testCustomFallbackReason();
+  testEvaluation();
 
   console.log("Adventure Brain foundation tests passed.");
 }

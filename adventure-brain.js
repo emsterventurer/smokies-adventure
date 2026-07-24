@@ -55,10 +55,29 @@
       },
     };
   }
+  function evaluate(context = {}) {
+    const state = createFallbackState("evaluation-complete");
 
-  return Object.freeze({
+    state.status = {
+      state: SIGNAL_STATES.AVAILABLE,
+      reason: "evaluation-complete",
+      evaluatedAt: new Date().toISOString(),
+    };
+
+    if (context.phase) {
+      state.phase = {
+        id: context.phase.id ?? null,
+        state:
+          context.phase.state ?? SIGNAL_STATES.UNKNOWN,
+      };
+    }
+
+    return state;
+  }
+    return Object.freeze({
     SIGNAL_STATES,
     PRIORITY_TIERS,
     createFallbackState,
+    evaluate,
   });
 });
