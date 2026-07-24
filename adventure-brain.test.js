@@ -5,6 +5,9 @@ const {
   SIGNAL_STATES,
   PRIORITY_TIERS,
   createFallbackState,
+  createSignal,
+  createFocusCandidate,
+  selectDailyFocus,
 } = require("./adventure-brain.js");
 
 function testSignalStates() {
@@ -92,8 +95,64 @@ function runTests() {
   testFallbackState();
   testCustomFallbackReason();
   testEvaluation();
+  testCreateSignal();
+  testDailyFocusSelection();
+  testQuietStateSelection();
 
   console.log("Adventure Brain foundation tests passed.");
+
+}
+function testCreateSignal() {
+  const signal = createSignal({
+    id: "weather-risk",
+    category: "weather",
+    priorityTier: PRIORITY_TIERS.SAFETY_OR_SERIOUS_WEATHER,
+    active: true,
+    state: SIGNAL_STATES.AVAILABLE,
+  });
+
+  assert.strictEqual(signal.id, "weather-risk");
+  assert.strictEqual(signal.active, true);
+  assert.strictEqual(
+    signal.priorityTier,
+    1
+  );
 }
 
+
+function testDailyFocusSelection() {
+  const focus = selectDailyFocus([
+    createFocusCandidate({
+      id: "tomorrow-packing",
+      priorityTier: PRIORITY_TIERS.TOMORROW_PREPARATION,
+      category: "packing",
+      title: "Prepare tomorrow",
+      message: "Prepare ahead.",
+    }),
+
+    createFocusCandidate({
+      id: "reservation",
+      priorityTier:
+        PRIORITY_TIERS.CONFIRMED_RESERVATION_OR_TRAVEL_REQUIREMENT,
+      category: "timing",
+      title: "Confirmed reservation",
+      message: "A reservation is approaching.",
+    }),
+  ]);
+
+  assert.strictEqual(
+    focus.id,
+    "reservation"
+  );
+}
+
+
+function testQuietStateSelection() {
+  const focus = selectDailyFocus([]);
+
+  assert.strictEqual(
+    focus,
+    null
+  );
+}
 runTests();

@@ -55,6 +55,63 @@
       },
     };
   }
+    function createSignal({
+    id,
+    category,
+    state = SIGNAL_STATES.UNKNOWN,
+    active = false,
+    priorityTier = null,
+    evidence = {},
+  }) {
+    return {
+      id,
+      category,
+      state,
+      active,
+      priorityTier,
+      evidence,
+    };
+  }
+
+  function createFocusCandidate({
+    id,
+    priorityTier,
+    category,
+    title,
+    message,
+    actionLabel = null,
+    actionTarget = null,
+    tone = "calm",
+  }) {
+    return {
+      id,
+      priorityTier,
+      category,
+      title,
+      message,
+      actionLabel,
+      actionTarget,
+      tone,
+    };
+  }
+
+  function selectDailyFocus(candidates = []) {
+    const validCandidates = candidates
+      .filter((candidate) => candidate)
+      .sort((a, b) => {
+        const priorityDifference =
+          (a.priorityTier ?? Infinity) -
+          (b.priorityTier ?? Infinity);
+
+        if (priorityDifference !== 0) {
+          return priorityDifference;
+        }
+
+        return a.id.localeCompare(b.id);
+      });
+
+    return validCandidates[0] ?? null;
+  }
   function evaluate(context = {}) {
     const state = createFallbackState("evaluation-complete");
 
@@ -74,10 +131,13 @@
 
     return state;
   }
-    return Object.freeze({
+      return Object.freeze({
     SIGNAL_STATES,
     PRIORITY_TIERS,
     createFallbackState,
+    createSignal,
+    createFocusCandidate,
+    selectDailyFocus,
     evaluate,
   });
 });
