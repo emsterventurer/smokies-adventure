@@ -128,6 +128,21 @@
     };
   }
   
+  function createPhaseSignal(phase = {}) {
+    return createSignal({
+      id: `phase-${phase.id ?? "unknown"}`,
+      category: "phase",
+      state:
+        phase.state ?? SIGNAL_STATES.UNKNOWN,
+      active: Boolean(phase.id),
+      priorityTier: null,
+      evidence: {
+        phaseId: phase.id ?? null,
+      },
+    });
+  }
+
+
   function createSignal({
     id,
     category,
@@ -185,7 +200,52 @@
 
     return validCandidates[0] ?? null;
   }
-function evaluate(context = {}) {
+
+  function createPhaseFocusCandidate(phase = {}) {
+    const phaseMessages = {
+      dreaming: {
+        title: "Enjoy imagining the adventure",
+        message:
+          "The journey has started before you arrive. Take time to look forward to what is ahead.",
+      },
+
+      planning: {
+        title: "Prepare calmly for the adventure",
+        message:
+          "A few thoughtful preparations now can help the adventure feel effortless later.",
+      },
+
+      experiencing: {
+        title: "Enjoy today's adventure",
+        message:
+          "The best moments happen when the family is present for the experience.",
+      },
+
+      remembering: {
+        title: "Capture the memories",
+        message:
+          "Take a moment to preserve the stories that made the adventure special.",
+      },
+    };
+
+    const message =
+      phaseMessages[phase.id] ?? null;
+
+    if (!message) {
+      return null;
+    }
+
+    return createFocusCandidate({
+      id: `phase-focus-${phase.id}`,
+      priorityTier:
+        PRIORITY_TIERS.ADVENTURE_DISCOVERY_OR_ENCOURAGEMENT,
+      category: "phase",
+      title: message.title,
+      message: message.message,
+    });
+  }
+
+  function evaluate(context = {}) {
     const normalizedContext = normalizeContext(context);
 
     const state = createFallbackState("evaluation-complete");
@@ -211,6 +271,8 @@ function evaluate(context = {}) {
     createSignal,
     createFocusCandidate,
     selectDailyFocus,
+    createPhaseSignal,
+    createPhaseFocusCandidate,
     evaluate,
 });
 });

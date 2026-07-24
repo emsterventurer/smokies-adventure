@@ -9,6 +9,8 @@ const {
   createSignal,
   createFocusCandidate,
   selectDailyFocus,
+  createPhaseSignal,
+  createPhaseFocusCandidate,
 } = require("./adventure-brain.js");
 
 function testSignalStates() {
@@ -100,6 +102,11 @@ function runTests() {
   testDailyFocusSelection();
   testQuietStateSelection();
   testContextNormalization();
+  testPhaseSignal();
+  testPhaseFocusCandidate();
+  testUnknownPhaseFocus();
+
+  
   console.log("Adventure Brain foundation tests passed.");
 
 }
@@ -180,5 +187,52 @@ function testContextNormalization() {
     SIGNAL_STATES.UNKNOWN
   );
 }
+
+function testPhaseSignal() {
+  const signal = createPhaseSignal({
+    id: "planning",
+    state: SIGNAL_STATES.AVAILABLE,
+  });
+
+  assert.strictEqual(
+    signal.id,
+    "phase-planning"
+  );
+
+  assert.strictEqual(
+    signal.category,
+    "phase"
+  );
+}
+
+
+function testPhaseFocusCandidate() {
+  const focus = createPhaseFocusCandidate({
+    id: "experiencing",
+  });
+
+  assert.strictEqual(
+    focus.category,
+    "phase"
+  );
+
+  assert.strictEqual(
+    focus.priorityTier,
+    PRIORITY_TIERS.ADVENTURE_DISCOVERY_OR_ENCOURAGEMENT
+  );
+}
+
+
+function testUnknownPhaseFocus() {
+  const focus = createPhaseFocusCandidate({
+    id: "unknown-phase",
+  });
+
+  assert.strictEqual(
+    focus,
+    null
+  );
+}
+
 
 runTests();
