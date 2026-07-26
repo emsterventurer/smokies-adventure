@@ -619,7 +619,11 @@ function wireReleaseCandidateTools(){
 function dashboardMarkup(d, adventureBrainState){
   const x=DAY_DASH[d.date]||{};
   const complete=isComplete(d.date);
-  return `<section class="dailyDashboard dashboardRedesign">
+  const dailyFocus =
+  adventureBrainState?.dailyFocus?.title ??
+  x.pace ??
+  "Flexible pace";
+   return `<section class="dailyDashboard dashboardRedesign">
     <div class="dashboardLead">
       <span class="dashboardIcon">${x.icon||"🏔️"}</span>
       <div><span class="eyebrow">DAY ${dayNumber(d.date)} OF ${DATA.days.length}</span><h3>${dateLabel(d.date)}</h3><p>${x.focus||d.theme}</p></div>
@@ -632,7 +636,7 @@ function dashboardMarkup(d, adventureBrainState){
       <article><small>🚗 TOTAL DRIVING</small><strong>${d.drive}</strong></article>
       <article><small>🌅 SUNSET</small><strong>${x.sunset||"Check closer to trip"}</strong></article>
     </div>
-    <div class="dashboardFooter"><span>🌿 ${x.pace||"Flexible pace"}</span><span>Smart Stop Cards are today's itinerary</span></div>
+    <div class="dashboardFooter"><span>🌿 ${dailyFocus}</span><span>Smart Stop Cards are today's itinerary</span></div>
   </section>
   <section class="adventureWeather" data-day-weather="${d.date}" aria-label="Adventure Intelligence">
     <div class="adventureWeatherHead">
@@ -950,6 +954,6 @@ window.AdventureReliability?.markAppReady({
   navigation: typeof view === "function",
   dailyAdventure: typeof showDay === "function",
   adventureBrain:
-  getadventureBrainState !== null &&
+  getAdventureBrainState !== null &&
   typeof globalThis.AdventureBrain?.evaluate === "function",
 });
