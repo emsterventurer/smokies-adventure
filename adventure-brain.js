@@ -55,8 +55,7 @@
       },
     };
   }
-  
-    function normalizeContext(context = {}) {
+      function normalizeContext(context = {}) {
     return {
       now: {
         state:
@@ -127,8 +126,7 @@
       },
     };
   }
-  
-  function createPhaseSignal(phase = {}) {
+    function createPhaseSignal(phase = {}) {
     return createSignal({
       id: `phase-${phase.id ?? "unknown"}`,
       category: "phase",

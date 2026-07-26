@@ -106,8 +106,7 @@ function runTests() {
   testPhaseFocusCandidate();
   testUnknownPhaseFocus();
 
-  
-  console.log("Adventure Brain foundation tests passed.");
+   console.log("Adventure Brain foundation tests passed.");
 
 }
 function testCreateSignal() {
