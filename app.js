@@ -630,6 +630,11 @@ function dashboardMarkup(d, adventureBrainState){
     x.reservation ??
     "No timed booking";
   
+  const departureSuggestion =
+    adventureBrainState?.departure?.suggestion ??
+    x.leave ??
+    "Flexible";
+
   return `<section class="dailyDashboard dashboardRedesign">
     <div class="dashboardLead">
       <span class="dashboardIcon">${x.icon||"🏔️"}</span>
@@ -637,7 +642,7 @@ function dashboardMarkup(d, adventureBrainState){
       <button class="completeDay ${complete?"done":""}" data-complete="${d.date}" type="button" aria-pressed="${complete}">${complete?"✓ Complete":"Mark complete"}</button>
     </div>
     <div class="adventureSummary" aria-label="Today's adventure summary">
-      <article><small>⏰ LEAVE AROUND</small><strong>${x.leave||"Flexible"}</strong></article>
+      <article><small>⏰ LEAVE AROUND</small><strong>${departureSuggestion}</strong></article>
       <article><small>📍 FIRST STOP</small><strong>${x.first||d.schedule[0][1]}</strong></article>
       <article><small>🎟️ RESERVATION</small><strong>${reservationSummary}</strong></article>
       <article><small>🚗 TOTAL DRIVING</small><strong>${d.drive}</strong></article>
