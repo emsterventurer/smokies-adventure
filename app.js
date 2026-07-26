@@ -943,8 +943,13 @@ const adventureBrainState = (() => {
 
 
 // Reliability handshake: this line is intentionally last so startup failures remain detectable.
+
+
 window.AdventureReliability?.markAppReady({
-  build:APP_BUILD.version,
-  navigation:typeof view==="function",
-  dailyAdventure:typeof showDay==="function"
+  build: APP_BUILD.version,
+  navigation: typeof view === "function",
+  dailyAdventure: typeof showDay === "function",
+  adventureBrain:
+    adventureBrainState !== null &&
+    typeof globalThis.AdventureBrain?.evaluate === "function",
 });
