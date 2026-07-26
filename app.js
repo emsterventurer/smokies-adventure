@@ -916,9 +916,40 @@ window.addEventListener("load",()=>{
   introFixObserver.observe(document.body,{childList:true,subtree:true});
 });
 
+const adventureBrainState = (() => {
+  try {
+    if (
+      !globalThis.AdventureBrain ||
+      typeof globalThis.AdventureBrain.evaluate !== "function"
+    ) {
+      return null;
+    }
+
+    return globalThis.AdventureBrain.evaluate({
+      phase:
+        typeof getAdventurePhase === "function"
+          ? getAdventurePhase()
+          : null,
+    });
+  } catch (error) {
+    console.warn(
+      "Adventure Brain evaluation failed safely.",
+      error
+    );
+
+    return null;
+  }
+})();
+
+
 // Reliability handshake: this line is intentionally last so startup failures remain detectable.
+
+
 window.AdventureReliability?.markAppReady({
-  build:APP_BUILD.version,
-  navigation:typeof view==="function",
-  dailyAdventure:typeof showDay==="function"
+  build: APP_BUILD.version,
+  navigation: typeof view === "function",
+  dailyAdventure: typeof showDay === "function",
+  adventureBrain:
+    adventureBrainState !== null &&
+    typeof globalThis.AdventureBrain?.evaluate === "function",
 });
