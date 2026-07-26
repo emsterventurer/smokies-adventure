@@ -616,9 +616,25 @@ function wireReleaseCandidateTools(){
   });
 }
 
-function dashboardMarkup(d){
+function dashboardMarkup(d, adventureBrainState){
   const x=DAY_DASH[d.date]||{};
   const complete=isComplete(d.date);
+  
+  const dailyFocus =
+    adventureBrainState?.dailyFocus?.title ??
+    x.pace ??
+    "Flexible pace";
+ 
+  const reservationSummary =
+    adventureBrainState?.reservation?.summary ??
+    x.reservation ??
+    "No timed booking";
+  
+  const departureSuggestion =
+    adventureBrainState?.departure?.suggestion ??
+    x.leave ??
+    "Flexible";
+
   return `<section class="dailyDashboard dashboardRedesign">
     <div class="dashboardLead">
       <span class="dashboardIcon">${x.icon||"🏔️"}</span>
@@ -626,13 +642,13 @@ function dashboardMarkup(d){
       <button class="completeDay ${complete?"done":""}" data-complete="${d.date}" type="button" aria-pressed="${complete}">${complete?"✓ Complete":"Mark complete"}</button>
     </div>
     <div class="adventureSummary" aria-label="Today's adventure summary">
-      <article><small>⏰ LEAVE AROUND</small><strong>${x.leave||"Flexible"}</strong></article>
+      <article><small>⏰ LEAVE AROUND</small><strong>${departureSuggestion}</strong></article>
       <article><small>📍 FIRST STOP</small><strong>${x.first||d.schedule[0][1]}</strong></article>
-      <article><small>🎟️ RESERVATION</small><strong>${x.reservation||"No timed booking"}</strong></article>
+      <article><small>🎟️ RESERVATION</small><strong>${reservationSummary}</strong></article>
       <article><small>🚗 TOTAL DRIVING</small><strong>${d.drive}</strong></article>
       <article><small>🌅 SUNSET</small><strong>${x.sunset||"Check closer to trip"}</strong></article>
     </div>
-    <div class="dashboardFooter"><span>🌿 ${x.pace||"Flexible pace"}</span><span>Smart Stop Cards are today's itinerary</span></div>
+    <div class="dashboardFooter"><span>🌿 ${dailyFocus}</span><span>Smart Stop Cards are today's itinerary</span></div>
   </section>
   <section class="adventureWeather" data-day-weather="${d.date}" aria-label="Adventure Intelligence">
     <div class="adventureWeatherHead">
@@ -709,7 +725,8 @@ if(p==="planning"){
 }
 if(p==="experiencing"){
   const day=DATA.days.find(x=>x.date===localISO(d))||DATA.days[0];
-  h=`${dashboardMarkup(day)}<button class=primary data-day="${day.date}">Open today's adventure</button>`
+  const adventureBrainState=getAdventureBrainState(day);
+  h=`${dashboardMarkup(day,adventureBrainState)}<button class=primary data-day="${day.date}">Open today's adventure</button>`
 }
 if(p==="remembering")h=`<div class=big>🌳</div><h3>This adventure is part of your story.</h3><p>Gather the photos, laughter, favorite meals, and lessons you want to carry forward.</p><button class=primary id=next>🏔️ Plan Your Next Adventure</button>`;
 $("#homeCard").innerHTML=h;renderExperienceDashboard();bindDynamic();bindCompletion();hydrateDayWeather()}
@@ -916,7 +933,7 @@ window.addEventListener("load",()=>{
   introFixObserver.observe(document.body,{childList:true,subtree:true});
 });
 
-const adventureBrainState = (() => {
+function getAdventureBrainState(day = null) {
   try {
     if (
       !globalThis.AdventureBrain ||
@@ -925,12 +942,24 @@ const adventureBrainState = (() => {
       return null;
     }
 
-    return globalThis.AdventureBrain.evaluate({
-      phase:
-        typeof getAdventurePhase === "function"
-          ? getAdventurePhase()
-          : null,
-    });
+   return globalThis.AdventureBrain.evaluate({
+  phase:
+    typeof getAdventurePhase === "function"
+      ? getAdventurePhase()
+      : null,
+
+  itinerary: {
+    state: day ? "available" : "unknown",
+    value: day,
+  },
+
+  reservations: {
+    state: day ? "available" : "unknown",
+    value: day
+      ? DAY_DASH[day.date]?.reservation ?? null
+      : null,
+  },
+});
   } catch (error) {
     console.warn(
       "Adventure Brain evaluation failed safely.",
@@ -939,8 +968,7 @@ const adventureBrainState = (() => {
 
     return null;
   }
-})();
-
+}
 
 // Reliability handshake: this line is intentionally last so startup failures remain detectable.
 
@@ -950,6 +978,6 @@ window.AdventureReliability?.markAppReady({
   navigation: typeof view === "function",
   dailyAdventure: typeof showDay === "function",
   adventureBrain:
-    adventureBrainState !== null &&
-    typeof globalThis.AdventureBrain?.evaluate === "function",
+  getAdventureBrainState !== null &&
+  typeof globalThis.AdventureBrain?.evaluate === "function",
 });

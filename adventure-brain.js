@@ -40,6 +40,15 @@
       signals: [],
       attentionItems: [],
       dailyFocus: null,
+      
+      reservation: {
+        summary: null,
+        state: SIGNAL_STATES.UNKNOWN,
+      },
+      departure: {
+        suggestion: null,
+        state: SIGNAL_STATES.UNKNOWN,
+      },
       remyContext: {
         mode: "light-touch",
         primaryTopic: null,
@@ -258,7 +267,25 @@
       id: normalizedContext.phase.id,
       state: normalizedContext.phase.state,
     };
+    state.itinerary = {
+      state: normalizedContext.itinerary.state,
+      value: normalizedContext.itinerary.value,
+    };
 
+    state.reservations = {
+     state: normalizedContext.reservations.state,
+    value: normalizedContext.reservations.value,
+    };
+    
+    state.reservation = {
+      summary: normalizedContext.reservations.value,
+      state: normalizedContext.reservations.state,
+    };
+    state.departure = {
+      suggestion:
+        normalizedContext.itinerary.value?.leave ?? null,
+    state: normalizedContext.itinerary.state,
+    };
     return state;
   }
    return Object.freeze({
