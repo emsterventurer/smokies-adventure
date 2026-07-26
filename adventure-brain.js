@@ -45,6 +45,10 @@
         summary: null,
         state: SIGNAL_STATES.UNKNOWN,
       },
+      departure: {
+        suggestion: null,
+        state: SIGNAL_STATES.UNKNOWN,
+      },
       remyContext: {
         mode: "light-touch",
         primaryTopic: null,
@@ -276,6 +280,11 @@
     state.reservation = {
       summary: normalizedContext.reservations.value,
       state: normalizedContext.reservations.state,
+    };
+    state.departure = {
+      suggestion:
+        normalizedContext.itinerary.value?.leave ?? null,
+    state: normalizedContext.itinerary.state,
     };
     return state;
   }
