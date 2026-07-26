@@ -40,6 +40,11 @@
       signals: [],
       attentionItems: [],
       dailyFocus: null,
+      
+      reservation: {
+        summary: null,
+        state: SIGNAL_STATES.UNKNOWN,
+      },
       remyContext: {
         mode: "light-touch",
         primaryTopic: null,
@@ -265,7 +270,12 @@
 
     state.reservations = {
      state: normalizedContext.reservations.state,
-      value: normalizedContext.reservations.value,
+    value: normalizedContext.reservations.value,
+    };
+    
+    state.reservation = {
+      summary: normalizedContext.reservations.value,
+      state: normalizedContext.reservations.state,
     };
     return state;
   }
