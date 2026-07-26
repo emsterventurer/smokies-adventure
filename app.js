@@ -619,11 +619,18 @@ function wireReleaseCandidateTools(){
 function dashboardMarkup(d, adventureBrainState){
   const x=DAY_DASH[d.date]||{};
   const complete=isComplete(d.date);
+  
   const dailyFocus =
-  adventureBrainState?.dailyFocus?.title ??
-  x.pace ??
-  "Flexible pace";
-   return `<section class="dailyDashboard dashboardRedesign">
+    adventureBrainState?.dailyFocus?.title ??
+    x.pace ??
+    "Flexible pace";
+ 
+  const reservationSummary =
+    adventureBrainState?.reservation?.summary ??
+    x.reservation ??
+    "No timed booking";
+  
+  return `<section class="dailyDashboard dashboardRedesign">
     <div class="dashboardLead">
       <span class="dashboardIcon">${x.icon||"🏔️"}</span>
       <div><span class="eyebrow">DAY ${dayNumber(d.date)} OF ${DATA.days.length}</span><h3>${dateLabel(d.date)}</h3><p>${x.focus||d.theme}</p></div>
@@ -632,7 +639,7 @@ function dashboardMarkup(d, adventureBrainState){
     <div class="adventureSummary" aria-label="Today's adventure summary">
       <article><small>⏰ LEAVE AROUND</small><strong>${x.leave||"Flexible"}</strong></article>
       <article><small>📍 FIRST STOP</small><strong>${x.first||d.schedule[0][1]}</strong></article>
-      <article><small>🎟️ RESERVATION</small><strong>${x.reservation||"No timed booking"}</strong></article>
+      <article><small>🎟️ RESERVATION</small><strong>${reservationSummary}</strong></article>
       <article><small>🚗 TOTAL DRIVING</small><strong>${d.drive}</strong></article>
       <article><small>🌅 SUNSET</small><strong>${x.sunset||"Check closer to trip"}</strong></article>
     </div>
