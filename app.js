@@ -616,7 +616,7 @@ function wireReleaseCandidateTools(){
   });
 }
 
-function dashboardMarkup(d){
+function dashboardMarkup(d, adventureBrainState){
   const x=DAY_DASH[d.date]||{};
   const complete=isComplete(d.date);
   return `<section class="dailyDashboard dashboardRedesign">
@@ -709,7 +709,8 @@ if(p==="planning"){
 }
 if(p==="experiencing"){
   const day=DATA.days.find(x=>x.date===localISO(d))||DATA.days[0];
-  h=`${dashboardMarkup(day)}<button class=primary data-day="${day.date}">Open today's adventure</button>`
+  const adventureBrainState=getAdventureBrainState();
+  h=`${dashboardMarkup(day,adventureBrainState)}<button class=primary data-day="${day.date}">Open today's adventure</button>`
 }
 if(p==="remembering")h=`<div class=big>🌳</div><h3>This adventure is part of your story.</h3><p>Gather the photos, laughter, favorite meals, and lessons you want to carry forward.</p><button class=primary id=next>🏔️ Plan Your Next Adventure</button>`;
 $("#homeCard").innerHTML=h;renderExperienceDashboard();bindDynamic();bindCompletion();hydrateDayWeather()}
@@ -916,7 +917,7 @@ window.addEventListener("load",()=>{
   introFixObserver.observe(document.body,{childList:true,subtree:true});
 });
 
-const adventureBrainState = (() => {
+function getAdventureBrainState() {
   try {
     if (
       !globalThis.AdventureBrain ||
@@ -939,8 +940,7 @@ const adventureBrainState = (() => {
 
     return null;
   }
-})();
-
+}
 
 // Reliability handshake: this line is intentionally last so startup failures remain detectable.
 
@@ -950,6 +950,6 @@ window.AdventureReliability?.markAppReady({
   navigation: typeof view === "function",
   dailyAdventure: typeof showDay === "function",
   adventureBrain:
-    adventureBrainState !== null &&
-    typeof globalThis.AdventureBrain?.evaluate === "function",
+  getadventureBrainState !== null &&
+  typeof globalThis.AdventureBrain?.evaluate === "function",
 });
