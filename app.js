@@ -725,7 +725,7 @@ if(p==="planning"){
 }
 if(p==="experiencing"){
   const day=DATA.days.find(x=>x.date===localISO(d))||DATA.days[0];
-  const adventureBrainState=getAdventureBrainState();
+  const adventureBrainState=getAdventureBrainState(day);
   h=`${dashboardMarkup(day,adventureBrainState)}<button class=primary data-day="${day.date}">Open today's adventure</button>`
 }
 if(p==="remembering")h=`<div class=big>🌳</div><h3>This adventure is part of your story.</h3><p>Gather the photos, laughter, favorite meals, and lessons you want to carry forward.</p><button class=primary id=next>🏔️ Plan Your Next Adventure</button>`;
@@ -933,7 +933,7 @@ window.addEventListener("load",()=>{
   introFixObserver.observe(document.body,{childList:true,subtree:true});
 });
 
-function getAdventureBrainState() {
+function getAdventureBrainState(day = null) {
   try {
     if (
       !globalThis.AdventureBrain ||
@@ -942,12 +942,24 @@ function getAdventureBrainState() {
       return null;
     }
 
-    return globalThis.AdventureBrain.evaluate({
-      phase:
-        typeof getAdventurePhase === "function"
-          ? getAdventurePhase()
-          : null,
-    });
+   return globalThis.AdventureBrain.evaluate({
+  phase:
+    typeof getAdventurePhase === "function"
+      ? getAdventurePhase()
+      : null,
+
+  itinerary: {
+    state: day ? "available" : "unknown",
+    value: day,
+  },
+
+  reservations: {
+    state: day ? "available" : "unknown",
+    value: day
+      ? DAY_DASH[day.date]?.reservation ?? null
+      : null,
+  },
+});
   } catch (error) {
     console.warn(
       "Adventure Brain evaluation failed safely.",

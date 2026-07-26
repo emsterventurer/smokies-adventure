@@ -258,7 +258,15 @@
       id: normalizedContext.phase.id,
       state: normalizedContext.phase.state,
     };
+    state.itinerary = {
+      state: normalizedContext.itinerary.state,
+      value: normalizedContext.itinerary.value,
+    };
 
+    state.reservations = {
+     state: normalizedContext.reservations.state,
+      value: normalizedContext.reservations.value,
+    };
     return state;
   }
    return Object.freeze({
