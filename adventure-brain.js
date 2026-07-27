@@ -1,19 +1,22 @@
 (function (root, factory) {
-  const api = factory();
+  const sharedState =
+    typeof module === "object" && module.exports
+      ? require("./shared-state")
+      : root.SharedState;
+
+  const api = factory(sharedState);
 
   if (typeof module === "object" && module.exports) {
     module.exports = api;
   }
 
   root.AdventureBrain = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function () {
-  "use strict";
+})(
+  typeof globalThis !== "undefined" ? globalThis : this,
+  function (SharedState) {
+    "use strict";
 
-  const SIGNAL_STATES = Object.freeze({
-    AVAILABLE: "available",
-    UNAVAILABLE: "unavailable",
-    UNKNOWN: "unknown",
-  });
+    const SIGNAL_STATES = SharedState.STATES;
 
   const PRIORITY_TIERS = Object.freeze({
     SAFETY_OR_SERIOUS_WEATHER: 1,

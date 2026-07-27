@@ -1,13 +1,20 @@
 (function (root, factory) {
-  const api = factory();
+  const sharedState =
+    typeof module === "object" && module.exports
+      ? require("./shared-state")
+      : root.SharedState;
+
+  const api = factory(sharedState);
 
   if (typeof module === "object" && module.exports) {
     module.exports = api;
   }
 
   root.LivingCampfire = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function () {
-  "use strict";
+})(
+  typeof globalThis !== "undefined" ? globalThis : this,
+  function (SharedState) {
+    "use strict";
 
   const MESSAGE_CATEGORIES = Object.freeze({
     ENCOURAGEMENT: "encouragement",
@@ -17,11 +24,7 @@
     LIGHT_TOUCH: "light-touch",
   });
 
-  const CONTEXT_STATES = Object.freeze({
-    AVAILABLE: "available",
-    UNAVAILABLE: "unavailable",
-    UNKNOWN: "unknown",
-  });
+  const CONTEXT_STATES = SharedState.STATES;
 
   function createFallbackExperience(
     reason = "campfire-context-unavailable"
