@@ -47,20 +47,50 @@
     };
   }
 
-  function evaluate(remyContext = null) {
-    if (
-      !remyContext ||
-      typeof remyContext !== "object"
-    ) {
-      return createFallbackExperience(
-        "invalid-remy-context"
-      );
-    }
+  function normalizeRemyContext(remyContext = {}) {
+   return {
+    mode:
+      remyContext.mode ??
+      "light-touch",
 
+    primaryTopic:
+      remyContext.primaryTopic ??
+      null,
+
+    dailyFocusId:
+      remyContext.dailyFocusId ??
+      null,
+
+    avoidTopics:
+      Array.isArray(remyContext.avoidTopics)
+        ? remyContext.avoidTopics
+        : [],
+
+    state:
+      remyContext.state ??
+      CONTEXT_STATES.UNKNOWN,
+    };
+  }
+
+  function evaluate(remyContext = null) {
+  if (
+    !remyContext ||
+    typeof remyContext !== "object"
+  ) {
     return createFallbackExperience(
-      "living-campfire-foundation"
+      "invalid-remy-context"
     );
   }
+
+  const context =
+    normalizeRemyContext(remyContext);
+
+  void context;
+
+  return createFallbackExperience(
+    "living-campfire-foundation"
+  );
+}
 
   return Object.freeze({
     MESSAGE_CATEGORIES,

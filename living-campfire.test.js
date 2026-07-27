@@ -70,6 +70,20 @@ function runTests() {
     "invalid-remy-context"
   );
 
+const normalized =
+  LivingCampfire.evaluate({
+    mode: "reflection",
+    primaryTopic: "weather",
+    dailyFocusId: "focus-1",
+    avoidTopics: ["packing"],
+    state: "available",
+  });
+
+assert.equal(
+  normalized.meta.reason,
+  "living-campfire-foundation"
+);
+
   console.log(
     "Living Campfire foundation tests passed."
   );
