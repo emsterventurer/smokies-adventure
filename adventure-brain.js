@@ -67,7 +67,7 @@
       },
     };
   }
-      function normalizeContext(context = {}) {
+  function normalizeContext(context = {}) {
     return {
       now: {
         state:
@@ -138,21 +138,56 @@
       },
     };
   }
-    function createPhaseSignal(phase = {}) {
-    return createSignal({
-      id: `phase-${phase.id ?? "unknown"}`,
-      category: "phase",
-      state:
-        phase.state ?? SIGNAL_STATES.UNKNOWN,
-      active: Boolean(phase.id),
-      priorityTier: null,
-      evidence: {
-        phaseId: phase.id ?? null,
-      },
-    });
+  function evaluateFamilyReadiness(
+    familyReadiness = {}
+  ) {
+    const state =
+      familyReadiness.state ??
+      SIGNAL_STATES.UNKNOWN;
+
+    const adventurers =
+      familyReadiness.value?.adventurers;
+
+    if (
+      state !== SIGNAL_STATES.AVAILABLE ||
+      !Array.isArray(adventurers)
+    ) {
+      return {
+        familyEligible: false,
+        blockedBy: [],
+        state: SIGNAL_STATES.UNKNOWN,
+      };
+    }
+
+    const blockedBy = adventurers
+      .filter(
+        (adventurer) =>
+          adventurer?.ready !== true
+      )
+      .map((adventurer) => adventurer.id)
+      .filter(Boolean);
+
+    return {
+      familyEligible:
+        adventurers.length > 0 &&
+        blockedBy.length === 0,
+      blockedBy,
+      state: SIGNAL_STATES.AVAILABLE,
+    };
   }
-
-
+  function createPhaseSignal(phase = {}) {
+      return createSignal({
+        id: `phase-${phase.id ?? "unknown"}`,
+        category: "phase",
+        state:
+          phase.state ?? SIGNAL_STATES.UNKNOWN,
+        active: Boolean(phase.id),
+        priorityTier: null,
+        evidence: {
+          phaseId: phase.id ?? null,
+        },
+      });
+    }
   function createSignal({
     id,
     category,
@@ -170,7 +205,205 @@
       evidence,
     };
   }
+  function detectFamilyReadinessTransitions(
+  previousFamilyReadiness,
+  currentFamilyReadiness
+) {
+  const previousEvaluation =
+    evaluateFamilyReadiness(
+      previousFamilyReadiness
+    );
 
+  const currentEvaluation =
+    evaluateFamilyReadiness(
+      currentFamilyReadiness
+    );
+
+  if (
+    previousEvaluation.state !==
+      SIGNAL_STATES.AVAILABLE ||
+    currentEvaluation.state !==
+      SIGNAL_STATES.AVAILABLE
+  ) {
+    return {
+      newlyReadyAdventurerIds: [],
+      familyBecameReady: false,
+    };
+  }
+
+  const previousAdventurers =
+    previousFamilyReadiness.value
+      ?.adventurers ?? [];
+
+  const currentAdventurers =
+    currentFamilyReadiness.value
+      ?.adventurers ?? [];
+
+  const previousReadinessById =
+    new Map(
+      previousAdventurers
+        .filter(
+          (adventurer) =>
+            Boolean(adventurer?.id)
+        )
+        .map((adventurer) => [
+          adventurer.id,
+          adventurer.ready === true,
+        ])
+    );
+
+  const newlyReadyAdventurerIds =
+    currentAdventurers
+      .filter(
+        (adventurer) =>
+          Boolean(adventurer?.id) &&
+          adventurer.ready === true &&
+          previousReadinessById.get(
+            adventurer.id
+          ) === false
+      )
+      .map((adventurer) => adventurer.id);
+
+  return {
+    newlyReadyAdventurerIds,
+    familyBecameReady:
+      previousEvaluation.familyEligible ===
+        false &&
+      currentEvaluation.familyEligible ===
+        true,
+  };
+}
+  function createRecognitionCandidates(
+  transitions = {}
+) {
+  const newlyReadyAdventurerIds =
+    Array.isArray(
+      transitions.newlyReadyAdventurerIds
+    )
+      ? transitions.newlyReadyAdventurerIds
+      : [];
+
+  const individualCandidates =
+    newlyReadyAdventurerIds
+      .filter(Boolean)
+      .map((adventurerId) => ({
+        id: `recognition-${adventurerId}`,
+        category: "recognition",
+        priorityTier:
+          PRIORITY_TIERS.INDIVIDUAL_READINESS,
+        evidence: {
+          adventurerId,
+        },
+      }));
+
+  const familyCandidates =
+    transitions.familyBecameReady === true
+      ? [
+          {
+            id: "family-recognition",
+            category: "recognition",
+            priorityTier:
+              PRIORITY_TIERS.FAMILY_READINESS,
+            evidence: {
+              familyBecameReady: true,
+            },
+          },
+        ]
+      : [];
+
+  return [
+    ...individualCandidates,
+    ...familyCandidates,
+  ];
+}
+  function buildFamilyIntelligence(
+  previousFamilyReadiness,
+  currentFamilyReadiness
+) {
+  const evaluation =
+    evaluateFamilyReadiness(
+      currentFamilyReadiness
+    );
+
+  const insightCandidates =
+    createFamilyInsightCandidates(
+      currentFamilyReadiness
+    );
+
+  const transitions =
+    detectFamilyReadinessTransitions(
+      previousFamilyReadiness,
+      currentFamilyReadiness
+    );
+
+  const recognitionCandidates =
+    createRecognitionCandidates(
+      transitions
+    );
+
+  return {
+    evaluation,
+    insightCandidates,
+    transitions,
+    recognitionCandidates,
+  };
+}
+  function createFamilyInsightCandidates(
+  familyReadiness = {}
+) {
+  const readiness =
+    evaluateFamilyReadiness(familyReadiness);
+
+  if (
+    readiness.state !==
+    SIGNAL_STATES.AVAILABLE
+  ) {
+    return [];
+  }
+
+  const adventurers =
+    familyReadiness.value?.adventurers ?? [];
+
+  if (readiness.familyEligible) {
+    return [
+      {
+        id: "family-readiness-ready",
+        category: "family-readiness",
+        priorityTier:
+          PRIORITY_TIERS.FAMILY_READINESS,
+        evidence: {
+          adventurerIds: adventurers
+            .map(
+              (adventurer) =>
+                adventurer?.id
+            )
+            .filter(Boolean),
+          familyEligible: true,
+        },
+      },
+    ];
+  }
+
+  return adventurers
+    .filter(
+      (adventurer) =>
+        adventurer?.ready !== true &&
+        Boolean(adventurer?.id)
+    )
+    .map((adventurer) => ({
+      id:
+        `individual-readiness-${adventurer.id}`,
+      category: "individual-readiness",
+      priorityTier:
+        PRIORITY_TIERS.INDIVIDUAL_READINESS,
+      evidence: {
+        adventurerId: adventurer.id,
+        adventurerName:
+          adventurer.name ?? null,
+        ready: false,
+      },
+    }));
+}
   function createFocusCandidate({
     id,
     priorityTier,
@@ -266,13 +499,18 @@
       evaluatedAt: new Date().toISOString(),
     };
 
-       state.phase = {
+    state.phase = {
       id: normalizedContext.phase.id,
       state: normalizedContext.phase.state,
     };
     state.itinerary = {
       state: normalizedContext.itinerary.state,
       value: normalizedContext.itinerary.value,
+    };
+
+    state.familyReadiness = {
+      state: normalizedContext.familyReadiness.state,
+      value: normalizedContext.familyReadiness.value,
     };
 
     state.reservations = {
@@ -296,6 +534,11 @@
     PRIORITY_TIERS,
     createFallbackState,
     normalizeContext,
+    evaluateFamilyReadiness,
+    detectFamilyReadinessTransitions,
+    createRecognitionCandidates,
+    buildFamilyIntelligence,
+    createFamilyInsightCandidates,
     createSignal,
     createFocusCandidate,
     selectDailyFocus,

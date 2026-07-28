@@ -69,11 +69,450 @@ function testCustomFallbackReason() {
 
   assert.strictEqual(state.status.reason, "evaluation-error");
 }
+function testFamilyReadinessUnknown() {
+  const result =
+    AdventureBrain.evaluateFamilyReadiness();
+
+  assert.deepStrictEqual(result, {
+    familyEligible: false,
+    blockedBy: [],
+    state: SIGNAL_STATES.UNKNOWN,
+  });
+}
+
+function testFamilyReadinessWithBlockers() {
+  const result =
+    AdventureBrain.evaluateFamilyReadiness({
+      state: SIGNAL_STATES.AVAILABLE,
+      value: {
+        adventurers: [
+          {
+            id: "emily",
+            name: "Emily",
+            ready: true,
+          },
+          {
+            id: "jake",
+            name: "Jake",
+            ready: false,
+          },
+          {
+            id: "kaseryn",
+            name: "Kaseryn",
+            ready: false,
+          },
+        ],
+      },
+    });
+
+  assert.deepStrictEqual(result, {
+    familyEligible: false,
+    blockedBy: ["jake", "kaseryn"],
+    state: SIGNAL_STATES.AVAILABLE,
+  });
+}
+
+function testFamilyReadinessEligible() {
+  const result =
+    AdventureBrain.evaluateFamilyReadiness({
+      state: SIGNAL_STATES.AVAILABLE,
+      value: {
+        adventurers: [
+          {
+            id: "emily",
+            name: "Emily",
+            ready: true,
+          },
+          {
+            id: "jake",
+            name: "Jake",
+            ready: true,
+          },
+        ],
+      },
+    });
+
+  assert.deepStrictEqual(result, {
+    familyEligible: true,
+    blockedBy: [],
+    state: SIGNAL_STATES.AVAILABLE,
+  });
+}
+function testFamilyInsightCandidatesUnknown() {
+  const candidates =
+    AdventureBrain.createFamilyInsightCandidates();
+
+  assert.deepStrictEqual(candidates, []);
+}
+
+function testFamilyInsightCandidatesWithBlockers() {
+  const candidates =
+    AdventureBrain.createFamilyInsightCandidates({
+      state: SIGNAL_STATES.AVAILABLE,
+      value: {
+        adventurers: [
+          {
+            id: "emily",
+            name: "Emily",
+            ready: true,
+          },
+          {
+            id: "jake",
+            name: "Jake",
+            ready: false,
+          },
+          {
+            id: "kaseryn",
+            name: "Kaseryn",
+            ready: false,
+          },
+        ],
+      },
+    });
+
+  assert.deepStrictEqual(candidates, [
+    {
+      id: "individual-readiness-jake",
+      category: "individual-readiness",
+      priorityTier:
+        AdventureBrain.PRIORITY_TIERS
+          .INDIVIDUAL_READINESS,
+      evidence: {
+        adventurerId: "jake",
+        adventurerName: "Jake",
+        ready: false,
+      },
+    },
+    {
+      id: "individual-readiness-kaseryn",
+      category: "individual-readiness",
+      priorityTier:
+        AdventureBrain.PRIORITY_TIERS
+          .INDIVIDUAL_READINESS,
+      evidence: {
+        adventurerId: "kaseryn",
+        adventurerName: "Kaseryn",
+        ready: false,
+      },
+    },
+  ]);
+}
+
+function testFamilyInsightCandidatesReady() {
+  const candidates =
+    AdventureBrain.createFamilyInsightCandidates({
+      state: SIGNAL_STATES.AVAILABLE,
+      value: {
+        adventurers: [
+          {
+            id: "emily",
+            name: "Emily",
+            ready: true,
+          },
+          {
+            id: "jake",
+            name: "Jake",
+            ready: true,
+          },
+        ],
+      },
+    });
+
+  assert.deepStrictEqual(candidates, [
+    {
+      id: "family-readiness-ready",
+      category: "family-readiness",
+      priorityTier:
+        AdventureBrain.PRIORITY_TIERS
+          .FAMILY_READINESS,
+      evidence: {
+        adventurerIds: ["emily", "jake"],
+        familyEligible: true,
+      },
+    },
+  ]);
+}
+function testFamilyReadinessTransitionsWithoutHistory() {
+  const transitions =
+    AdventureBrain.detectFamilyReadinessTransitions(
+      undefined,
+      {
+        state: SIGNAL_STATES.AVAILABLE,
+        value: {
+          adventurers: [
+            {
+              id: "emily",
+              name: "Emily",
+              ready: true,
+            },
+          ],
+        },
+      }
+    );
+
+  assert.deepStrictEqual(transitions, {
+    newlyReadyAdventurerIds: [],
+    familyBecameReady: false,
+  });
+}
+
+function testFamilyReadinessTransitionsIndividualReady() {
+  const transitions =
+    AdventureBrain.detectFamilyReadinessTransitions(
+      {
+        state: SIGNAL_STATES.AVAILABLE,
+        value: {
+          adventurers: [
+            {
+              id: "emily",
+              name: "Emily",
+              ready: true,
+            },
+            {
+              id: "jake",
+              name: "Jake",
+              ready: false,
+            },
+          ],
+        },
+      },
+      {
+        state: SIGNAL_STATES.AVAILABLE,
+        value: {
+          adventurers: [
+            {
+              id: "emily",
+              name: "Emily",
+              ready: true,
+            },
+            {
+              id: "jake",
+              name: "Jake",
+              ready: true,
+            },
+          ],
+        },
+      }
+    );
+
+  assert.deepStrictEqual(transitions, {
+    newlyReadyAdventurerIds: ["jake"],
+    familyBecameReady: true,
+  });
+}
+
+function testFamilyReadinessTransitionsRemainReady() {
+  const readiness = {
+    state: SIGNAL_STATES.AVAILABLE,
+    value: {
+      adventurers: [
+        {
+          id: "emily",
+          name: "Emily",
+          ready: true,
+        },
+        {
+          id: "jake",
+          name: "Jake",
+          ready: true,
+        },
+      ],
+    },
+  };
+
+  const transitions =
+    AdventureBrain.detectFamilyReadinessTransitions(
+      readiness,
+      readiness
+    );
+
+  assert.deepStrictEqual(transitions, {
+    newlyReadyAdventurerIds: [],
+    familyBecameReady: false,
+  });
+}
+function testRecognitionCandidatesWithoutTransitions() {
+  const candidates =
+    AdventureBrain.createRecognitionCandidates({
+      newlyReadyAdventurerIds: [],
+      familyBecameReady: false,
+    });
+
+  assert.deepStrictEqual(candidates, []);
+}
+
+function testRecognitionCandidatesIndividual() {
+  const candidates =
+    AdventureBrain.createRecognitionCandidates({
+      newlyReadyAdventurerIds: [
+        "jake",
+        "kaseryn",
+      ],
+      familyBecameReady: false,
+    });
+
+  assert.deepStrictEqual(candidates, [
+    {
+      id: "recognition-jake",
+      category: "recognition",
+      priorityTier:
+        AdventureBrain.PRIORITY_TIERS
+          .INDIVIDUAL_READINESS,
+      evidence: {
+        adventurerId: "jake",
+      },
+    },
+    {
+      id: "recognition-kaseryn",
+      category: "recognition",
+      priorityTier:
+        AdventureBrain.PRIORITY_TIERS
+          .INDIVIDUAL_READINESS,
+      evidence: {
+        adventurerId: "kaseryn",
+      },
+    },
+  ]);
+}
+
+function testRecognitionCandidatesFamily() {
+  const candidates =
+    AdventureBrain.createRecognitionCandidates({
+      newlyReadyAdventurerIds: [],
+      familyBecameReady: true,
+    });
+
+  assert.deepStrictEqual(candidates, [
+    {
+      id: "family-recognition",
+      category: "recognition",
+      priorityTier:
+        AdventureBrain.PRIORITY_TIERS
+          .FAMILY_READINESS,
+      evidence: {
+        familyBecameReady: true,
+      },
+    },
+  ]);
+}
+function testFamilyIntelligencePipeline() {
+  const previous = {
+    state: SIGNAL_STATES.AVAILABLE,
+    value: {
+      adventurers: [
+        {
+          id: "emily",
+          name: "Emily",
+          ready: true,
+        },
+        {
+          id: "jake",
+          name: "Jake",
+          ready: false,
+        },
+      ],
+    },
+  };
+
+  const current = {
+    state: SIGNAL_STATES.AVAILABLE,
+    value: {
+      adventurers: [
+        {
+          id: "emily",
+          name: "Emily",
+          ready: true,
+        },
+        {
+          id: "jake",
+          name: "Jake",
+          ready: true,
+        },
+      ],
+    },
+  };
+
+  const result =
+    AdventureBrain.buildFamilyIntelligence(
+      previous,
+      current
+    );
+
+  assert.deepStrictEqual(result, {
+    evaluation: {
+      familyEligible: true,
+      blockedBy: [],
+      state: SIGNAL_STATES.AVAILABLE,
+    },
+    insightCandidates: [
+      {
+        id: "family-readiness-ready",
+        category: "family-readiness",
+        priorityTier:
+          AdventureBrain.PRIORITY_TIERS
+            .FAMILY_READINESS,
+        evidence: {
+          adventurerIds: [
+            "emily",
+            "jake",
+          ],
+          familyEligible: true,
+        },
+      },
+    ],
+    transitions: {
+      newlyReadyAdventurerIds: [
+        "jake",
+      ],
+      familyBecameReady: true,
+    },
+    recognitionCandidates: [
+      {
+        id: "recognition-jake",
+        category: "recognition",
+        priorityTier:
+          AdventureBrain.PRIORITY_TIERS
+            .INDIVIDUAL_READINESS,
+        evidence: {
+          adventurerId: "jake",
+        },
+      },
+      {
+        id: "family-recognition",
+        category: "recognition",
+        priorityTier:
+          AdventureBrain.PRIORITY_TIERS
+            .FAMILY_READINESS,
+        evidence: {
+          familyBecameReady: true,
+        },
+      },
+    ],
+  });
+}
 function testEvaluation() {
   const state = require("./adventure-brain.js").evaluate({
     phase: {
       id: "planning",
       state: SIGNAL_STATES.AVAILABLE,
+    },
+    familyReadiness: {
+      state: SIGNAL_STATES.AVAILABLE,
+      value: {
+        adventurers: [
+          {
+            id: "emily",
+            name: "Emily",
+            ready: true,
+          },
+          {
+            id: "jake",
+            name: "Jake",
+            ready: false,
+          },
+        ],
+        familyReady: false,
+      },
     },
   });
 
@@ -91,12 +530,49 @@ function testEvaluation() {
     state.phase.id,
     "planning"
   );
+
+  assert.strictEqual(
+    state.familyReadiness.state,
+    SIGNAL_STATES.AVAILABLE
+  );
+
+  assert.deepEqual(
+    state.familyReadiness.value,
+    {
+      adventurers: [
+        {
+          id: "emily",
+          name: "Emily",
+          ready: true,
+        },
+        {
+          id: "jake",
+          name: "Jake",
+          ready: false,
+        },
+      ],
+      familyReady: false,
+    }
+  );
 }
 function runTests() {
   testSignalStates();
   testPriorityTiers();
   testFallbackState();
   testCustomFallbackReason();
+  testFamilyReadinessUnknown();
+  testFamilyReadinessWithBlockers();
+  testFamilyReadinessEligible();
+  testFamilyInsightCandidatesUnknown();
+  testFamilyInsightCandidatesWithBlockers();
+  testFamilyInsightCandidatesReady();
+  testFamilyReadinessTransitionsWithoutHistory();
+  testFamilyReadinessTransitionsIndividualReady();
+  testFamilyReadinessTransitionsRemainReady();
+  testRecognitionCandidatesWithoutTransitions();
+  testRecognitionCandidatesIndividual();
+  testRecognitionCandidatesFamily();
+  testFamilyIntelligencePipeline();
   testEvaluation();
   testCreateSignal();
   testDailyFocusSelection();
