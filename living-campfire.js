@@ -116,7 +116,31 @@
   );
 }
 
-  function evaluate(remyContext = null) {
+  function createCampfireExperience({
+  message,
+  context,
+  reason = "message-selected",
+}) {
+  return {
+    message: {
+      category: message.category,
+      title: message.title,
+      body: message.body,
+    },
+
+    prompt: null,
+
+    meta: {
+      contextKey: context.mode,
+      state: context.state,
+      reason,
+      primaryTopic: context.primaryTopic,
+      dailyFocusId: context.dailyFocusId,
+    },
+  };
+}
+
+function evaluate(remyContext = null) {
   if (
     !remyContext ||
     typeof remyContext !== "object"
@@ -132,21 +156,10 @@
   const message =
     selectMessageTemplate(context.mode);
 
-  return {
-    message: {
-      category: message.category,
-      title: message.title,
-      body: message.body,
-    },
-
-    prompt: null,
-
-    meta: {
-      contextKey: context.mode,
-      state: context.state,
-      reason: "message-selected",
-    },
-  };
+  return createCampfireExperience({
+  message,
+  context,
+});
 }
   
   return Object.freeze({
@@ -156,6 +169,7 @@
     createFallbackExperience,
     normalizeRemyContext,
     selectMessageTemplate,
+    createCampfireExperience,
     evaluate,
   });
 });

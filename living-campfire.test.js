@@ -94,6 +94,55 @@ assert.equal(
   "reflection"
 );
 
+assert.equal(
+  normalized.meta.primaryTopic,
+  "weather"
+);
+
+assert.equal(
+  normalized.meta.dailyFocusId,
+  "focus-1"
+);
+
+const builtExperience =
+  LivingCampfire.createCampfireExperience({
+    message:
+      LivingCampfire.MESSAGE_TEMPLATES.celebration,
+    context: {
+      mode: "celebration",
+      primaryTopic: "packing",
+      dailyFocusId: "packing-complete",
+      avoidTopics: [],
+      state: "available",
+    },
+    reason: "builder-test",
+  });
+
+assert.equal(
+  builtExperience.message.category,
+  "celebration"
+);
+
+assert.equal(
+  builtExperience.meta.contextKey,
+  "celebration"
+);
+
+assert.equal(
+  builtExperience.meta.primaryTopic,
+  "packing"
+);
+
+assert.equal(
+  builtExperience.meta.dailyFocusId,
+  "packing-complete"
+);
+
+assert.equal(
+  builtExperience.meta.reason,
+  "builder-test"
+);
+
 const encouragement =
   LivingCampfire.evaluate({
     mode: "encouragement",
