@@ -110,20 +110,28 @@
   }
 
   function selectMessageTemplate(mode = "light-touch") {
-  return (
+   return (
     MESSAGE_TEMPLATES[mode] ??
     MESSAGE_TEMPLATES["light-touch"]
   );
 }
 
+  function selectMessageForDecision(decision = {}) {
+  if (decision.primaryTopic === "daily-focus") {
+    return selectMessageTemplate("encouragement");
+  }
+
+   return selectMessageTemplate(decision.mode);
+}
+
   function resolveMode(mode = "light-touch") {
-  return MESSAGE_TEMPLATES[mode]
+   return MESSAGE_TEMPLATES[mode]
     ? mode
     : "light-touch";
 }
 
   function resolvePrimaryTopic(context = {}) {
-  const primaryTopic =
+   const primaryTopic =
     context.primaryTopic ?? null;
 
   const avoidTopics =
@@ -230,7 +238,7 @@ const decision =
   buildDecision(context);
 
 const message =
-  selectMessageTemplate(decision.mode);
+  selectMessageForDecision(decision);
 
 return createCampfireExperience({
   message,
@@ -248,6 +256,7 @@ return createCampfireExperience({
     createFallbackExperience,
     normalizeRemyContext,
     selectMessageTemplate,
+    selectMessageForDecision,
     resolveMode,
     resolvePrimaryTopic,
     resolveDecisionTopic,

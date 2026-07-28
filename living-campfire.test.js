@@ -86,7 +86,7 @@ assert.equal(
 
 assert.equal(
   normalized.message.category,
-  "reflection"
+  "encouragement"
 );
 
 assert.equal(
