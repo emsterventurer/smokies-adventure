@@ -259,6 +259,23 @@ assert.equal(
   "light-touch"
 );
 
+const decision =
+  LivingCampfire.buildDecision({
+    mode: "not-a-real-mode",
+    primaryTopic: "packing",
+    avoidTopics: ["packing"],
+    dailyFocusId: "focus-123",
+  });
+
+assert.deepEqual(
+  decision,
+  {
+    mode: "light-touch",
+    primaryTopic: null,
+    dailyFocusId: "focus-123",
+  }
+);
+
   console.log(
     "Living Campfire foundation tests passed."
   );

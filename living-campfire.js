@@ -141,6 +141,14 @@
   return primaryTopic;
 }
 
+  function buildDecision(context = {}) {
+  return {
+    mode: resolveMode(context.mode),
+    primaryTopic: resolvePrimaryTopic(context),
+    dailyFocusId: context.dailyFocusId,
+  };
+}
+
   function createCampfireExperience({
   message,
   context,
@@ -167,7 +175,7 @@
   };
 }
 
-function evaluate(remyContext = null) {
+  function evaluate(remyContext = null) {
   if (
     !remyContext ||
     typeof remyContext !== "object"
@@ -177,20 +185,20 @@ function evaluate(remyContext = null) {
     );
   }
 
-  const context =
-    normalizeRemyContext(remyContext);
+const context =
+  normalizeRemyContext(remyContext);
 
-  const resolvedMode =
-  resolveMode(context.mode);
+const decision =
+  buildDecision(context);
 
 const message =
-  selectMessageTemplate(resolvedMode);
+  selectMessageTemplate(decision.mode);
 
 return createCampfireExperience({
   message,
   context: {
     ...context,
-    mode: resolvedMode,
+    ...decision,
   },
 });
 }
@@ -204,6 +212,7 @@ return createCampfireExperience({
     selectMessageTemplate,
     resolveMode,
     resolvePrimaryTopic,
+    buildDecision,
     createCampfireExperience,
     evaluate,
   });
