@@ -246,6 +246,7 @@ return createCampfireExperience({
     ...context,
     ...decision,
   },
+  reason: decision.reason,
 });
 }
   

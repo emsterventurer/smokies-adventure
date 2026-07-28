@@ -81,7 +81,7 @@ const normalized =
 
 assert.equal(
   normalized.meta.reason,
-  "message-selected"
+  "daily-focus"
 );
 
 assert.equal(
