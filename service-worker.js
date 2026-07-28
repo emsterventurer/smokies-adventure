@@ -3,7 +3,26 @@ importScripts("./config.js","./version.js");
 const BUILD_INFO=self.AdventureCompanionBuild;
 const CACHE=BUILD_INFO.cache;
 const BUILD=BUILD_INFO.version;
-const ASSETS=["./","./index.html","./styles.css","./config.js","./version.js","./reliability.js","./adventure-brain.js","./app.js","./weather-service.js","./weather-ui.js","./packing.js","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./favicon-32.png"];
+const ASSETS=[
+  "./",
+  "./index.html",
+  "./styles.css",
+  "./config.js",
+  "./version.js",
+  "./reliability.js",
+  "./adventure-brain.js",
+  "./living-campfire.js",
+  "./shared-state.js",
+  "./app.js",
+  "./weather-service.js",
+  "./weather-ui.js",
+  "./packing.js",
+  "./manifest.webmanifest",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./apple-touch-icon.png",
+  "./favicon-32.png"
+];
 
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));
