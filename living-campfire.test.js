@@ -143,6 +143,32 @@ assert.equal(
   "builder-test"
 );
 
+const allowedTopic =
+  LivingCampfire.evaluate({
+    mode: "encouragement",
+    primaryTopic: "weather",
+    avoidTopics: ["packing"],
+    state: "available",
+  });
+
+assert.equal(
+  allowedTopic.meta.primaryTopic,
+  "weather"
+);
+
+const avoidedTopic =
+  LivingCampfire.evaluate({
+    mode: "encouragement",
+    primaryTopic: "packing",
+    avoidTopics: ["packing"],
+    state: "available",
+  });
+
+assert.equal(
+  avoidedTopic.meta.primaryTopic,
+  null
+);
+
 const encouragement =
   LivingCampfire.evaluate({
     mode: "encouragement",
@@ -220,7 +246,17 @@ assert.equal(
 
 assert.equal(
   unknownMode.meta.contextKey,
-  "not-a-real-mode"
+  "light-touch"
+);
+
+assert.equal(
+  LivingCampfire.resolveMode("reflection"),
+  "reflection"
+);
+
+assert.equal(
+  LivingCampfire.resolveMode("not-a-real-mode"),
+  "light-touch"
 );
 
   console.log(

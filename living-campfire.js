@@ -116,11 +116,38 @@
   );
 }
 
+  function resolveMode(mode = "light-touch") {
+  return MESSAGE_TEMPLATES[mode]
+    ? mode
+    : "light-touch";
+}
+
+  function resolvePrimaryTopic(context = {}) {
+  const primaryTopic =
+    context.primaryTopic ?? null;
+
+  const avoidTopics =
+    Array.isArray(context.avoidTopics)
+      ? context.avoidTopics
+      : [];
+
+  if (
+    primaryTopic &&
+    avoidTopics.includes(primaryTopic)
+  ) {
+    return null;
+  }
+
+  return primaryTopic;
+}
+
   function createCampfireExperience({
   message,
   context,
   reason = "message-selected",
 }) {
+   const primaryTopic =
+  resolvePrimaryTopic(context);
   return {
     message: {
       category: message.category,
@@ -134,7 +161,7 @@
       contextKey: context.mode,
       state: context.state,
       reason,
-      primaryTopic: context.primaryTopic,
+      primaryTopic,
       dailyFocusId: context.dailyFocusId,
     },
   };
@@ -153,12 +180,18 @@ function evaluate(remyContext = null) {
   const context =
     normalizeRemyContext(remyContext);
 
-  const message =
-    selectMessageTemplate(context.mode);
+  const resolvedMode =
+  resolveMode(context.mode);
 
-  return createCampfireExperience({
+const message =
+  selectMessageTemplate(resolvedMode);
+
+return createCampfireExperience({
   message,
-  context,
+  context: {
+    ...context,
+    mode: resolvedMode,
+  },
 });
 }
   
@@ -169,6 +202,8 @@ function evaluate(remyContext = null) {
     createFallbackExperience,
     normalizeRemyContext,
     selectMessageTemplate,
+    resolveMode,
+    resolvePrimaryTopic,
     createCampfireExperience,
     evaluate,
   });
