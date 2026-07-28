@@ -7,9 +7,9 @@ const reliability=fs.readFileSync("reliability.js","utf8");
 const packing=fs.readFileSync("packing.js","utf8");
 const worker=fs.readFileSync("service-worker.js","utf8");
 
-assert.equal(build.version,"M3-05.0B");
-assert.equal(build.build,"Build 2");
-assert.equal(build.cache,"adventure-companion-m3-05-0b-build-2");
+assert.equal(build.version,"M3-06");
+assert.equal(build.build,"Build 1");
+assert.equal(build.cache,"adventure-companion-m3-06-build-1");
 assert(Object.isFrozen(build),"build information must be immutable");
 assert(html.includes('src="version.js"'),"version.js script tag is missing");
 assert(html.indexOf('src="version.js"')<html.indexOf('src="reliability.js"'),"version.js must load before reliability.js");
