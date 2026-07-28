@@ -81,7 +81,97 @@ const normalized =
 
 assert.equal(
   normalized.meta.reason,
-  "living-campfire-foundation"
+  "message-selected"
+);
+
+assert.equal(
+  normalized.message.category,
+  "reflection"
+);
+
+assert.equal(
+  normalized.meta.contextKey,
+  "reflection"
+);
+
+const encouragement =
+  LivingCampfire.evaluate({
+    mode: "encouragement",
+    state: "available",
+  });
+
+assert.equal(
+  encouragement.message.category,
+  "encouragement"
+);
+
+assert.equal(
+  encouragement.meta.contextKey,
+  "encouragement"
+);
+
+const celebration =
+  LivingCampfire.evaluate({
+    mode: "celebration",
+    state: "available",
+  });
+
+assert.equal(
+  celebration.message.category,
+  "celebration"
+);
+
+assert.equal(
+  celebration.meta.contextKey,
+  "celebration"
+);
+
+const discovery =
+  LivingCampfire.evaluate({
+    mode: "discovery",
+    state: "available",
+  });
+
+assert.equal(
+  discovery.message.category,
+  "discovery"
+);
+
+assert.equal(
+  discovery.meta.contextKey,
+  "discovery"
+);
+
+const lightTouch =
+  LivingCampfire.evaluate({
+    mode: "light-touch",
+    state: "available",
+  });
+
+assert.equal(
+  lightTouch.message.category,
+  "light-touch"
+);
+
+assert.equal(
+  lightTouch.meta.contextKey,
+  "light-touch"
+);
+
+const unknownMode =
+  LivingCampfire.evaluate({
+    mode: "not-a-real-mode",
+    state: "available",
+  });
+
+assert.equal(
+  unknownMode.message.category,
+  "light-touch"
+);
+
+assert.equal(
+  unknownMode.meta.contextKey,
+  "not-a-real-mode"
 );
 
   console.log(
