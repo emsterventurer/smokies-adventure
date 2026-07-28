@@ -395,6 +395,101 @@ function testRecognitionCandidatesFamily() {
     },
   ]);
 }
+function testFamilyIntelligencePipeline() {
+  const previous = {
+    state: SIGNAL_STATES.AVAILABLE,
+    value: {
+      adventurers: [
+        {
+          id: "emily",
+          name: "Emily",
+          ready: true,
+        },
+        {
+          id: "jake",
+          name: "Jake",
+          ready: false,
+        },
+      ],
+    },
+  };
+
+  const current = {
+    state: SIGNAL_STATES.AVAILABLE,
+    value: {
+      adventurers: [
+        {
+          id: "emily",
+          name: "Emily",
+          ready: true,
+        },
+        {
+          id: "jake",
+          name: "Jake",
+          ready: true,
+        },
+      ],
+    },
+  };
+
+  const result =
+    AdventureBrain.buildFamilyIntelligence(
+      previous,
+      current
+    );
+
+  assert.deepStrictEqual(result, {
+    evaluation: {
+      familyEligible: true,
+      blockedBy: [],
+      state: SIGNAL_STATES.AVAILABLE,
+    },
+    insightCandidates: [
+      {
+        id: "family-readiness-ready",
+        category: "family-readiness",
+        priorityTier:
+          AdventureBrain.PRIORITY_TIERS
+            .FAMILY_READINESS,
+        evidence: {
+          adventurerIds: [
+            "emily",
+            "jake",
+          ],
+          familyEligible: true,
+        },
+      },
+    ],
+    transitions: {
+      newlyReadyAdventurerIds: [
+        "jake",
+      ],
+      familyBecameReady: true,
+    },
+    recognitionCandidates: [
+      {
+        id: "recognition-jake",
+        category: "recognition",
+        priorityTier:
+          AdventureBrain.PRIORITY_TIERS
+            .INDIVIDUAL_READINESS,
+        evidence: {
+          adventurerId: "jake",
+        },
+      },
+      {
+        id: "family-recognition",
+        category: "recognition",
+        priorityTier:
+          AdventureBrain.PRIORITY_TIERS
+            .FAMILY_READINESS,
+        evidence: {
+          familyBecameReady: true,
+        },
+      },
+    ],
+  });
+}
 function testEvaluation() {
   const state = require("./adventure-brain.js").evaluate({
     phase: {
@@ -477,6 +572,7 @@ function runTests() {
   testRecognitionCandidatesWithoutTransitions();
   testRecognitionCandidatesIndividual();
   testRecognitionCandidatesFamily();
+  testFamilyIntelligencePipeline();
   testEvaluation();
   testCreateSignal();
   testDailyFocusSelection();

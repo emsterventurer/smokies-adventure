@@ -316,6 +316,38 @@
     ...familyCandidates,
   ];
 }
+  function buildFamilyIntelligence(
+  previousFamilyReadiness,
+  currentFamilyReadiness
+) {
+  const evaluation =
+    evaluateFamilyReadiness(
+      currentFamilyReadiness
+    );
+
+  const insightCandidates =
+    createFamilyInsightCandidates(
+      currentFamilyReadiness
+    );
+
+  const transitions =
+    detectFamilyReadinessTransitions(
+      previousFamilyReadiness,
+      currentFamilyReadiness
+    );
+
+  const recognitionCandidates =
+    createRecognitionCandidates(
+      transitions
+    );
+
+  return {
+    evaluation,
+    insightCandidates,
+    transitions,
+    recognitionCandidates,
+  };
+}
   function createFamilyInsightCandidates(
   familyReadiness = {}
 ) {
@@ -505,6 +537,7 @@
     evaluateFamilyReadiness,
     detectFamilyReadinessTransitions,
     createRecognitionCandidates,
+    buildFamilyIntelligence,
     createFamilyInsightCandidates,
     createSignal,
     createFocusCandidate,
