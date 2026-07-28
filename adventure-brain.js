@@ -205,7 +205,74 @@
       evidence,
     };
   }
+  function detectFamilyReadinessTransitions(
+  previousFamilyReadiness,
+  currentFamilyReadiness
+) {
+  const previousEvaluation =
+    evaluateFamilyReadiness(
+      previousFamilyReadiness
+    );
 
+  const currentEvaluation =
+    evaluateFamilyReadiness(
+      currentFamilyReadiness
+    );
+
+  if (
+    previousEvaluation.state !==
+      SIGNAL_STATES.AVAILABLE ||
+    currentEvaluation.state !==
+      SIGNAL_STATES.AVAILABLE
+  ) {
+    return {
+      newlyReadyAdventurerIds: [],
+      familyBecameReady: false,
+    };
+  }
+
+  const previousAdventurers =
+    previousFamilyReadiness.value
+      ?.adventurers ?? [];
+
+  const currentAdventurers =
+    currentFamilyReadiness.value
+      ?.adventurers ?? [];
+
+  const previousReadinessById =
+    new Map(
+      previousAdventurers
+        .filter(
+          (adventurer) =>
+            Boolean(adventurer?.id)
+        )
+        .map((adventurer) => [
+          adventurer.id,
+          adventurer.ready === true,
+        ])
+    );
+
+  const newlyReadyAdventurerIds =
+    currentAdventurers
+      .filter(
+        (adventurer) =>
+          Boolean(adventurer?.id) &&
+          adventurer.ready === true &&
+          previousReadinessById.get(
+            adventurer.id
+          ) === false
+      )
+      .map((adventurer) => adventurer.id);
+
+  return {
+    newlyReadyAdventurerIds,
+    familyBecameReady:
+      previousEvaluation.familyEligible ===
+        false &&
+      currentEvaluation.familyEligible ===
+        true,
+  };
+}
   function createFamilyInsightCandidates(
   familyReadiness = {}
 ) {
@@ -393,6 +460,7 @@
     createFallbackState,
     normalizeContext,
     evaluateFamilyReadiness,
+    detectFamilyReadinessTransitions,
     createFamilyInsightCandidates,
     createSignal,
     createFocusCandidate,

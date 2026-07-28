@@ -232,6 +232,105 @@ function testFamilyInsightCandidatesReady() {
     },
   ]);
 }
+function testFamilyReadinessTransitionsWithoutHistory() {
+  const transitions =
+    AdventureBrain.detectFamilyReadinessTransitions(
+      undefined,
+      {
+        state: SIGNAL_STATES.AVAILABLE,
+        value: {
+          adventurers: [
+            {
+              id: "emily",
+              name: "Emily",
+              ready: true,
+            },
+          ],
+        },
+      }
+    );
+
+  assert.deepStrictEqual(transitions, {
+    newlyReadyAdventurerIds: [],
+    familyBecameReady: false,
+  });
+}
+
+function testFamilyReadinessTransitionsIndividualReady() {
+  const transitions =
+    AdventureBrain.detectFamilyReadinessTransitions(
+      {
+        state: SIGNAL_STATES.AVAILABLE,
+        value: {
+          adventurers: [
+            {
+              id: "emily",
+              name: "Emily",
+              ready: true,
+            },
+            {
+              id: "jake",
+              name: "Jake",
+              ready: false,
+            },
+          ],
+        },
+      },
+      {
+        state: SIGNAL_STATES.AVAILABLE,
+        value: {
+          adventurers: [
+            {
+              id: "emily",
+              name: "Emily",
+              ready: true,
+            },
+            {
+              id: "jake",
+              name: "Jake",
+              ready: true,
+            },
+          ],
+        },
+      }
+    );
+
+  assert.deepStrictEqual(transitions, {
+    newlyReadyAdventurerIds: ["jake"],
+    familyBecameReady: true,
+  });
+}
+
+function testFamilyReadinessTransitionsRemainReady() {
+  const readiness = {
+    state: SIGNAL_STATES.AVAILABLE,
+    value: {
+      adventurers: [
+        {
+          id: "emily",
+          name: "Emily",
+          ready: true,
+        },
+        {
+          id: "jake",
+          name: "Jake",
+          ready: true,
+        },
+      ],
+    },
+  };
+
+  const transitions =
+    AdventureBrain.detectFamilyReadinessTransitions(
+      readiness,
+      readiness
+    );
+
+  assert.deepStrictEqual(transitions, {
+    newlyReadyAdventurerIds: [],
+    familyBecameReady: false,
+  });
+}
 function testEvaluation() {
   const state = require("./adventure-brain.js").evaluate({
     phase: {
@@ -308,6 +407,9 @@ function runTests() {
   testFamilyInsightCandidatesUnknown();
   testFamilyInsightCandidatesWithBlockers();
   testFamilyInsightCandidatesReady();
+  testFamilyReadinessTransitionsWithoutHistory();
+  testFamilyReadinessTransitionsIndividualReady();
+  testFamilyReadinessTransitionsRemainReady();
   testEvaluation();
   testCreateSignal();
   testDailyFocusSelection();
