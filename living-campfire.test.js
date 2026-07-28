@@ -96,7 +96,7 @@ assert.equal(
 
 assert.equal(
   normalized.meta.primaryTopic,
-  "weather"
+  "daily-focus"
 );
 
 assert.equal(
@@ -271,7 +271,7 @@ assert.deepEqual(
   decision,
   {
     mode: "light-touch",
-    primaryTopic: null,
+    primaryTopic: "daily-focus",
     dailyFocusId: "focus-123",
   }
 );
