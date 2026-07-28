@@ -138,6 +138,100 @@ function testFamilyReadinessEligible() {
     state: SIGNAL_STATES.AVAILABLE,
   });
 }
+function testFamilyInsightCandidatesUnknown() {
+  const candidates =
+    AdventureBrain.createFamilyInsightCandidates();
+
+  assert.deepStrictEqual(candidates, []);
+}
+
+function testFamilyInsightCandidatesWithBlockers() {
+  const candidates =
+    AdventureBrain.createFamilyInsightCandidates({
+      state: SIGNAL_STATES.AVAILABLE,
+      value: {
+        adventurers: [
+          {
+            id: "emily",
+            name: "Emily",
+            ready: true,
+          },
+          {
+            id: "jake",
+            name: "Jake",
+            ready: false,
+          },
+          {
+            id: "kaseryn",
+            name: "Kaseryn",
+            ready: false,
+          },
+        ],
+      },
+    });
+
+  assert.deepStrictEqual(candidates, [
+    {
+      id: "individual-readiness-jake",
+      category: "individual-readiness",
+      priorityTier:
+        AdventureBrain.PRIORITY_TIERS
+          .INDIVIDUAL_READINESS,
+      evidence: {
+        adventurerId: "jake",
+        adventurerName: "Jake",
+        ready: false,
+      },
+    },
+    {
+      id: "individual-readiness-kaseryn",
+      category: "individual-readiness",
+      priorityTier:
+        AdventureBrain.PRIORITY_TIERS
+          .INDIVIDUAL_READINESS,
+      evidence: {
+        adventurerId: "kaseryn",
+        adventurerName: "Kaseryn",
+        ready: false,
+      },
+    },
+  ]);
+}
+
+function testFamilyInsightCandidatesReady() {
+  const candidates =
+    AdventureBrain.createFamilyInsightCandidates({
+      state: SIGNAL_STATES.AVAILABLE,
+      value: {
+        adventurers: [
+          {
+            id: "emily",
+            name: "Emily",
+            ready: true,
+          },
+          {
+            id: "jake",
+            name: "Jake",
+            ready: true,
+          },
+        ],
+      },
+    });
+
+  assert.deepStrictEqual(candidates, [
+    {
+      id: "family-readiness-ready",
+      category: "family-readiness",
+      priorityTier:
+        AdventureBrain.PRIORITY_TIERS
+          .FAMILY_READINESS,
+      evidence: {
+        adventurerIds: ["emily", "jake"],
+        familyEligible: true,
+      },
+    },
+  ]);
+}
 function testEvaluation() {
   const state = require("./adventure-brain.js").evaluate({
     phase: {
@@ -211,6 +305,9 @@ function runTests() {
   testFamilyReadinessUnknown();
   testFamilyReadinessWithBlockers();
   testFamilyReadinessEligible();
+  testFamilyInsightCandidatesUnknown();
+  testFamilyInsightCandidatesWithBlockers();
+  testFamilyInsightCandidatesReady();
   testEvaluation();
   testCreateSignal();
   testDailyFocusSelection();

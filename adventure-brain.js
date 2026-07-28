@@ -206,6 +206,62 @@
     };
   }
 
+  function createFamilyInsightCandidates(
+  familyReadiness = {}
+) {
+  const readiness =
+    evaluateFamilyReadiness(familyReadiness);
+
+  if (
+    readiness.state !==
+    SIGNAL_STATES.AVAILABLE
+  ) {
+    return [];
+  }
+
+  const adventurers =
+    familyReadiness.value?.adventurers ?? [];
+
+  if (readiness.familyEligible) {
+    return [
+      {
+        id: "family-readiness-ready",
+        category: "family-readiness",
+        priorityTier:
+          PRIORITY_TIERS.FAMILY_READINESS,
+        evidence: {
+          adventurerIds: adventurers
+            .map(
+              (adventurer) =>
+                adventurer?.id
+            )
+            .filter(Boolean),
+          familyEligible: true,
+        },
+      },
+    ];
+  }
+
+  return adventurers
+    .filter(
+      (adventurer) =>
+        adventurer?.ready !== true &&
+        Boolean(adventurer?.id)
+    )
+    .map((adventurer) => ({
+      id:
+        `individual-readiness-${adventurer.id}`,
+      category: "individual-readiness",
+      priorityTier:
+        PRIORITY_TIERS.INDIVIDUAL_READINESS,
+      evidence: {
+        adventurerId: adventurer.id,
+        adventurerName:
+          adventurer.name ?? null,
+        ready: false,
+      },
+    }));
+}
   function createFocusCandidate({
     id,
     priorityTier,
@@ -337,6 +393,7 @@
     createFallbackState,
     normalizeContext,
     evaluateFamilyReadiness,
+    createFamilyInsightCandidates,
     createSignal,
     createFocusCandidate,
     selectDailyFocus,
