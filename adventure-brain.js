@@ -67,7 +67,7 @@
       },
     };
   }
-      function normalizeContext(context = {}) {
+  function normalizeContext(context = {}) {
     return {
       now: {
         state:
@@ -138,21 +138,56 @@
       },
     };
   }
-    function createPhaseSignal(phase = {}) {
-    return createSignal({
-      id: `phase-${phase.id ?? "unknown"}`,
-      category: "phase",
-      state:
-        phase.state ?? SIGNAL_STATES.UNKNOWN,
-      active: Boolean(phase.id),
-      priorityTier: null,
-      evidence: {
-        phaseId: phase.id ?? null,
-      },
-    });
+  function evaluateFamilyReadiness(
+    familyReadiness = {}
+  ) {
+    const state =
+      familyReadiness.state ??
+      SIGNAL_STATES.UNKNOWN;
+
+    const adventurers =
+      familyReadiness.value?.adventurers;
+
+    if (
+      state !== SIGNAL_STATES.AVAILABLE ||
+      !Array.isArray(adventurers)
+    ) {
+      return {
+        familyEligible: false,
+        blockedBy: [],
+        state: SIGNAL_STATES.UNKNOWN,
+      };
+    }
+
+    const blockedBy = adventurers
+      .filter(
+        (adventurer) =>
+          adventurer?.ready !== true
+      )
+      .map((adventurer) => adventurer.id)
+      .filter(Boolean);
+
+    return {
+      familyEligible:
+        adventurers.length > 0 &&
+        blockedBy.length === 0,
+      blockedBy,
+      state: SIGNAL_STATES.AVAILABLE,
+    };
   }
-
-
+  function createPhaseSignal(phase = {}) {
+      return createSignal({
+        id: `phase-${phase.id ?? "unknown"}`,
+        category: "phase",
+        state:
+          phase.state ?? SIGNAL_STATES.UNKNOWN,
+        active: Boolean(phase.id),
+        priorityTier: null,
+        evidence: {
+          phaseId: phase.id ?? null,
+        },
+      });
+    }
   function createSignal({
     id,
     category,
@@ -279,7 +314,7 @@
       state: normalizedContext.familyReadiness.state,
       value: normalizedContext.familyReadiness.value,
     };
-    
+
     state.reservations = {
      state: normalizedContext.reservations.state,
     value: normalizedContext.reservations.value,
@@ -301,6 +336,7 @@
     PRIORITY_TIERS,
     createFallbackState,
     normalizeContext,
+    evaluateFamilyReadiness,
     createSignal,
     createFocusCandidate,
     selectDailyFocus,

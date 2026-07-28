@@ -69,6 +69,75 @@ function testCustomFallbackReason() {
 
   assert.strictEqual(state.status.reason, "evaluation-error");
 }
+function testFamilyReadinessUnknown() {
+  const result =
+    AdventureBrain.evaluateFamilyReadiness();
+
+  assert.deepStrictEqual(result, {
+    familyEligible: false,
+    blockedBy: [],
+    state: SIGNAL_STATES.UNKNOWN,
+  });
+}
+
+function testFamilyReadinessWithBlockers() {
+  const result =
+    AdventureBrain.evaluateFamilyReadiness({
+      state: SIGNAL_STATES.AVAILABLE,
+      value: {
+        adventurers: [
+          {
+            id: "emily",
+            name: "Emily",
+            ready: true,
+          },
+          {
+            id: "jake",
+            name: "Jake",
+            ready: false,
+          },
+          {
+            id: "kaseryn",
+            name: "Kaseryn",
+            ready: false,
+          },
+        ],
+      },
+    });
+
+  assert.deepStrictEqual(result, {
+    familyEligible: false,
+    blockedBy: ["jake", "kaseryn"],
+    state: SIGNAL_STATES.AVAILABLE,
+  });
+}
+
+function testFamilyReadinessEligible() {
+  const result =
+    AdventureBrain.evaluateFamilyReadiness({
+      state: SIGNAL_STATES.AVAILABLE,
+      value: {
+        adventurers: [
+          {
+            id: "emily",
+            name: "Emily",
+            ready: true,
+          },
+          {
+            id: "jake",
+            name: "Jake",
+            ready: true,
+          },
+        ],
+      },
+    });
+
+  assert.deepStrictEqual(result, {
+    familyEligible: true,
+    blockedBy: [],
+    state: SIGNAL_STATES.AVAILABLE,
+  });
+}
 function testEvaluation() {
   const state = require("./adventure-brain.js").evaluate({
     phase: {
@@ -139,6 +208,9 @@ function runTests() {
   testPriorityTiers();
   testFallbackState();
   testCustomFallbackReason();
+  testFamilyReadinessUnknown();
+  testFamilyReadinessWithBlockers();
+  testFamilyReadinessEligible();
   testEvaluation();
   testCreateSignal();
   testDailyFocusSelection();
