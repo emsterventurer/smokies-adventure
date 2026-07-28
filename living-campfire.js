@@ -157,12 +157,33 @@
   return resolvePrimaryTopic(context);
 }
 
+  function resolveDecisionReason(context = {}) {
+  const avoidTopics =
+    Array.isArray(context.avoidTopics)
+      ? context.avoidTopics
+      : [];
+
+  if (
+    context.dailyFocusId &&
+    !avoidTopics.includes("daily-focus")
+  ) {
+    return "daily-focus";
+  }
+
+  if (resolvePrimaryTopic(context)) {
+    return "primary-topic";
+  }
+
+  return "fallback";
+}
+
   function buildDecision(context = {}) {
   return {
     mode: resolveMode(context.mode),
     primaryTopic:
       resolveDecisionTopic(context),
     dailyFocusId: context.dailyFocusId,
+    reason: resolveDecisionReason(context),
   };
 }
 
@@ -230,6 +251,7 @@ return createCampfireExperience({
     resolveMode,
     resolvePrimaryTopic,
     resolveDecisionTopic,
+    resolveDecisionReason,
     buildDecision,
     createCampfireExperience,
     evaluate,

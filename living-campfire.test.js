@@ -270,10 +270,30 @@ const decision =
 assert.deepEqual(
   decision,
   {
-    mode: "light-touch",
-    primaryTopic: "daily-focus",
-    dailyFocusId: "focus-123",
+  mode: "light-touch",
+  primaryTopic: "daily-focus",
+  dailyFocusId: "focus-123",
+  reason: "daily-focus",
   }
+);
+
+assert.equal(
+  LivingCampfire.resolveDecisionReason({
+    dailyFocusId: "focus-123",
+  }),
+  "daily-focus"
+);
+
+assert.equal(
+  LivingCampfire.resolveDecisionReason({
+    primaryTopic: "weather",
+  }),
+  "primary-topic"
+);
+
+assert.equal(
+  LivingCampfire.resolveDecisionReason({}),
+  "fallback"
 );
 
   console.log(
