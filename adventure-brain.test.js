@@ -331,6 +331,70 @@ function testFamilyReadinessTransitionsRemainReady() {
     familyBecameReady: false,
   });
 }
+function testRecognitionCandidatesWithoutTransitions() {
+  const candidates =
+    AdventureBrain.createRecognitionCandidates({
+      newlyReadyAdventurerIds: [],
+      familyBecameReady: false,
+    });
+
+  assert.deepStrictEqual(candidates, []);
+}
+
+function testRecognitionCandidatesIndividual() {
+  const candidates =
+    AdventureBrain.createRecognitionCandidates({
+      newlyReadyAdventurerIds: [
+        "jake",
+        "kaseryn",
+      ],
+      familyBecameReady: false,
+    });
+
+  assert.deepStrictEqual(candidates, [
+    {
+      id: "recognition-jake",
+      category: "recognition",
+      priorityTier:
+        AdventureBrain.PRIORITY_TIERS
+          .INDIVIDUAL_READINESS,
+      evidence: {
+        adventurerId: "jake",
+      },
+    },
+    {
+      id: "recognition-kaseryn",
+      category: "recognition",
+      priorityTier:
+        AdventureBrain.PRIORITY_TIERS
+          .INDIVIDUAL_READINESS,
+      evidence: {
+        adventurerId: "kaseryn",
+      },
+    },
+  ]);
+}
+
+function testRecognitionCandidatesFamily() {
+  const candidates =
+    AdventureBrain.createRecognitionCandidates({
+      newlyReadyAdventurerIds: [],
+      familyBecameReady: true,
+    });
+
+  assert.deepStrictEqual(candidates, [
+    {
+      id: "family-recognition",
+      category: "recognition",
+      priorityTier:
+        AdventureBrain.PRIORITY_TIERS
+          .FAMILY_READINESS,
+      evidence: {
+        familyBecameReady: true,
+      },
+    },
+  ]);
+}
 function testEvaluation() {
   const state = require("./adventure-brain.js").evaluate({
     phase: {
@@ -410,6 +474,9 @@ function runTests() {
   testFamilyReadinessTransitionsWithoutHistory();
   testFamilyReadinessTransitionsIndividualReady();
   testFamilyReadinessTransitionsRemainReady();
+  testRecognitionCandidatesWithoutTransitions();
+  testRecognitionCandidatesIndividual();
+  testRecognitionCandidatesFamily();
   testEvaluation();
   testCreateSignal();
   testDailyFocusSelection();

@@ -273,6 +273,49 @@
         true,
   };
 }
+  function createRecognitionCandidates(
+  transitions = {}
+) {
+  const newlyReadyAdventurerIds =
+    Array.isArray(
+      transitions.newlyReadyAdventurerIds
+    )
+      ? transitions.newlyReadyAdventurerIds
+      : [];
+
+  const individualCandidates =
+    newlyReadyAdventurerIds
+      .filter(Boolean)
+      .map((adventurerId) => ({
+        id: `recognition-${adventurerId}`,
+        category: "recognition",
+        priorityTier:
+          PRIORITY_TIERS.INDIVIDUAL_READINESS,
+        evidence: {
+          adventurerId,
+        },
+      }));
+
+  const familyCandidates =
+    transitions.familyBecameReady === true
+      ? [
+          {
+            id: "family-recognition",
+            category: "recognition",
+            priorityTier:
+              PRIORITY_TIERS.FAMILY_READINESS,
+            evidence: {
+              familyBecameReady: true,
+            },
+          },
+        ]
+      : [];
+
+  return [
+    ...individualCandidates,
+    ...familyCandidates,
+  ];
+}
   function createFamilyInsightCandidates(
   familyReadiness = {}
 ) {
@@ -461,6 +504,7 @@
     normalizeContext,
     evaluateFamilyReadiness,
     detectFamilyReadinessTransitions,
+    createRecognitionCandidates,
     createFamilyInsightCandidates,
     createSignal,
     createFocusCandidate,
