@@ -75,6 +75,24 @@ function testEvaluation() {
       id: "planning",
       state: SIGNAL_STATES.AVAILABLE,
     },
+    familyReadiness: {
+      state: SIGNAL_STATES.AVAILABLE,
+      value: {
+        adventurers: [
+          {
+            id: "emily",
+            name: "Emily",
+            ready: true,
+          },
+          {
+            id: "jake",
+            name: "Jake",
+            ready: false,
+          },
+        ],
+        familyReady: false,
+      },
+    },
   });
 
   assert.strictEqual(
@@ -90,6 +108,30 @@ function testEvaluation() {
   assert.strictEqual(
     state.phase.id,
     "planning"
+  );
+
+  assert.strictEqual(
+    state.familyReadiness.state,
+    SIGNAL_STATES.AVAILABLE
+  );
+
+  assert.deepEqual(
+    state.familyReadiness.value,
+    {
+      adventurers: [
+        {
+          id: "emily",
+          name: "Emily",
+          ready: true,
+        },
+        {
+          id: "jake",
+          name: "Jake",
+          ready: false,
+        },
+      ],
+      familyReady: false,
+    }
   );
 }
 function runTests() {

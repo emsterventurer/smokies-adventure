@@ -266,7 +266,7 @@
       evaluatedAt: new Date().toISOString(),
     };
 
-       state.phase = {
+    state.phase = {
       id: normalizedContext.phase.id,
       state: normalizedContext.phase.state,
     };
@@ -275,6 +275,11 @@
       value: normalizedContext.itinerary.value,
     };
 
+    state.familyReadiness = {
+      state: normalizedContext.familyReadiness.state,
+      value: normalizedContext.familyReadiness.value,
+    };
+    
     state.reservations = {
      state: normalizedContext.reservations.state,
     value: normalizedContext.reservations.value,
