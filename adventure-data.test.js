@@ -3,8 +3,8 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const AdventureData = require("./adventure-data.js");
-const AdventurerDirectory = require("./adventurer-directory.js");
+const AdventureData = require("./adventure/adventure-data.js");
+const AdventurerDirectory = require("./adventure/adventurer-directory.js");
 
 test("creates the initial Adventurer Directory", () => {
   const directory = AdventurerDirectory.createInitialAdventurerDirectory();
