@@ -109,9 +109,88 @@ function createActiveAdventureManager(options = {}) {
   });
 }
 
+function createActiveAdventureService(options = {}) {
+  const manager = createActiveAdventureManager(options);
+  const adventureStorage = options.adventureStorage;
+  const seedFactory =
+    typeof options.seedFactory === "function"
+      ? options.seedFactory
+      : null;
+
+  function loadActiveAdventure() {
+    const currentAdventure =
+      manager.getActiveAdventure();
+
+    if (currentAdventure) {
+      return {
+        status: "loaded",
+        adventure: currentAdventure,
+      };
+    }
+
+    const storedAdventures =
+      adventureStorage.listAdventureRecords();
+
+    if (storedAdventures.length > 0) {
+      const selectedAdventure = storedAdventures[0];
+
+      manager.setActiveAdventureId(
+        selectedAdventure.id,
+      );
+
+      return {
+        status: "selected",
+        adventure: selectedAdventure,
+      };
+    }
+
+    if (!seedFactory) {
+      return {
+        status: "empty",
+        adventure: null,
+      };
+    }
+
+    const seedAdventure = seedFactory();
+    const savedAdventure =
+      manager.saveActiveAdventure(seedAdventure);
+
+    return {
+      status: "seeded",
+      adventure: savedAdventure,
+    };
+  }
+
+  function exportActiveAdventure() {
+    const activeAdventure =
+      manager.getActiveAdventure();
+
+    if (!activeAdventure) {
+      return null;
+    }
+
+    return JSON.stringify(
+      {
+        exportType: "adventure-companion",
+        exportVersion: 1,
+        exportedAt: new Date().toISOString(),
+        adventure: activeAdventure,
+      },
+      null,
+      2,
+    );
+  }
+
+  return Object.freeze({
+    ...manager,
+    loadActiveAdventure,
+    exportActiveAdventure,
+  });
+}
 const ActiveAdventure = Object.freeze({
   ACTIVE_ADVENTURE_KEY,
   createActiveAdventureManager,
+  createActiveAdventureService,
 });
 
 if (typeof module !== "undefined" && module.exports) {
