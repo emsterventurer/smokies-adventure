@@ -7,7 +7,16 @@ const AdventureNormalization = require(
 const AdventureValidation = require(
   "./adventure-validation.js",
 );
+const LEGACY_STORAGE_KEYS = Object.freeze({
+  completedDays: "acCompletedDays008",
+  reservationOverrides:
+    "adventureCompanionReservationOverridesV1",
+  readiness: "adventureCompanionReadiness",
+  packing: "adventureCompanionPackingM3041",
+});
 
+const LEGACY_MIGRATION_SOURCE =
+  "legacy-local-storage";
 function cloneValue(value) {
   if (typeof structuredClone === "function") {
     return structuredClone(value);
@@ -128,9 +137,119 @@ function needsAdventureMigration(record) {
   return !validation.valid;
 }
 
+function isStorageProvider(value) {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    typeof value.getItem === "function"
+  );
+}
+
+function readLegacyJson(storage, key, fallback) {
+  const rawValue = storage.getItem(key);
+
+  if (rawValue === null) {
+    return cloneValue(fallback);
+  }
+
+  try {
+    return JSON.parse(rawValue);
+  } catch {
+    return cloneValue(fallback);
+  }
+}
+
+function readLegacyAdventureData(storage) {
+  if (!isStorageProvider(storage)) {
+    throw new TypeError(
+      "A valid legacy storage provider is required.",
+    );
+  }
+
+  return {
+    completedDays: readLegacyJson(
+      storage,
+      LEGACY_STORAGE_KEYS.completedDays,
+      [],
+    ),
+
+    reservationOverrides: readLegacyJson(
+      storage,
+      LEGACY_STORAGE_KEYS.reservationOverrides,
+      {},
+    ),
+
+    readiness: readLegacyJson(
+      storage,
+      LEGACY_STORAGE_KEYS.readiness,
+      {},
+    ),
+
+    packing: readLegacyJson(
+      storage,
+      LEGACY_STORAGE_KEYS.packing,
+      {},
+    ),
+  };
+}
+
+function migrateLegacyStorage(options = {}) {
+  const storage = options.storage;
+  const baseRecord =
+    options.baseRecord ||
+    AdventureData.createSmokiesAdventureRecord();
+  const migratedAt =
+    typeof options.migratedAt === "string"
+      ? options.migratedAt
+      : new Date().toISOString();
+
+  const legacy = readLegacyAdventureData(storage);
+
+  const migrated = migrateAdventureRecord({
+    ...cloneValue(baseRecord),
+
+    reservations: {
+      ...cloneValue(baseRecord.reservations),
+      legacyOverrides: cloneValue(
+        legacy.reservationOverrides,
+      ),
+    },
+
+    packing: {
+      ...cloneValue(baseRecord.packing),
+      travelers: cloneValue(legacy.packing),
+    },
+
+    readiness: {
+      ...cloneValue(baseRecord.readiness),
+      travelers: cloneValue(legacy.readiness),
+    },
+
+    completion: {
+      ...cloneValue(baseRecord.completion),
+      completedDayIds: Array.isArray(
+        legacy.completedDays,
+      )
+        ? cloneValue(legacy.completedDays)
+        : [],
+    },
+
+    metadata: {
+      ...cloneValue(baseRecord.metadata),
+      migratedAt,
+      migrationSource: LEGACY_MIGRATION_SOURCE,
+    },
+  });
+
+  return migrated;
+}
 const AdventureMigration = Object.freeze({
+  LEGACY_STORAGE_KEYS,
+  LEGACY_MIGRATION_SOURCE,
   migrateAdventureRecord,
   needsAdventureMigration,
+  readLegacyAdventureData,
+  migrateLegacyStorage,
 });
 
 if (typeof module !== "undefined" && module.exports) {

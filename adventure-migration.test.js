@@ -6,6 +6,9 @@ const assert = require("node:assert/strict");
 const AdventureData = require(
   "./adventure/adventure-data.js",
 );
+const AdventureStorage = require(
+  "./adventure/adventure-storage.js",
+);
 const AdventureMigration = require(
   "./adventure/adventure-migration.js",
 );
@@ -167,4 +170,248 @@ test("produces independent migrated instances", () => {
   first.title = "Changed Adventure";
 
   assert.equal(second.title, "Legacy Adventure");
+});
+test("reads adventure-specific legacy storage values", () => {
+  const storage =
+    AdventureStorage.createMemoryStorage();
+
+  storage.setItem(
+    AdventureMigration.LEGACY_STORAGE_KEYS.completedDays,
+    JSON.stringify(["2026-08-07"]),
+  );
+
+  storage.setItem(
+    AdventureMigration.LEGACY_STORAGE_KEYS
+      .reservationOverrides,
+    JSON.stringify({
+      "local-goat": {
+        confirmation: "Confirmed",
+      },
+    }),
+  );
+
+  storage.setItem(
+    AdventureMigration.LEGACY_STORAGE_KEYS.readiness,
+    JSON.stringify({
+      emily: {
+        state: "ready",
+      },
+    }),
+  );
+
+  storage.setItem(
+    AdventureMigration.LEGACY_STORAGE_KEYS.packing,
+    JSON.stringify({
+      "packing-item-1": true,
+    }),
+  );
+
+  const result =
+    AdventureMigration.readLegacyAdventureData(
+      storage,
+    );
+
+  assert.deepEqual(result.completedDays, [
+    "2026-08-07",
+  ]);
+
+  assert.deepEqual(result.reservationOverrides, {
+    "local-goat": {
+      confirmation: "Confirmed",
+    },
+  });
+
+  assert.deepEqual(result.readiness, {
+    emily: {
+      state: "ready",
+    },
+  });
+
+  assert.deepEqual(result.packing, {
+    "packing-item-1": true,
+  });
+});
+
+test("migrates legacy storage into the canonical Adventure Record", () => {
+  const storage =
+    AdventureStorage.createMemoryStorage();
+
+  storage.setItem(
+    AdventureMigration.LEGACY_STORAGE_KEYS.completedDays,
+    JSON.stringify([
+      "2026-08-07",
+      "2026-08-08",
+    ]),
+  );
+
+  storage.setItem(
+    AdventureMigration.LEGACY_STORAGE_KEYS
+      .reservationOverrides,
+    JSON.stringify({
+      "local-goat": {
+        time: "6:00 PM",
+      },
+    }),
+  );
+
+  storage.setItem(
+    AdventureMigration.LEGACY_STORAGE_KEYS.readiness,
+    JSON.stringify({
+      emily: {
+        state: "ready",
+      },
+    }),
+  );
+
+  storage.setItem(
+    AdventureMigration.LEGACY_STORAGE_KEYS.packing,
+    JSON.stringify({
+      "packing-item-1": true,
+    }),
+  );
+
+  const migrated =
+    AdventureMigration.migrateLegacyStorage({
+      storage,
+      migratedAt:
+        "2026-07-31T18:00:00-04:00",
+    });
+
+  assert.deepEqual(
+    migrated.completion.completedDayIds,
+    ["2026-08-07", "2026-08-08"],
+  );
+
+  assert.deepEqual(
+    migrated.reservations.legacyOverrides,
+    {
+      "local-goat": {
+        time: "6:00 PM",
+      },
+    },
+  );
+
+  assert.deepEqual(migrated.readiness.travelers, {
+    emily: {
+      state: "ready",
+    },
+  });
+
+  assert.deepEqual(migrated.packing.travelers, {
+    "packing-item-1": true,
+  });
+
+  assert.equal(
+    migrated.metadata.migratedAt,
+    "2026-07-31T18:00:00-04:00",
+  );
+
+  assert.equal(
+    migrated.metadata.migrationSource,
+    AdventureMigration.LEGACY_MIGRATION_SOURCE,
+  );
+});
+
+test("retains legacy storage values after migration", () => {
+  const storage =
+    AdventureStorage.createMemoryStorage();
+
+  storage.setItem(
+    AdventureMigration.LEGACY_STORAGE_KEYS.completedDays,
+    JSON.stringify(["2026-08-07"]),
+  );
+
+  AdventureMigration.migrateLegacyStorage({
+    storage,
+    migratedAt:
+      "2026-07-31T18:00:00-04:00",
+  });
+
+  assert.equal(
+    storage.getItem(
+      AdventureMigration.LEGACY_STORAGE_KEYS
+        .completedDays,
+    ),
+    JSON.stringify(["2026-08-07"]),
+  );
+});
+
+test("legacy storage migration is idempotent", () => {
+  const storage =
+    AdventureStorage.createMemoryStorage();
+
+  storage.setItem(
+    AdventureMigration.LEGACY_STORAGE_KEYS.completedDays,
+    JSON.stringify(["2026-08-07"]),
+  );
+
+  storage.setItem(
+    AdventureMigration.LEGACY_STORAGE_KEYS
+      .reservationOverrides,
+    JSON.stringify({
+      "local-goat": {
+        time: "6:00 PM",
+      },
+    }),
+  );
+
+  const first =
+    AdventureMigration.migrateLegacyStorage({
+      storage,
+      migratedAt:
+        "2026-07-31T18:00:00-04:00",
+    });
+
+  const second =
+    AdventureMigration.migrateLegacyStorage({
+      storage,
+      baseRecord: first,
+      migratedAt:
+        "2026-07-31T18:00:00-04:00",
+    });
+
+  assert.deepEqual(second, first);
+});
+
+test("ignores malformed legacy JSON without deleting it", () => {
+  const storage =
+    AdventureStorage.createMemoryStorage();
+
+  storage.setItem(
+    AdventureMigration.LEGACY_STORAGE_KEYS.completedDays,
+    "{not valid JSON",
+  );
+
+  const migrated =
+    AdventureMigration.migrateLegacyStorage({
+      storage,
+      migratedAt:
+        "2026-07-31T18:00:00-04:00",
+    });
+
+  assert.deepEqual(
+    migrated.completion.completedDayIds,
+    [],
+  );
+
+  assert.equal(
+    storage.getItem(
+      AdventureMigration.LEGACY_STORAGE_KEYS
+        .completedDays,
+    ),
+    "{not valid JSON",
+  );
+});
+
+test("requires a valid storage provider for legacy migration", () => {
+  assert.throws(
+    () =>
+      AdventureMigration.migrateLegacyStorage({
+        storage: null,
+      }),
+    {
+      message:
+        "A valid legacy storage provider is required.",
+    },
+  );
 });
