@@ -1,4 +1,5 @@
-"use strict";
+(function () {
+    "use strict";
 
 const ACTIVE_ADVENTURE_KEY =
   "adventure-companion:active-adventure-id";
@@ -200,3 +201,4 @@ if (typeof module !== "undefined" && module.exports) {
 if (typeof window !== "undefined") {
   window.ActiveAdventure = ActiveAdventure;
 }
+})();

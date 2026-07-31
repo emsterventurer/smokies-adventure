@@ -171,6 +171,47 @@ window.addEventListener("load",()=>{
 });
 
 let DATA;
+let ACTIVE_ADVENTURE = null;
+let ADVENTURE_STARTUP_RESULT = null;
+
+function initializeDurableAdventureData() {
+  try {
+    if (
+      !globalThis.AdventureStartup ||
+      typeof globalThis.AdventureStartup
+        .createAdventureStartup !== "function"
+    ) {
+      return null;
+    }
+
+    const startup =
+      globalThis.AdventureStartup.createAdventureStartup();
+
+    const result = startup.initializeAdventure();
+
+    ADVENTURE_STARTUP_RESULT = result;
+    ACTIVE_ADVENTURE = result.adventure;
+
+    return result;
+  } catch (error) {
+    console.warn(
+      "Durable Adventure Data initialization failed safely.",
+      error,
+    );
+
+    ADVENTURE_STARTUP_RESULT = {
+      status: "failed",
+      adventure: null,
+      error,
+    };
+
+    ACTIVE_ADVENTURE = null;
+
+    return ADVENTURE_STARTUP_RESULT;
+  }
+}
+
+initializeDurableAdventureData();
 const start=new Date(APP_CONFIG.trip.start||"2026-08-07T00:00:00"), end=new Date(APP_CONFIG.trip.end||"2026-08-15T00:00:00"), planning=new Date(APP_CONFIG.trip.planningStart||"2026-07-01T00:00:00");
 const phases=["dreaming","planning","experiencing","remembering"];
 const meta={dreaming:["🌱","Dreaming"],planning:["🌿","Planning"],experiencing:["🏔️🌿","Experiencing"],remembering:["🌳","Remembering"]};

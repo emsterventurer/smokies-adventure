@@ -1,6 +1,10 @@
+(function () {
 "use strict";
 
-const AdventureData = require("./adventure-data.js");
+const AdventureData =
+  typeof module === "object" && module.exports
+    ? require("./adventure-data.js")
+    : globalThis.AdventureData;
 
 function createValidationError(path, code, message) {
   return {
@@ -211,3 +215,4 @@ if (typeof module !== "undefined" && module.exports) {
 if (typeof window !== "undefined") {
   window.AdventureValidation = AdventureValidation;
 }
+})();

@@ -1,11 +1,15 @@
+(function () {
 "use strict";
 
-const AdventureNormalization = require(
-  "./adventure-normalization.js",
-);
-const AdventureValidation = require(
-  "./adventure-validation.js",
-);
+const AdventureNormalization =
+  typeof module === "object" && module.exports
+    ? require("./adventure-normalization.js")
+    : globalThis.AdventureNormalization;
+
+const AdventureValidation =
+  typeof module === "object" && module.exports
+    ? require("./adventure-validation.js")
+    : globalThis.AdventureValidation;
 
 const STORAGE_KEY_PREFIX = "adventure-companion:adventure:";
 const STORAGE_INDEX_KEY =
@@ -277,3 +281,4 @@ if (typeof module !== "undefined" && module.exports) {
 if (typeof window !== "undefined") {
   window.AdventureStorage = AdventureStorage;
 }
+})();

@@ -1,3 +1,4 @@
+(function () {
 "use strict";
 
 const ADVENTURER_DIRECTORY_SCHEMA_VERSION = 1;
@@ -66,3 +67,4 @@ if (typeof module !== "undefined" && module.exports) {
 if (typeof window !== "undefined") {
   window.AdventurerDirectory = AdventurerDirectory;
 }
+})();

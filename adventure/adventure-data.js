@@ -1,3 +1,4 @@
+(function () {
 "use strict";
 
 const ADVENTURE_RECORD_SCHEMA_VERSION = 1;
@@ -134,3 +135,4 @@ if (typeof module !== "undefined" && module.exports) {
 if (typeof window !== "undefined") {
   window.AdventureData = AdventureData;
 }
+})();

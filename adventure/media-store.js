@@ -1,3 +1,4 @@
+(function () {
 "use strict";
 
 const DEFAULT_DATABASE_NAME = "adventure-companion-media";
@@ -502,3 +503,4 @@ if (typeof module !== "undefined" && module.exports) {
 if (typeof window !== "undefined") {
   window.MediaStore = MediaStore;
 }
+})();
