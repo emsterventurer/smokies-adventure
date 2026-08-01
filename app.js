@@ -216,7 +216,37 @@ function initializeDurableAdventureData() {
 }
 
 initializeDurableAdventureData();
+let ADVENTURE_MEDIA_STORE = null;
 let MEMORY_JOURNAL = null;
+
+function initializeAdventureMediaStore() {
+  try {
+  if (
+    !globalThis.MediaStore ||
+    typeof globalThis.MediaStore
+     .createMediaStore !== "function"
+  ) {
+    return null;
+  }
+
+  ADVENTURE_MEDIA_STORE =
+    globalThis.MediaStore.createMediaStore();
+
+    return ADVENTURE_MEDIA_STORE;
+  } catch (error) {
+    console.warn(
+      "Adventure Media Store initialization failed safely.",
+      error,
+    );
+
+    ADVENTURE_MEDIA_STORE = null;
+    return null;
+  }
+}
+
+initializeAdventureMediaStore();
+
+
 
 function initializeMemoryJournal() {
   try {
@@ -413,16 +443,33 @@ function memoryJournalMarkup() {
   </label>
 
   <section class="memoryPhotoPlaceholder">
-    <h4>📷 Photos</h4>
 
-    <p>
-      Photos are part of every great story.
-    </p>
+  <h4>📷 Photos</h4>
 
-    <small>
-      Add photos to this memory here.
-    </small>
-  </section>
+  <p>
+    Photos are part of every great story.
+  </p>
+
+  <label class="memoryPhotoPicker">
+  <input
+    type="file"
+    id="memoryPhotos"
+    name="photos"
+    accept="image/*"
+    multiple
+  >
+
+  <span>📷 Add Photos</span>
+</label>
+
+  <div
+    class="memoryPhotoPreview"
+    data-memory-photo-preview
+  >
+    No photos selected.
+  </div>
+
+</section>
 
   <button class="primary" type="submit">
     💚 Add to Adventure Book
@@ -441,12 +488,193 @@ function memoryJournalMarkup() {
 function bindMemoryJournal() {
   const form =
     document.querySelector("[data-memory-form]");
+  
+  const photoInput =
+  form?.querySelector("#memoryPhotos");
+
+  const photoPreview =
+  form?.querySelector(
+    "[data-memory-photo-preview]",
+  );
+  
+  
+function renderSelectedMemoryPhotos() {
+  if (!photoPreview) {
+    return;
+  }
+
+  if (!selectedMemoryPhotos.length) {
+    photoPreview.textContent =
+      "No photos selected.";
+    return;
+  }
+
+  photoPreview.innerHTML = "";
+
+  selectedMemoryPhotos.forEach(
+    (file, index) => {
+      const previewItem =
+        document.createElement("figure");
+
+      previewItem.className =
+        "memoryPhotoPreviewItem";
+
+      const image =
+        document.createElement("img");
+
+      image.alt =
+        file.name || "Selected memory photo";
+
+      const objectUrl =
+        URL.createObjectURL(file);
+
+      image.src = objectUrl;
+
+      image.addEventListener(
+        "load",
+        () => {
+          URL.revokeObjectURL(objectUrl);
+        },
+        { once: true },
+      );
+
+      const caption =
+        document.createElement("figcaption");
+
+      caption.textContent = file.name;
+
+      const removeButton =
+        document.createElement("button");
+
+      removeButton.type = "button";
+      removeButton.className =
+        "memoryPhotoRemoveButton";
+      removeButton.textContent = "×";
+      removeButton.setAttribute(
+        "aria-label",
+        `Remove ${file.name || "photo"}`,
+      );
+
+      removeButton.addEventListener(
+        "click",
+        () => {
+          selectedMemoryPhotos.splice(
+            index,
+            1,
+          );
+
+          renderSelectedMemoryPhotos();
+        },
+      );
+
+    previewItem.append(
+      image,
+      removeButton,
+    );
+
+      photoPreview.appendChild(
+        previewItem,
+      );
+    },
+  );
+}
+
+let selectedMemoryPhotos = [];
+
+function renderSelectedMemoryPhotos() {
+  if (!photoPreview) {
+    return;
+  }
+
+  if (!selectedMemoryPhotos.length) {
+    photoPreview.textContent =
+      "No photos selected.";
+    return;
+  }
+
+  photoPreview.innerHTML = "";
+
+  selectedMemoryPhotos.forEach(
+    (file, index) => {
+      const previewItem =
+        document.createElement("figure");
+
+      previewItem.className =
+        "memoryPhotoPreviewItem";
+
+      const image =
+        document.createElement("img");
+
+      image.alt =
+        file.name || "Selected memory photo";
+
+      const objectUrl =
+        URL.createObjectURL(file);
+
+      image.src = objectUrl;
+
+      image.addEventListener(
+        "load",
+        () => {
+          URL.revokeObjectURL(objectUrl);
+        },
+        { once: true },
+      );
+
+      
+      const removeButton =
+        document.createElement("button");
+
+      removeButton.type = "button";
+      removeButton.className =
+        "memoryPhotoRemoveButton";
+      removeButton.textContent = "×";
+      removeButton.setAttribute(
+        "aria-label",
+        `Remove ${file.name || "photo"}`,
+      );
+
+      removeButton.addEventListener(
+        "click",
+        () => {
+          selectedMemoryPhotos.splice(
+            index,
+            1,
+          );
+
+          renderSelectedMemoryPhotos();
+        },
+      );
+
+      previewItem.append(
+        image,
+        removeButton,
+      );
+
+      photoPreview.appendChild(
+        previewItem,
+      );
+    },
+  );
+}
+
+photoInput?.addEventListener(
+  "change",
+  () => {
+    selectedMemoryPhotos = Array.from(
+      photoInput.files ?? [],
+    );
+
+    renderSelectedMemoryPhotos();
+  },
+);
+
   const adventureDateInput =
   form?.querySelector(
     '[name="adventureDate"]',
   );
 
-const titleInput =
+ const titleInput =
   form?.querySelector('[name="title"]');
 
 adventureDateInput?.addEventListener(
@@ -480,26 +708,118 @@ adventureDateInput?.addEventListener(
   },
 );
 
-  form?.addEventListener("submit", (event) => {
+  form?.addEventListener(
+  "submit",
+  async (event) => {
     event.preventDefault();
 
     if (!MEMORY_JOURNAL) {
       return;
     }
 
-    const formData = new FormData(form);
+    const submitButton =
+      form.querySelector(
+        'button[type="submit"]',
+      );
 
-    MEMORY_JOURNAL.createMemory({
-      title: formData.get("title"),
-      note: formData.get("note"),
-      adventureDate:
-        formData.get("adventureDate") || null,
-      adventurerIds:
-        formData.getAll("adventurerIds"),
-    });
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent =
+        "Adding to Adventure Book…";
+    }
 
-    view("memories");
-  });
+    try {
+      const formData =
+        new FormData(form);
+
+      const memory =
+        MEMORY_JOURNAL.createMemory({
+          title: formData.get("title"),
+          note: formData.get("note"),
+          adventureDate:
+            formData.get("adventureDate") ||
+            null,
+          adventurerIds:
+            formData.getAll("adventurerIds"),
+          
+        });
+
+      const mediaIds = [];
+
+      if (selectedMemoryPhotos.length) {
+        if (!ADVENTURE_MEDIA_STORE) {
+          throw new Error(
+            "Photo storage is unavailable.",
+          );
+        }
+
+        for (
+          const file of selectedMemoryPhotos
+        ) {
+          const mediaId =
+            globalThis.crypto
+              ?.randomUUID?.() ??
+            `media-${Date.now()}-${Math.random()
+              .toString(16)
+              .slice(2)}`;
+
+          const timestamp =
+            new Date().toISOString();
+
+          await ADVENTURE_MEDIA_STORE.saveMedia({
+            id: mediaId,
+            adventureId:
+              memory.adventureId,
+            memoryId: memory.id,
+            type: "image",
+            mimeType:
+              file.type ||
+              "application/octet-stream",
+            fileName:
+              file.name || null,
+            size:
+              Number.isFinite(file.size)
+                ? file.size
+                : null,
+            data: file,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          });
+
+          mediaIds.push(mediaId);
+        }
+      }
+
+      if (mediaIds.length) {
+        MEMORY_JOURNAL.updateMemory(
+          memory.id,
+          {
+            mediaIds,
+          },
+        );
+      }
+
+      selectedMemoryPhotos = [];
+
+      view("memories");
+    } catch (error) {
+      console.error(
+        "Adventure Book memory save failed.",
+        error,
+      );
+
+      alert(
+        "This memory could not be saved completely. Please try again.",
+      );
+
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent =
+          "💚 Add to Adventure Book";
+      }
+    }
+  },
+);
 
   document
     .querySelectorAll("[data-delete-memory]")

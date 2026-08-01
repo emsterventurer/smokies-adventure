@@ -4147,3 +4147,77 @@ button[disabled] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+.memoryPhotoPreview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.memoryPhotoPreviewItem {
+  margin: 0;
+}
+
+.memoryPhotoPreviewItem img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.memoryPhotoPreviewItem figcaption {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+.memoryPhotoPreviewItem {
+  position: relative;
+}
+
+.memoryPhotoRemoveButton {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(25, 46, 36, 0.9);
+  color: white;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.memoryPhotoRemoveButton:hover,
+.memoryPhotoRemoveButton:focus-visible {
+  transform: scale(1.05);
+}
+.memoryPhotoPicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 44px;
+  padding: 0.7rem 1rem;
+  border: 1px solid #315c48;
+  border-radius: 999px;
+  background: #315c48;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.memoryPhotoPicker:hover,
+.memoryPhotoPicker:focus-within {
+  background: #254939;
+}
+
+.memoryPhotoPicker input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
