@@ -333,7 +333,89 @@ function getMemoryTitleSuggestion(adventureDate) {
     return plannedDay?.title ?? "";
 }
 
+function getMemoryAdventurers(memory) {
+  const adventurerIds = Array.isArray(
+    memory?.adventurerIds,
+  )
+    ? memory.adventurerIds
+    : [];
+
+  const directory =
+    globalThis.AdventurerDirectory
+      ?.INITIAL_ADVENTURERS;
+
+  if (!Array.isArray(directory)) {
+    return [];
+  }
+
+  return adventurerIds
+    .map((adventurerId) =>
+      directory.find(
+        (adventurer) =>
+          adventurer.id === adventurerId,
+      ),
+    )
+    .filter(Boolean);
+}
+
 function renderMemoryCard(memory) {
+  const adventurers =
+    getMemoryAdventurers(memory);
+
+  const travelerMarkup = adventurers.length
+    ? `
+        <div
+          class="memoryCardTravelers"
+          aria-label="Shared by ${escapeMemoryText(
+            adventurers
+              .map(
+                (adventurer) =>
+                  adventurer.displayName,
+              )
+              .join(", "),
+          )}"
+        >
+          <span class="memoryCardMetaLabel">
+            Shared by
+          </span>
+
+          <div class="memoryCardTravelerList">
+            ${adventurers
+              .map(
+                (adventurer) => `
+                  <span
+                    class="memoryCardTraveler"
+                    title="${escapeMemoryText(
+                      adventurer.relationshipLabel ||
+                        adventurer.displayName,
+                    )}"
+                  >
+                    <span aria-hidden="true">
+                      ${escapeMemoryText(
+                        adventurer.avatar || "🌿",
+                      )}
+                    </span>
+
+                    <span>
+                      ${escapeMemoryText(
+                        adventurer.displayName,
+                      )}
+                    </span>
+                  </span>
+                `,
+              )
+              .join("")}
+          </div>
+        </div>
+      `
+    : "";
+
+  const photoCount = Array.isArray(
+    memory.mediaIds,
+  )
+    ? memory.mediaIds.length
+    : 0;
+
   return `
     <article
       class="memoryJournalCard"
@@ -342,12 +424,12 @@ function renderMemoryCard(memory) {
       )}"
     >
       <div class="memoryJournalCardHead">
-        <div>
-          <small>
+        <div class="memoryCardHeading">
+          <span class="memoryCardDate">
             ${escapeMemoryText(
               memory.adventureDate || "Undated",
             )}
-          </small>
+          </span>
 
           <h4>
             ${escapeMemoryText(
@@ -372,16 +454,32 @@ function renderMemoryCard(memory) {
 
       ${
         memory.note
-          ? `<p>${escapeMemoryText(
-              memory.note,
-            )}</p>`
+          ? `
+            <p class="memoryCardStory">
+              ${escapeMemoryText(memory.note)}
+            </p>
+          `
           : ""
       }
 
+      ${travelerMarkup}
+
       ${
-        Array.isArray(memory.mediaIds) &&
-        memory.mediaIds.length
+        photoCount
           ? `
+            <div class="memoryCardPhotoSummary">
+              <span aria-hidden="true">📷</span>
+
+              <span>
+                ${photoCount}
+                ${
+                  photoCount === 1
+                    ? "photo"
+                    : "photos"
+                }
+              </span>
+            </div>
+
             <div
               class="memorySavedPhotoGrid"
               data-memory-photo-gallery="${escapeMemoryText(
@@ -396,6 +494,7 @@ function renderMemoryCard(memory) {
     </article>
   `;
 }
+
 
 function memoryJournalMarkup() {
   const memories =

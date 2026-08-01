@@ -590,7 +590,22 @@ Current verified change:
 - Prepared memory cards for focused future enhancement
 
 ---
+### M3-07.2 Commit 5
 
+Current verified change:
+
+- Added `getMemoryAdventurers(memory)` in `app.js`
+- Resolved stored `adventurerIds` through `AdventurerDirectory.INITIAL_ADVENTURERS`
+- Enriched `renderMemoryCard(memory)` with:
+  - Rounded Adventure date badge
+  - Improved story presentation
+  - Shared-by traveler chips
+  - Photo-count summary when media exists
+- Preserved the existing Memory Journal data model
+- Preserved timeline grouping and storage behavior
+- Verified 110 automated tests pass
+- Verified the rich memory card in the browser
+---
 ## Related Architecture
 
 ```text

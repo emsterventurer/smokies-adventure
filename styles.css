@@ -4394,6 +4394,76 @@ button[disabled] {
 .memoryJournalCardHead h4 {
   margin: 0.2rem 0 0;
 }
+.memoryCardHeading {
+  min-width: 0;
+}
+
+.memoryCardDate {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(49, 92, 72, 0.09);
+  color: #526158;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.memoryCardStory {
+  margin: 0.9rem 0 0;
+  color: #33463d;
+  font-size: 1rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.memoryCardTravelers {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.memoryCardMetaLabel {
+  color: #647267;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.memoryCardTravelerList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.memoryCardTraveler {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 36px;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid rgba(49, 92, 72, 0.14);
+  border-radius: 999px;
+  background: #eef4ef;
+  color: #315c48;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.memoryCardPhotoSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(49, 92, 72, 0.08);
+  color: #526158;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
 
 .memoryJournalCardHead small {
   color: #647267;
