@@ -290,7 +290,7 @@ The provider contract is now available, but the active application provider rema
 
 ---
 
-## Firebase Foundation
+## Cloud Foundation
 
 Firebase initialization currently lives in:
 
@@ -323,9 +323,34 @@ isInitialized: true
 
 Firebase is initialized but is not yet the active Adventure data provider.
 
-No cloud reads, writes, media uploads, or synchronization occur yet.
+The Cloud Adventure Provider lives in:
 
----
+```text
+adventure/firebase/firebase-provider.mjs
+```
+
+It exposes this browser object:
+
+```js
+globalThis.CloudAdventureProvider;
+```
+
+Current provider capabilities:
+
+```js
+loadAdventureRecord(adventureId);
+saveAdventureRecord(record);
+listAdventureRecords();
+deleteAdventureRecord(adventureId);
+hasAdventureRecord(adventureId);
+subscribeToAdventure(adventureId, observer, errorObserver);
+```
+
+The Cloud Adventure Provider communicates with Cloud Firestore.
+
+It is loaded and verified in the browser, but it is not yet selected as the application’s active provider.
+
+## No cloud reads, writes, media uploads, or synchronization occur during normal application use yet.
 
 ## Current Provider
 
