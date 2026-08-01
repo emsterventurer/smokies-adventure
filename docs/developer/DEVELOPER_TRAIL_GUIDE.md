@@ -8,19 +8,209 @@
 
 ---
 
-## Development Workflow
+# 🧭 Adventure Companion Development Standard
 
-Use this sequence for meaningful changes:
+Every meaningful repository change should follow this workflow:
 
-1. Review the repository.
-2. Confirm existing responsibilities and reusable data.
-3. Implement one focused change.
-4. Run automated tests.
-5. Verify the behavior in the browser.
-6. Update the Developer Trail Guide with the verified final structure.
-7. Commit the focused change.
+```text
+🧭 Repository Review
+        ↓
+📐 Architecture Check
+        ↓
+🔨 One Focused Implementation
+        ↓
+🧪 Automated Tests
+        ↓
+🌐 Browser Verification
+        ↓
+📖 Update Developer Trail Guide
+        ↓
+💾 Commit
+```
 
-Do not document speculative implementation as though it already exists.
+## Core Principle
+
+> **Inspect before you instruct.**
+
+Verify the current repository before deciding where or how to make a change.
+
+Do not rely on remembered filenames, assumed functions, or planned architecture when the current implementation can be inspected directly.
+
+---
+
+## 1. 🧭 Repository Review
+
+Understand the current implementation before making changes.
+
+Verify:
+
+- Existing files
+- Current responsibilities
+- Reusable functions
+- Data sources
+- Existing tests
+- Related documentation
+- Known browser or development behavior
+
+Never assume where code lives.
+
+---
+
+## 2. 📐 Architecture Check
+
+Confirm the proposed implementation aligns with the approved architecture.
+
+Ask:
+
+- Does this responsibility already exist?
+- Would this duplicate data?
+- Would this duplicate logic?
+- Does an Architecture Plan already define the behavior?
+- Can an existing module be safely extended?
+- Does the change preserve future compatibility?
+
+Architecture Plans describe what Adventure Companion intends to build and why.
+
+The implementation should reinforce that architecture rather than work around it.
+
+---
+
+## 3. 🔨 One Focused Implementation
+
+Implement one logical improvement at a time.
+
+Guidelines:
+
+- One clear responsibility
+- Small, reviewable changes
+- Prefer complete function or clearly bounded block replacements
+- Avoid unrelated cleanup
+- Preserve working behavior
+- Keep the change easy to explain and reverse
+- Pause for confirmation after each development step
+
+Every implementation should answer:
+
+> **What single improvement does this make?**
+
+---
+
+## 4. 🧪 Automated Tests
+
+Run the appropriate automated verification before browser testing.
+
+Typical minimum:
+
+```powershell
+node --check app.js
+node --test
+```
+
+Use narrower tests first when helpful, but run the complete suite before committing.
+
+Rules:
+
+- Fix failures before continuing.
+- Never commit failing tests.
+- Do not weaken a valid test merely to make it pass.
+- Update tests when intentional behavior changes.
+- Preserve regression coverage for existing systems.
+
+---
+
+## 5. 🌐 Browser Verification
+
+Verify the actual user experience after automated tests pass.
+
+Typical checks include:
+
+- Feature behaves correctly
+- Existing behavior still works
+- No visible regressions
+- No red console errors
+- Responsive layout remains healthy
+- Controls remain accessible
+- Empty states remain useful
+
+When applicable, verify:
+
+- Creation
+- Editing
+- Deletion
+- Persistence after reload
+- Error handling
+- Mobile presentation
+- Reduced-motion behavior
+
+Automated tests do not replace browser verification.
+
+---
+
+## 6. 📖 Update Developer Trail Guide
+
+Document the verified final implementation.
+
+Update the Trail Guide when a change introduces or modifies:
+
+- Primary files
+- Module responsibilities
+- Reusable entry points
+- Important data sources
+- Tests
+- Browser-verification requirements
+- Recurring development issues
+- Safe extension rules
+
+Document only what has been implemented and verified.
+
+Do not describe planned functionality as though it already exists.
+
+---
+
+## 7. 💾 Commit
+
+Create a single-purpose commit only after verification and documentation are complete.
+
+Before committing, confirm:
+
+- Automated tests pass
+- Browser verification passes
+- Trail Guide reflects the verified implementation
+- Only intended files are staged
+- Temporary files and test data are removed
+- The commit message clearly describes one responsibility
+
+Examples:
+
+```text
+feat: redesign Adventure Book foundation
+feat: enrich Adventure Book timeline days
+refactor: extract Adventure Book memory card renderer
+docs: formalize Adventure Companion development standard
+```
+
+---
+
+## Guiding Principles
+
+Every commit should leave Adventure Companion in a better state than it was found.
+
+Priorities:
+
+- Clear architecture
+- Small commits
+- Verified behavior
+- Accurate documentation
+- Easy future maintenance
+- A polished family experience
+
+Build deliberately.
+
+Verify thoroughly.
+
+Document responsibly.
+
+Commit with confidence.
 
 ---
 
