@@ -378,11 +378,27 @@ function memoryJournalMarkup() {
               </div>
 
               ${
-                memory.note
-                  ? `<p>${escapeMemoryText(memory.note)}</p>`
-                  : ""
-              }
-            </article>
+  memory.note
+    ? `<p>${escapeMemoryText(memory.note)}</p>`
+    : ""
+}
+
+${
+  Array.isArray(memory.mediaIds) &&
+  memory.mediaIds.length
+    ? `
+      <div
+        class="memorySavedPhotoGrid"
+        data-memory-photo-gallery="${escapeMemoryText(
+          memory.id,
+        )}"
+      >
+        <small>Loading photos…</small>
+      </div>
+    `
+    : ""
+}
+</article>
           `,
         )
         .join("")
@@ -485,6 +501,73 @@ function memoryJournalMarkup() {
   `;
 }
 
+async function hydrateSavedMemoryPhotos() {
+  if (!ADVENTURE_MEDIA_STORE) {
+    return;
+  }
+
+  const galleries = document.querySelectorAll(
+    "[data-memory-photo-gallery]",
+  );
+
+  for (const gallery of galleries) {
+    const memoryId =
+      gallery.dataset.memoryPhotoGallery;
+
+    if (!memoryId) {
+      continue;
+    }
+
+    try {
+      const mediaRecords =
+        await ADVENTURE_MEDIA_STORE.listMediaForMemory(
+          memoryId,
+        );
+
+      gallery.innerHTML = "";
+
+      if (!mediaRecords.length) {
+        gallery.remove();
+        continue;
+      }
+
+      mediaRecords.forEach((record) => {
+        const image =
+          document.createElement("img");
+
+        image.className =
+          "memorySavedPhoto";
+
+        image.alt =
+          record.fileName ||
+          "Adventure Book photo";
+
+        const objectUrl =
+          URL.createObjectURL(record.data);
+
+        image.src = objectUrl;
+
+        image.addEventListener(
+          "load",
+          () => {
+            URL.revokeObjectURL(objectUrl);
+          },
+          { once: true },
+        );
+
+        gallery.appendChild(image);
+      });
+    } catch (error) {
+      console.warn(
+        "Saved Adventure Book photos could not be loaded.",
+        error,
+      );
+
+      gallery.innerHTML =
+        "<small>Photos could not be loaded.</small>";
+    }
+  }
+}
 function bindMemoryJournal() {
   const form =
     document.querySelector("[data-memory-form]");
@@ -824,7 +907,7 @@ adventureDateInput?.addEventListener(
   document
     .querySelectorAll("[data-delete-memory]")
     .forEach((button) => {
-      button.addEventListener("click", () => {
+      button.addEventListener("click", async () => {
         if (!MEMORY_JOURNAL) {
           return;
         }
@@ -833,14 +916,40 @@ adventureDateInput?.addEventListener(
           button.dataset.deleteMemory;
 
         if (
-          memoryId &&
-          confirm("Delete this memory?")
-        ) {
-          MEMORY_JOURNAL.deleteMemory(memoryId);
-          view("memories");
+         memoryId &&
+         confirm(
+           "Delete this memory and its photos?",
+         )
+       ) {
+         try {
+          if (ADVENTURE_MEDIA_STORE) {
+            const mediaRecords =
+             await ADVENTURE_MEDIA_STORE
+              .listMediaForMemory(memoryId);
+
+            for (const mediaRecord of mediaRecords) {
+             await ADVENTURE_MEDIA_STORE
+              .deleteMedia(mediaRecord.id);
+            }
+          }
+
+           MEMORY_JOURNAL.deleteMemory(memoryId);
+           view("memories");
+         } catch (error) {
+           console.error(
+            "Adventure Book memory deletion failed.",
+            error,
+           );
+
+           alert(
+            "This memory could not be deleted completely. Please try again.",
+          );
         }
-      });
+      }
     });
+  });
+
+hydrateSavedMemoryPhotos();
 }
 const start=new Date(APP_CONFIG.trip.start||"2026-08-07T00:00:00"), end=new Date(APP_CONFIG.trip.end||"2026-08-15T00:00:00"), planning=new Date(APP_CONFIG.trip.planningStart||"2026-07-01T00:00:00");
 const phases=["dreaming","planning","experiencing","remembering"];
