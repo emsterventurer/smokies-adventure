@@ -290,6 +290,64 @@ The provider contract is now available, but the active application provider rema
 
 ---
 
+## Shared Adventure Synchronization
+
+The synchronization controller lives in:
+
+```text
+adventure/shared-adventure-sync.js
+```
+
+It coordinates the local Active Adventure Service with the Cloud Adventure Provider.
+
+Verified browser export:
+
+```js
+globalThis.SharedAdventureSync;
+```
+
+Current capabilities:
+
+```js
+createSharedAdventureSync(options);
+```
+
+The created controller exposes:
+
+```js
+getStatus();
+pushActiveAdventure();
+pullAdventure(adventureId);
+subscribe(adventureId);
+stop();
+```
+
+Current synchronization behavior:
+
+- Pushes the active local Adventure to the cloud provider
+- Pulls a cloud Adventure into the local Active Adventure Service
+- Subscribes to cloud Adventure changes
+- Saves received cloud updates locally
+- Tracks idle, syncing, synced, and error states
+- Supports stopping the active subscription
+
+Related tests:
+
+```text
+shared-adventure-sync.test.js
+```
+
+Current verification:
+
+```text
+3 focused synchronization tests pass
+117 total tests pass
+```
+
+The synchronization controller is implemented and verified, but normal application startup does not activate cloud synchronization yet.
+
+---
+
 ## Cloud Foundation
 
 Firebase initialization currently lives in:
