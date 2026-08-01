@@ -242,6 +242,101 @@ hasAdventureRecord(adventureId);
 
 ---
 
+## Firebase Foundation
+
+Firebase initialization currently lives in:
+
+```text
+adventure/firebase/firebase-config.js
+adventure/firebase/firebase-client.mjs
+```
+
+### `adventure/firebase/firebase-config.js`
+
+Exposes the registered Firebase web-app configuration as:
+
+```js
+globalThis.ADVENTURE_FIREBASE_CONFIG;
+```
+
+### `adventure/firebase/firebase-client.mjs`
+
+Initializes the Firebase application through the official Firebase JavaScript SDK and exposes:
+
+```js
+globalThis.AdventureFirebase;
+```
+
+Verified browser status:
+
+```text
+isInitialized: true
+```
+
+Firebase is initialized but is not yet the active Adventure data provider.
+
+No cloud reads, writes, media uploads, or synchronization occur yet.
+
+---
+
+## Current Provider
+
+The active Adventure provider remains:
+
+```text
+Adventure Repository
+        ↓
+AdventureStorage
+        ↓
+localStorage
+```
+
+Firebase is currently initialized alongside the local provider but does not yet store Adventure data.
+
+---
+
+## Verified Load Order
+
+In `index.html`:
+
+```text
+adventure/adventure-storage.js
+        ↓
+adventure/adventure-repository.js
+        ↓
+adventure/firebase/firebase-config.js
+        ↓
+adventure/firebase/firebase-client.mjs
+        ↓
+adventure/active-adventure.js
+        ↓
+adventure/adventure-startup.js
+        ↓
+app.js
+```
+
+---
+
+## Verification
+
+After Firebase foundation changes, run:
+
+```powershell
+node --check adventure\firebase\firebase-config.js
+node --check adventure\firebase\firebase-client.mjs
+node --test
+```
+
+Browser verification should confirm:
+
+- The application loads normally
+- No visible behavior changes occur
+- No red console errors appear
+- `globalThis.AdventureFirebase` exists
+- `globalThis.AdventureFirebase.isInitialized` is `true`
+
+---
+
 # Repository Landmarks
 
 | Area                             | Purpose                                                           |
