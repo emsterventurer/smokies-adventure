@@ -146,7 +146,7 @@
     <button class="active" data-view="home">⌂<span>Dashboard</span></button>
     <button data-view="week">🗓️<span>Daily Adventure</span></button>
     <button data-view="reservations">🍽️<span>Reservations</span></button>
-    <button data-view="traditions">💚<span>Traditions</span></button>
+    <button data-view="memories">📖<span>Memories</span></button>
     <button data-view="packing">🎒<span>Family Packing</span></button>
     <button data-view="trip">📍<span>Trip Snapshot</span></button>
   </div>
@@ -209,7 +209,13 @@
 <section class="quick">
  <button data-view="week">🗓️<span><strong>Daily Adventure</strong><small>Dashboard, stops & directions</small></span></button>
  <button data-view="reservations">🍽️<span><strong>Reservations</strong><small>Confirmed & pending</small></span></button>
- <button data-view="traditions">💚<span><strong>Traditions</strong><small>Moments to protect</small></span></button>
+ <button data-view="memories">
+  📖
+  <span>
+    <strong>Memories</strong>
+    <small>Adventure Book</small>
+  </span>
+</button>
  <button data-view="packing">🎒<span><strong>Family Packing</strong><small>Essentials by traveler</small></span></button>
 </section>
 <section id="screen" class="card screen" hidden></section>
@@ -225,7 +231,7 @@
 <button class="active" data-view="home">⌂<small>Home</small></button>
 <button data-view="week">🗺️<small>Adventure</small></button>
 <button data-view="packing">🎒<small>Prepare</small></button>
-<button data-view="traditions">📖<small>Memories</small></button>
+<button data-view="memories">📖<small>Memories</small></button>
 <button data-view="companion">🌿<small>Companion</small></button>
 </nav>
 </div>
@@ -242,6 +248,7 @@
 <script src="adventure/adventure-storage.js"></script>
 <script src="adventure/active-adventure.js"></script>
 <script src="adventure/media-store.js"></script>
+<script src="adventure/memory-journal.js"></script>
 <script src="adventure/adventure-startup.js"></script>
 
 <script src="shared-state.js"></script>
