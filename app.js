@@ -171,6 +171,786 @@ window.addEventListener("load",()=>{
 });
 
 let DATA;
+let ACTIVE_ADVENTURE = null;
+let ADVENTURE_STARTUP_RESULT = null;
+
+function initializeDurableAdventureData() {
+  try {
+    if (
+      !globalThis.AdventureStartup ||
+      typeof globalThis.AdventureStartup
+        .createAdventureStartup !== "function"
+    ) {
+      return null;
+    }
+
+    const startup =
+      globalThis.AdventureStartup.createAdventureStartup();
+
+    const result = startup.initializeAdventure();
+
+    ADVENTURE_STARTUP_RESULT = {
+      ...result,
+      activeAdventureService:
+        startup.activeAdventureService,
+    };
+    ACTIVE_ADVENTURE = result.adventure;
+
+    return result;
+  } catch (error) {
+    console.warn(
+      "Durable Adventure Data initialization failed safely.",
+      error,
+    );
+
+    ADVENTURE_STARTUP_RESULT = {
+      status: "failed",
+      adventure: null,
+      error,
+    };
+
+    ACTIVE_ADVENTURE = null;
+
+    return ADVENTURE_STARTUP_RESULT;
+  }
+}
+
+initializeDurableAdventureData();
+let ADVENTURE_MEDIA_STORE = null;
+let MEMORY_JOURNAL = null;
+
+function initializeAdventureMediaStore() {
+  try {
+  if (
+    !globalThis.MediaStore ||
+    typeof globalThis.MediaStore
+     .createMediaStore !== "function"
+  ) {
+    return null;
+  }
+
+  ADVENTURE_MEDIA_STORE =
+    globalThis.MediaStore.createMediaStore();
+
+    return ADVENTURE_MEDIA_STORE;
+  } catch (error) {
+    console.warn(
+      "Adventure Media Store initialization failed safely.",
+      error,
+    );
+
+    ADVENTURE_MEDIA_STORE = null;
+    return null;
+  }
+}
+
+initializeAdventureMediaStore();
+
+
+
+function initializeMemoryJournal() {
+  try {
+    if (
+      !globalThis.MemoryJournal ||
+      typeof globalThis.MemoryJournal.createMemoryJournal !== "function" ||
+      !ADVENTURE_STARTUP_RESULT?.activeAdventureService
+    ) {
+      return null;
+    }
+
+    MEMORY_JOURNAL =
+      globalThis.MemoryJournal.createMemoryJournal({
+        activeAdventureService:
+          ADVENTURE_STARTUP_RESULT.activeAdventureService,
+      });
+
+    return MEMORY_JOURNAL;
+  } catch (error) {
+    console.warn(
+      "Memory Journal initialization failed safely.",
+      error,
+    );
+
+    MEMORY_JOURNAL = null;
+    return null;
+  }
+}
+
+initializeMemoryJournal();
+
+function escapeMemoryText(value) {
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      })[character],
+  );
+}
+
+function memoryTravelerOptions() {
+  const travelers = [
+    ["emily", "Emily"],
+    ["jake", "Jake"],
+    ["kaseryn", "Kaz"],
+    ["bubbe", "Bubbe"],
+    ["papa", "Papa"],
+  ];
+
+  return travelers
+    .map(
+      ([id, name]) => `
+        <label class="memoryTravelerOption">
+          <input
+            type="checkbox"
+            name="adventurerIds"
+            value="${id}"
+          >
+          <span>${name}</span>
+        </label>
+      `,
+    )
+    .join("");
+}
+
+function getMemoryTitleSuggestion(adventureDate) {
+  if (
+    typeof adventureDate !== "string" ||
+    adventureDate.trim() === "" ||
+    !Array.isArray(DATA?.days)
+  ) {
+    return "";
+  }
+
+  const plannedDay = DATA.days.find(
+    (day) => day.date === adventureDate,
+  );
+
+  return plannedDay?.title ?? "";
+}
+function memoryJournalMarkup() {
+  const memories =
+    MEMORY_JOURNAL?.listMemories() ?? [];
+
+  const initialAdventureDate =
+  localISO(new Date());
+
+  const initialTitleSuggestion =
+    getMemoryTitleSuggestion(
+      initialAdventureDate,
+    );  
+  const memoryList = memories.length
+    ? memories
+        .map(
+          (memory) => `
+            <article
+              class="memoryJournalCard"
+              data-memory-id="${escapeMemoryText(memory.id)}"
+            >
+              <div class="memoryJournalCardHead">
+                <div>
+                  <small>
+                    ${escapeMemoryText(
+                      memory.adventureDate || "Undated",
+                    )}
+                  </small>
+                  <h4>
+                    ${escapeMemoryText(
+                      memory.title || "Untitled memory",
+                    )}
+                  </h4>
+                </div>
+
+                <button
+                  type="button"
+                  class="memoryDeleteButton"
+                  data-delete-memory="${escapeMemoryText(memory.id)}"
+                  aria-label="Delete ${escapeMemoryText(
+                    memory.title || "memory",
+                  )}"
+                >
+                  Delete
+                </button>
+              </div>
+
+              ${
+  memory.note
+    ? `<p>${escapeMemoryText(memory.note)}</p>`
+    : ""
+}
+
+${
+  Array.isArray(memory.mediaIds) &&
+  memory.mediaIds.length
+    ? `
+      <div
+        class="memorySavedPhotoGrid"
+        data-memory-photo-gallery="${escapeMemoryText(
+          memory.id,
+        )}"
+      >
+        <small>Loading photos…</small>
+      </div>
+    `
+    : ""
+}
+</article>
+          `,
+        )
+        .join("")
+    : `<p class="info">The Adventure Book is waiting for its first page.</p>`;
+
+  return `
+    <section class="memoryJournal">
+      <header class="memoryJournalHead">
+        <div>
+          <span class="eyebrow">ADVENTURE BOOK</span>
+          <h3>📖 Adventure Book</h3>
+          <p>Every adventure has a story worth keeping.</p>
+        </div>
+      </header>
+
+      <form data-memory-form class="memoryCaptureForm">
+
+  <div class="memoryJournalRow">
+    <label>
+    <span>Adventure Date</span>
+    <input
+      type="date"
+      name="adventureDate"
+      value="${initialAdventureDate}"
+    >
+  </label>
+
+  <label>
+    <span>Memory Title</span>
+    <input
+      type="text"
+      name="title"
+      autocomplete="off"
+      value="${escapeMemoryText(
+        initialTitleSuggestion,
+      )}"
+      data-suggested-title="${escapeMemoryText(
+        initialTitleSuggestion,
+      )}"
+    >
+  </label>
+</div>
+
+  <fieldset>
+    <legend>Who shared this moment?</legend>
+    <div class="memoryTravelerGrid">
+      ${memoryTravelerOptions()}
+    </div>
+  </fieldset>
+
+  <label>
+    <span>Tell the story</span>
+    <textarea
+      name="note"
+      rows="5"
+      placeholder="A sentence or two is enough."
+    ></textarea>
+  </label>
+
+  <section class="memoryPhotoPlaceholder">
+
+  <h4>📷 Photos</h4>
+
+  <p>
+    Photos are part of every great story.
+  </p>
+
+  <label class="memoryPhotoPicker">
+  <input
+    type="file"
+    id="memoryPhotos"
+    name="photos"
+    accept="image/*"
+    multiple
+  >
+
+  <span>📷 Add Photos</span>
+</label>
+
+  <div
+    class="memoryPhotoPreview"
+    data-memory-photo-preview
+  >
+    No photos selected.
+  </div>
+
+</section>
+
+  <button class="primary" type="submit">
+    💚 Add to Adventure Book
+  </button>
+
+</form>
+
+      <section class="memoryJournalList">
+        <h4>Adventure Journal</h4>
+        ${memoryList}
+      </section>
+    </section>
+  `;
+}
+
+async function hydrateSavedMemoryPhotos() {
+  if (!ADVENTURE_MEDIA_STORE) {
+    return;
+  }
+
+  const galleries = document.querySelectorAll(
+    "[data-memory-photo-gallery]",
+  );
+
+  for (const gallery of galleries) {
+    const memoryId =
+      gallery.dataset.memoryPhotoGallery;
+
+    if (!memoryId) {
+      continue;
+    }
+
+    try {
+      const mediaRecords =
+        await ADVENTURE_MEDIA_STORE.listMediaForMemory(
+          memoryId,
+        );
+
+      gallery.innerHTML = "";
+
+      if (!mediaRecords.length) {
+        gallery.remove();
+        continue;
+      }
+
+      mediaRecords.forEach((record) => {
+        const image =
+          document.createElement("img");
+
+        image.className =
+          "memorySavedPhoto";
+
+        image.alt =
+          record.fileName ||
+          "Adventure Book photo";
+
+        const objectUrl =
+          URL.createObjectURL(record.data);
+
+        image.src = objectUrl;
+
+        image.addEventListener(
+          "load",
+          () => {
+            URL.revokeObjectURL(objectUrl);
+          },
+          { once: true },
+        );
+
+        gallery.appendChild(image);
+      });
+    } catch (error) {
+      console.warn(
+        "Saved Adventure Book photos could not be loaded.",
+        error,
+      );
+
+      gallery.innerHTML =
+        "<small>Photos could not be loaded.</small>";
+    }
+  }
+}
+function bindMemoryJournal() {
+  const form =
+    document.querySelector("[data-memory-form]");
+  
+  const photoInput =
+  form?.querySelector("#memoryPhotos");
+
+  const photoPreview =
+  form?.querySelector(
+    "[data-memory-photo-preview]",
+  );
+  
+  
+function renderSelectedMemoryPhotos() {
+  if (!photoPreview) {
+    return;
+  }
+
+  if (!selectedMemoryPhotos.length) {
+    photoPreview.textContent =
+      "No photos selected.";
+    return;
+  }
+
+  photoPreview.innerHTML = "";
+
+  selectedMemoryPhotos.forEach(
+    (file, index) => {
+      const previewItem =
+        document.createElement("figure");
+
+      previewItem.className =
+        "memoryPhotoPreviewItem";
+
+      const image =
+        document.createElement("img");
+
+      image.alt =
+        file.name || "Selected memory photo";
+
+      const objectUrl =
+        URL.createObjectURL(file);
+
+      image.src = objectUrl;
+
+      image.addEventListener(
+        "load",
+        () => {
+          URL.revokeObjectURL(objectUrl);
+        },
+        { once: true },
+      );
+
+      const caption =
+        document.createElement("figcaption");
+
+      caption.textContent = file.name;
+
+      const removeButton =
+        document.createElement("button");
+
+      removeButton.type = "button";
+      removeButton.className =
+        "memoryPhotoRemoveButton";
+      removeButton.textContent = "×";
+      removeButton.setAttribute(
+        "aria-label",
+        `Remove ${file.name || "photo"}`,
+      );
+
+      removeButton.addEventListener(
+        "click",
+        () => {
+          selectedMemoryPhotos.splice(
+            index,
+            1,
+          );
+
+          renderSelectedMemoryPhotos();
+        },
+      );
+
+    previewItem.append(
+      image,
+      removeButton,
+    );
+
+      photoPreview.appendChild(
+        previewItem,
+      );
+    },
+  );
+}
+
+let selectedMemoryPhotos = [];
+
+function renderSelectedMemoryPhotos() {
+  if (!photoPreview) {
+    return;
+  }
+
+  if (!selectedMemoryPhotos.length) {
+    photoPreview.textContent =
+      "No photos selected.";
+    return;
+  }
+
+  photoPreview.innerHTML = "";
+
+  selectedMemoryPhotos.forEach(
+    (file, index) => {
+      const previewItem =
+        document.createElement("figure");
+
+      previewItem.className =
+        "memoryPhotoPreviewItem";
+
+      const image =
+        document.createElement("img");
+
+      image.alt =
+        file.name || "Selected memory photo";
+
+      const objectUrl =
+        URL.createObjectURL(file);
+
+      image.src = objectUrl;
+
+      image.addEventListener(
+        "load",
+        () => {
+          URL.revokeObjectURL(objectUrl);
+        },
+        { once: true },
+      );
+
+      
+      const removeButton =
+        document.createElement("button");
+
+      removeButton.type = "button";
+      removeButton.className =
+        "memoryPhotoRemoveButton";
+      removeButton.textContent = "×";
+      removeButton.setAttribute(
+        "aria-label",
+        `Remove ${file.name || "photo"}`,
+      );
+
+      removeButton.addEventListener(
+        "click",
+        () => {
+          selectedMemoryPhotos.splice(
+            index,
+            1,
+          );
+
+          renderSelectedMemoryPhotos();
+        },
+      );
+
+      previewItem.append(
+        image,
+        removeButton,
+      );
+
+      photoPreview.appendChild(
+        previewItem,
+      );
+    },
+  );
+}
+
+photoInput?.addEventListener(
+  "change",
+  () => {
+    selectedMemoryPhotos = Array.from(
+      photoInput.files ?? [],
+    );
+
+    renderSelectedMemoryPhotos();
+  },
+);
+
+  const adventureDateInput =
+  form?.querySelector(
+    '[name="adventureDate"]',
+  );
+
+ const titleInput =
+  form?.querySelector('[name="title"]');
+
+adventureDateInput?.addEventListener(
+  "change",
+  () => {
+    if (!titleInput) {
+      return;
+    }
+
+    const previousSuggestion =
+      titleInput.dataset.suggestedTitle ?? "";
+
+    const currentTitle =
+      titleInput.value.trim();
+
+    const nextSuggestion =
+      getMemoryTitleSuggestion(
+        adventureDateInput.value,
+      );
+
+    const canReplaceTitle =
+      currentTitle === "" ||
+      currentTitle === previousSuggestion;
+
+    if (canReplaceTitle) {
+      titleInput.value = nextSuggestion;
+    }
+
+    titleInput.dataset.suggestedTitle =
+      nextSuggestion;
+  },
+);
+
+  form?.addEventListener(
+  "submit",
+  async (event) => {
+    event.preventDefault();
+
+    if (!MEMORY_JOURNAL) {
+      return;
+    }
+
+    const submitButton =
+      form.querySelector(
+        'button[type="submit"]',
+      );
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent =
+        "Adding to Adventure Book…";
+    }
+
+    try {
+      const formData =
+        new FormData(form);
+
+      const memory =
+        MEMORY_JOURNAL.createMemory({
+          title: formData.get("title"),
+          note: formData.get("note"),
+          adventureDate:
+            formData.get("adventureDate") ||
+            null,
+          adventurerIds:
+            formData.getAll("adventurerIds"),
+          
+        });
+
+      const mediaIds = [];
+
+      if (selectedMemoryPhotos.length) {
+        if (!ADVENTURE_MEDIA_STORE) {
+          throw new Error(
+            "Photo storage is unavailable.",
+          );
+        }
+
+        for (
+          const file of selectedMemoryPhotos
+        ) {
+          const mediaId =
+            globalThis.crypto
+              ?.randomUUID?.() ??
+            `media-${Date.now()}-${Math.random()
+              .toString(16)
+              .slice(2)}`;
+
+          const timestamp =
+            new Date().toISOString();
+
+          await ADVENTURE_MEDIA_STORE.saveMedia({
+            id: mediaId,
+            adventureId:
+              memory.adventureId,
+            memoryId: memory.id,
+            type: "image",
+            mimeType:
+              file.type ||
+              "application/octet-stream",
+            fileName:
+              file.name || null,
+            size:
+              Number.isFinite(file.size)
+                ? file.size
+                : null,
+            data: file,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          });
+
+          mediaIds.push(mediaId);
+        }
+      }
+
+      if (mediaIds.length) {
+        MEMORY_JOURNAL.updateMemory(
+          memory.id,
+          {
+            mediaIds,
+          },
+        );
+      }
+
+      selectedMemoryPhotos = [];
+
+      view("memories");
+    } catch (error) {
+      console.error(
+        "Adventure Book memory save failed.",
+        error,
+      );
+
+      alert(
+        "This memory could not be saved completely. Please try again.",
+      );
+
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent =
+          "💚 Add to Adventure Book";
+      }
+    }
+  },
+);
+
+  document
+    .querySelectorAll("[data-delete-memory]")
+    .forEach((button) => {
+      button.addEventListener("click", async () => {
+        if (!MEMORY_JOURNAL) {
+          return;
+        }
+
+        const memoryId =
+          button.dataset.deleteMemory;
+
+        if (
+         memoryId &&
+         confirm(
+           "Delete this memory and its photos?",
+         )
+       ) {
+         try {
+          if (ADVENTURE_MEDIA_STORE) {
+            const mediaRecords =
+             await ADVENTURE_MEDIA_STORE
+              .listMediaForMemory(memoryId);
+
+            for (const mediaRecord of mediaRecords) {
+             await ADVENTURE_MEDIA_STORE
+              .deleteMedia(mediaRecord.id);
+            }
+          }
+
+           MEMORY_JOURNAL.deleteMemory(memoryId);
+           view("memories");
+         } catch (error) {
+           console.error(
+            "Adventure Book memory deletion failed.",
+            error,
+           );
+
+           alert(
+            "This memory could not be deleted completely. Please try again.",
+          );
+        }
+      }
+    });
+  });
+
+hydrateSavedMemoryPhotos();
+}
 const start=new Date(APP_CONFIG.trip.start||"2026-08-07T00:00:00"), end=new Date(APP_CONFIG.trip.end||"2026-08-15T00:00:00"), planning=new Date(APP_CONFIG.trip.planningStart||"2026-07-01T00:00:00");
 const phases=["dreaming","planning","experiencing","remembering"];
 const meta={dreaming:["🌱","Dreaming"],planning:["🌿","Planning"],experiencing:["🏔️🌿","Experiencing"],remembering:["🌳","Remembering"]};
@@ -758,23 +1538,333 @@ function bindCompletion(){
     showDay(date);
   });
 }
-function view(v){$$("nav button,.desktopSideNav [data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v));const s=$("#screen");if(v==="home"){s.classList.remove("screenEntering");s.hidden=true;scrollTo({top:0,behavior:"smooth"});$("#homeCard")?.focus?.({preventScroll:true});return}s.hidden=false;s.classList.remove("screenEntering");void s.offsetWidth;s.classList.add("screenEntering");
-if(v==="week")s.innerHTML=`<div class=weekHeading><div><span class=eyebrow>MILESTONE 3</span><h3>🗓️ Our Adventure Week</h3></div><span class=weekProgress>${completedDays().length}/8 complete</span></div><p class=info>Each day opens to a dashboard plus smart stop cards with Waze, Google Maps, and stop-to-stop route links.</p><div class=familyDayGrid>${DATA.days.map(d=>{const dt=new Date(d.date+"T12:00:00"),x=DAY_DASH[d.date],done=isComplete(d.date);return `<div class="familyDayCard ${done?"completed":""}"><button data-open="${d.date}"><span class=datePill><small>${dt.toLocaleDateString(undefined,{weekday:"short"})}</small><b>${dt.getDate()}</b></span><span class=summary><strong>${done?"✓ ":""}${d.title}</strong><small>${x.icon} ${x.leave} · ${x.reservation}</small><em>${x.focus}</em></span><span class=chev>›</span></button></div>`}).join("")}</div>`;
-if(v==="reservations")s.innerHTML=`<div class="reservationIndexHead simplified">
-  <div><span class="eyebrow">TRIP RESERVATIONS</span><h3>🍽️ Reservations</h3></div>
-  <button class="manageReservationsButton compact" data-manage-reservations="1" type="button">✏️ Manage</button>
-</div>${Object.entries(RESERVATION_DATA).filter(([,items])=>items.length).map(([date,items])=>`
-  <section class="reservationIndexDay"><h4>${dateLabel(date)}</h4>
-  ${items.map((item,index)=>{const rec=getReservationRecord(date,item,index);return `<article class="reservationIndexCard">
-    <span>${item.icon}</span>
-    <div><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.time)}${rec.confirmation?` · Confirmation ${escapeHtml(rec.confirmation)}`:""}</small></div>
-    <b class="${statusClass(rec.status)}">${escapeHtml(rec.status)}</b>
-  </article>`}).join("")}</section>`).join("")}`;
-if(v==="traditions")s.innerHTML=`<h3>💚 Moments to Protect</h3><ul class=info>${DATA.traditions.map(t=>`<li>${t}</li>`).join("")}</ul>`;
-if(v==="packing"){window.AdventurePacking?.render(s);}
-if(v==="trip")s.innerHTML=`<h3>🎒 Trip Snapshot</h3><p><b>Dates:</b> August 7–14, 2026</p><p><b>Home base:</b> ${DATA.trip.homeBase}</p><p><b>Travel party:</b> ${DATA.trip.party}</p><p><b>Priorities:</b> Stay together, place busy attractions on weekdays, eat well, minimize unnecessary driving, and preserve rest.</p>`;
-if(v==="companion"){const campfire=localStorage.getItem("adventureCompanionCampfireUnlocked")==="true";s.innerHTML=`<div class="remysCornerHead"><span class="bigFire">🔥</span><div><span class="eyebrow">A PLACE TO PAUSE</span><h3>Remy’s Corner</h3><p>Celebrate effort. Preserve memories. Reduce stress.</p></div></div><section class="todayThought"><small>TODAY’S THOUGHT</small><blockquote>The itinerary supports the experience; it does not have to control it.</blockquote></section><section class="cornerPhase"><small>ADVENTURE PHASE</small><strong>🌿 Planning · The adventure is taking shape</strong></section><h4 class="campfireTitle">🔥 Campfire Stories</h4>${campfire?`<section class="campfireUnlocked"><span aria-hidden="true">🔥</span><div><small>UNLOCKED · THE JOURNEY BEGINS</small><h4>Packing is the moment a dream becomes real.</h4><p>Soon you’ll be standing together in the Smoky Mountains. Laugh often. Take pictures. Be present. These moments become memories faster than we expect.</p><em>— Remy 💚</em></div></section>`:`<section class="campfireLocked"><span>🔒</span><div><strong>The Journey Begins</strong><p>Complete every adventurer’s packing list to unlock this Campfire.</p></div></section>`}<section class="futureCampfires"><span>🔒 One Week Left</span><span>🔒 Road Trip Begins</span><span>🔒 First Sunrise</span></section>`;}
-hydrateDayWeather();$$(`[data-open]`).forEach(b=>b.onclick=()=>showDay(b.dataset.open));$$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));bindManageReservationButtons();s.scrollIntoView({behavior:"smooth",block:"start"})}
+function view(v) {
+  $$("nav button,.desktopSideNav [data-view]")
+    .forEach((button) =>
+      button.classList.toggle(
+        "active",
+        button.dataset.view === v,
+      ),
+    );
+
+  const screen = $("#screen");
+
+  if (v === "home") {
+    screen.classList.remove("screenEntering");
+    screen.hidden = true;
+    scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+    $("#homeCard")?.focus?.({
+      preventScroll: true,
+    });
+    return;
+  }
+
+  screen.hidden = false;
+  screen.classList.remove("screenEntering");
+  void screen.offsetWidth;
+  screen.classList.add("screenEntering");
+
+  if (v === "week") {
+    screen.innerHTML = `
+      <div class="weekHeading">
+        <div>
+          <span class="eyebrow">MILESTONE 3</span>
+          <h3>🗓️ Our Adventure Week</h3>
+        </div>
+        <span class="weekProgress">
+          ${completedDays().length}/8 complete
+        </span>
+      </div>
+
+      <p class="info">
+        Each day opens to a dashboard plus smart stop cards
+        with Waze, Google Maps, and stop-to-stop route links.
+      </p>
+
+      <div class="familyDayGrid">
+        ${DATA.days
+          .map((day) => {
+            const date = new Date(
+              `${day.date}T12:00:00`,
+            );
+            const dashboard =
+              DAY_DASH[day.date];
+            const done =
+              isComplete(day.date);
+
+            return `
+              <div class="familyDayCard ${
+                done ? "completed" : ""
+              }">
+                <button data-open="${day.date}">
+                  <span class="datePill">
+                    <small>
+                      ${date.toLocaleDateString(
+                        undefined,
+                        {
+                          weekday: "short",
+                        },
+                      )}
+                    </small>
+                    <b>${date.getDate()}</b>
+                  </span>
+
+                  <span class="summary">
+                    <strong>
+                      ${done ? "✓ " : ""}
+                      ${day.title}
+                    </strong>
+                    <small>
+                      ${dashboard.icon}
+                      ${dashboard.leave}
+                      ·
+                      ${dashboard.reservation}
+                    </small>
+                    <em>${dashboard.focus}</em>
+                  </span>
+
+                  <span class="chev">›</span>
+                </button>
+              </div>
+            `;
+          })
+          .join("")}
+      </div>
+    `;
+  }
+
+  if (v === "reservations") {
+    screen.innerHTML = `
+      <div class="reservationIndexHead simplified">
+        <div>
+          <span class="eyebrow">
+            TRIP RESERVATIONS
+          </span>
+          <h3>🍽️ Reservations</h3>
+        </div>
+
+        <button
+          class="manageReservationsButton compact"
+          data-manage-reservations="1"
+          type="button"
+        >
+          ⚙️ Manage
+        </button>
+      </div>
+
+      ${Object.entries(RESERVATION_DATA)
+        .filter(([, items]) => items.length)
+        .map(
+          ([date, items]) => `
+            <section class="reservationIndexDay">
+              <h4>${dateLabel(date)}</h4>
+
+              ${items
+                .map((item, index) => {
+                  const record =
+                    getReservationRecord(
+                      date,
+                      item,
+                      index,
+                    );
+
+                  return `
+                    <article class="reservationIndexCard">
+                      <span>${item.icon}</span>
+
+                      <div>
+                        <strong>
+                          ${escapeHtml(item.name)}
+                        </strong>
+                        <small>
+                          ${escapeHtml(item.time)}
+                          ${
+                            record.confirmation
+                              ? ` · Confirmation ${escapeHtml(
+                                  record.confirmation,
+                                )}`
+                              : ""
+                          }
+                        </small>
+                      </div>
+
+                      <b class="${statusClass(
+                        record.status,
+                      )}">
+                        ${escapeHtml(record.status)}
+                      </b>
+                    </article>
+                  `;
+                })
+                .join("")}
+            </section>
+          `,
+        )
+        .join("")}
+    `;
+  }
+
+  if (v === "memories") {
+    screen.innerHTML = memoryJournalMarkup();
+  }
+
+  if (v === "traditions") {
+    screen.innerHTML = `
+      <h3>💚 Moments to Protect</h3>
+      <ul class="info">
+        ${DATA.traditions
+          .map(
+            (tradition) =>
+              `<li>${tradition}</li>`,
+          )
+          .join("")}
+      </ul>
+    `;
+  }
+
+  if (v === "packing") {
+    window.AdventurePacking?.render(screen);
+  }
+
+  if (v === "trip") {
+    screen.innerHTML = `
+      <h3>🎒 Trip Snapshot</h3>
+      <p>
+        <b>Dates:</b>
+        August 7–14, 2026
+      </p>
+      <p>
+        <b>Home base:</b>
+        ${DATA.trip.homeBase}
+      </p>
+      <p>
+        <b>Travel party:</b>
+        ${DATA.trip.party}
+      </p>
+      <p>
+        <b>Priorities:</b>
+        Stay together, place busy attractions on weekdays,
+        eat well, minimize unnecessary driving, and preserve rest.
+      </p>
+    `;
+  }
+
+  if (v === "companion") {
+    const campfire =
+      localStorage.getItem(
+        "adventureCompanionCampfireUnlocked",
+      ) === "true";
+
+    screen.innerHTML = `
+      <div class="remysCornerHead">
+        <span class="bigFire">🔥</span>
+        <div>
+          <span class="eyebrow">
+            A PLACE TO PAUSE
+          </span>
+          <h3>Remy’s Corner</h3>
+          <p>
+            Celebrate effort. Preserve memories.
+            Reduce stress.
+          </p>
+        </div>
+      </div>
+
+      <section class="todayThought">
+        <small>TODAY’S THOUGHT</small>
+        <blockquote>
+          The itinerary supports the experience;
+          it does not have to control it.
+        </blockquote>
+      </section>
+
+      <section class="cornerPhase">
+        <small>ADVENTURE PHASE</small>
+        <strong>
+          🌿 Planning · The adventure is taking shape
+        </strong>
+      </section>
+
+      <h4 class="campfireTitle">
+        🔥 Campfire Stories
+      </h4>
+
+      ${
+        campfire
+          ? `
+            <section class="campfireUnlocked">
+              <span aria-hidden="true">🔥</span>
+              <div>
+                <small>
+                  UNLOCKED · THE JOURNEY BEGINS
+                </small>
+                <h4>
+                  Packing is the moment a dream
+                  becomes real.
+                </h4>
+                <p>
+                  Soon you’ll be standing together in
+                  the Smoky Mountains. Laugh often.
+                  Take pictures. Be present. These
+                  moments become memories faster than
+                  we expect.
+                </p>
+                <em>— Remy 💚</em>
+              </div>
+            </section>
+          `
+          : `
+            <section class="campfireLocked">
+              <span>🔒</span>
+              <div>
+                <strong>
+                  The Journey Begins
+                </strong>
+                <p>
+                  Complete every adventurer’s packing
+                  list to unlock this Campfire.
+                </p>
+              </div>
+            </section>
+          `
+      }
+
+      <section class="futureCampfires">
+        <span>🔒 One Week Left</span>
+        <span>🔒 Road Trip Begins</span>
+        <span>🔒 First Sunrise</span>
+      </section>
+    `;
+  }
+
+  hydrateDayWeather();
+
+  $$("[data-open]").forEach(
+    (button) =>
+      (button.onclick = () =>
+        showDay(button.dataset.open)),
+  );
+
+  $$("[data-view]").forEach(
+    (button) =>
+      (button.onclick = () =>
+        view(button.dataset.view)),
+  );
+
+  bindManageReservationButtons();
+
+  if (v === "memories") {
+    bindMemoryJournal();
+  }
+
+  screen.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
 function showDay(date){const d=DATA.days.find(x=>x.date===date);if(!d)return;const s=$("#screen");s.hidden=false;s.innerHTML=`<div class=dayHead><button class=back data-back>← Week</button><span class=dayPosition>Day ${dayNumber(date)} of ${DATA.days.length}</span></div>
 ${dashboardMarkup(d)}
 <div class=dayHero><small>${d.short} · ${d.theme}</small><h3>${d.title}</h3><p>${d.why}</p><div class=dayChips><span>🚗 ${d.drive}</span><span>🌤️ Adaptive weather guidance</span><span>📍 Stops in journey order</span></div></div>

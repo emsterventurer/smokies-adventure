@@ -23,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Show tool versions
         run: |
@@ -104,7 +104,7 @@ jobs:
       - name: Verify critical startup protection
         shell: bash
         run: |
-          test $(wc -c < app.js) -gt 50000
+          node -e "const fs=require('fs'); const size=fs.statSync('app.js').size; console.log('app.js bytes:',size); if(size<=50000) process.exit(1);"
           grep -q 'function view(v)' app.js
           grep -q 'function showDay(' app.js
           grep -q 'markAppReady' app.js
@@ -112,5 +112,5 @@ jobs:
           grep -q 'src="reliability.js"' index.html
           grep -q 'AdventureCompanionBuild' app.js
           grep -q 'importScripts("./config.js","./version.js")' service-worker.js
-          grep -q 'adventure-companion-m3-05-0b-build-2' version.js
+          grep -q 'adventure-companion-m3-07-1-build-1' version.js
           echo "Critical startup protection is present."

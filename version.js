@@ -7,15 +7,15 @@
   "use strict";
 
     const build=Object.freeze({
-    version:"M3-06",
-    milestone:"Milestone 3",
-    feature:"Adventure Intelligence",
-    build:"Build 1",
-    updated:"July 28, 2026",
-    cache:"adventure-companion-m3-06-build-1",
-    eyebrow:"M3-06 · ADVENTURE INTELLIGENCE",
-    description:"Adventure Brain, Dynamic Dashboard, Living Campfire, and Family Adventure Intelligence work together to provide calm guidance, meaningful storytelling, and adventurer-specific encouragement."
-  });
+  version:"M3-07.1",
+  milestone:"Milestone 3",
+  feature:"Durable Adventure Data",
+  build:"Build 1",
+  updated:"August 1, 2026",
+  cache:"adventure-companion-m3-07-1-build-1",
+  eyebrow:"M3-07.1 · DURABLE ADVENTURE DATA",
+  description:"Durable Adventure Records, the Adventure Book, intelligent memory title suggestions, and persistent photo storage work together to preserve family stories across browser sessions."
+});
 
   function applyToDocument(doc){
     if(!doc)return;
