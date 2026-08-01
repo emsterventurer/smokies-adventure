@@ -337,165 +337,377 @@ function memoryJournalMarkup() {
     MEMORY_JOURNAL?.listMemories() ?? [];
 
   const initialAdventureDate =
-  localISO(new Date());
+    localISO(new Date());
 
   const initialTitleSuggestion =
     getMemoryTitleSuggestion(
       initialAdventureDate,
-    );  
-  const memoryList = memories.length
-    ? memories
-        .map(
-          (memory) => `
-            <article
-              class="memoryJournalCard"
-              data-memory-id="${escapeMemoryText(memory.id)}"
+    );
+
+  const datedMemories = [...memories].sort(
+    (leftMemory, rightMemory) => {
+      const leftDate =
+        leftMemory.adventureDate || "";
+      const rightDate =
+        rightMemory.adventureDate || "";
+
+      if (leftDate !== rightDate) {
+        return leftDate.localeCompare(rightDate);
+      }
+
+      return String(
+        leftMemory.createdAt || leftMemory.id || "",
+      ).localeCompare(
+        String(
+          rightMemory.createdAt ||
+            rightMemory.id ||
+            "",
+        ),
+      );
+    },
+  );
+
+  const groupedMemories = datedMemories.reduce(
+    (groups, memory) => {
+      const adventureDate =
+        memory.adventureDate || "Undated";
+
+      if (!groups.has(adventureDate)) {
+        groups.set(adventureDate, []);
+      }
+
+      groups.get(adventureDate).push(memory);
+
+      return groups;
+    },
+    new Map(),
+  );
+
+  const photoCount = memories.reduce(
+    (total, memory) =>
+      total +
+      (Array.isArray(memory.mediaIds)
+        ? memory.mediaIds.length
+        : 0),
+    0,
+  );
+
+  const formatAdventureBookDate = (
+    adventureDate,
+  ) => {
+    if (
+      adventureDate === "Undated" ||
+      typeof adventureDate !== "string"
+    ) {
+      return "Undated Memories";
+    }
+
+    const parsedDate = new Date(
+      `${adventureDate}T12:00:00`,
+    );
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return adventureDate;
+    }
+
+    return parsedDate.toLocaleDateString(
+      undefined,
+      {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      },
+    );
+  };
+
+  const renderMemoryCard = (memory) => `
+    <article
+      class="memoryJournalCard"
+      data-memory-id="${escapeMemoryText(
+        memory.id,
+      )}"
+    >
+      <div class="memoryJournalCardHead">
+        <div>
+          <small>
+            ${escapeMemoryText(
+              memory.adventureDate || "Undated",
+            )}
+          </small>
+
+          <h4>
+            ${escapeMemoryText(
+              memory.title || "Untitled memory",
+            )}
+          </h4>
+        </div>
+
+        <button
+          type="button"
+          class="memoryDeleteButton"
+          data-delete-memory="${escapeMemoryText(
+            memory.id,
+          )}"
+          aria-label="Delete ${escapeMemoryText(
+            memory.title || "memory",
+          )}"
+        >
+          Delete
+        </button>
+      </div>
+
+      ${
+        memory.note
+          ? `<p>${escapeMemoryText(
+              memory.note,
+            )}</p>`
+          : ""
+      }
+
+      ${
+        Array.isArray(memory.mediaIds) &&
+        memory.mediaIds.length
+          ? `
+            <div
+              class="memorySavedPhotoGrid"
+              data-memory-photo-gallery="${escapeMemoryText(
+                memory.id,
+              )}"
             >
-              <div class="memoryJournalCardHead">
+              <small>Loading photos…</small>
+            </div>
+          `
+          : ""
+      }
+    </article>
+  `;
+
+  const memoryTimeline = groupedMemories.size
+    ? [...groupedMemories.entries()]
+        .map(
+          ([adventureDate, dayMemories]) => `
+            <section
+              class="memoryDaySection"
+              data-memory-day="${escapeMemoryText(
+                adventureDate,
+              )}"
+            >
+              <header class="memoryDayHeader">
                 <div>
-                  <small>
-                    ${escapeMemoryText(
-                      memory.adventureDate || "Undated",
-                    )}
-                  </small>
+                  <span class="eyebrow">
+                    ADVENTURE DAY
+                  </span>
+
                   <h4>
                     ${escapeMemoryText(
-                      memory.title || "Untitled memory",
+                      formatAdventureBookDate(
+                        adventureDate,
+                      ),
                     )}
                   </h4>
                 </div>
 
-                <button
-                  type="button"
-                  class="memoryDeleteButton"
-                  data-delete-memory="${escapeMemoryText(memory.id)}"
-                  aria-label="Delete ${escapeMemoryText(
-                    memory.title || "memory",
-                  )}"
-                >
-                  Delete
-                </button>
+                <span class="memoryDayCount">
+                  ${dayMemories.length}
+                  ${
+                    dayMemories.length === 1
+                      ? "memory"
+                      : "memories"
+                  }
+                </span>
+              </header>
+
+              <div class="memoryDayEntries">
+                ${dayMemories
+                  .map(renderMemoryCard)
+                  .join("")}
               </div>
-
-              ${
-  memory.note
-    ? `<p>${escapeMemoryText(memory.note)}</p>`
-    : ""
-}
-
-${
-  Array.isArray(memory.mediaIds) &&
-  memory.mediaIds.length
-    ? `
-      <div
-        class="memorySavedPhotoGrid"
-        data-memory-photo-gallery="${escapeMemoryText(
-          memory.id,
-        )}"
-      >
-        <small>Loading photos…</small>
-      </div>
-    `
-    : ""
-}
-</article>
+            </section>
           `,
         )
         .join("")
-    : `<p class="info">The Adventure Book is waiting for its first page.</p>`;
+    : `
+        <div class="memoryBookEmptyState">
+          <span aria-hidden="true">🏕️</span>
+          <h4>The Adventure Book is waiting for its first page.</h4>
+          <p>
+            Capture a favorite moment, a family quote,
+            or a photo from the day.
+          </p>
+        </div>
+      `;
 
   return `
     <section class="memoryJournal">
       <header class="memoryJournalHead">
         <div>
-          <span class="eyebrow">ADVENTURE BOOK</span>
+          <span class="eyebrow">
+            ADVENTURE BOOK
+          </span>
+
           <h3>📖 Adventure Book</h3>
-          <p>Every adventure has a story worth keeping.</p>
+
+          <p>
+            Every adventure has a story worth keeping.
+          </p>
+        </div>
+
+        <div
+          class="memoryBookSummary"
+          aria-label="Adventure Book summary"
+        >
+          <div>
+            <strong>${memories.length}</strong>
+            <span>
+              ${
+                memories.length === 1
+                  ? "Memory"
+                  : "Memories"
+              }
+            </span>
+          </div>
+
+          <div>
+            <strong>${photoCount}</strong>
+            <span>
+              ${
+                photoCount === 1
+                  ? "Photo"
+                  : "Photos"
+              }
+            </span>
+          </div>
+
+          <div>
+            <strong>${groupedMemories.size}</strong>
+            <span>
+              ${
+                groupedMemories.size === 1
+                  ? "Adventure Day"
+                  : "Adventure Days"
+              }
+            </span>
+          </div>
         </div>
       </header>
 
-      <form data-memory-form class="memoryCaptureForm">
+      <section class="memoryCapturePanel">
+        <div class="memoryCaptureIntro">
+          <span aria-hidden="true">🔥</span>
 
-  <div class="memoryJournalRow">
-    <label>
-    <span>Adventure Date</span>
-    <input
-      type="date"
-      name="adventureDate"
-      value="${initialAdventureDate}"
-    >
-  </label>
+          <div>
+            <h4>Add today’s story</h4>
+            <p>
+              A sentence, a quote, or a few photos
+              are enough to preserve the moment.
+            </p>
+          </div>
+        </div>
 
-  <label>
-    <span>Memory Title</span>
-    <input
-      type="text"
-      name="title"
-      autocomplete="off"
-      value="${escapeMemoryText(
-        initialTitleSuggestion,
-      )}"
-      data-suggested-title="${escapeMemoryText(
-        initialTitleSuggestion,
-      )}"
-    >
-  </label>
-</div>
+        <form
+          data-memory-form
+          class="memoryCaptureForm"
+        >
+          <div class="memoryJournalRow">
+            <label>
+              <span>Adventure Date</span>
 
-  <fieldset>
-    <legend>Who shared this moment?</legend>
-    <div class="memoryTravelerGrid">
-      ${memoryTravelerOptions()}
-    </div>
-  </fieldset>
+              <input
+                type="date"
+                name="adventureDate"
+                value="${initialAdventureDate}"
+              >
+            </label>
 
-  <label>
-    <span>Tell the story</span>
-    <textarea
-      name="note"
-      rows="5"
-      placeholder="A sentence or two is enough."
-    ></textarea>
-  </label>
+            <label>
+              <span>Memory Title</span>
 
-  <section class="memoryPhotoPlaceholder">
+              <input
+                type="text"
+                name="title"
+                autocomplete="off"
+                value="${escapeMemoryText(
+                  initialTitleSuggestion,
+                )}"
+                data-suggested-title="${escapeMemoryText(
+                  initialTitleSuggestion,
+                )}"
+              >
+            </label>
+          </div>
 
-  <h4>📷 Photos</h4>
+          <fieldset>
+            <legend>Who shared this moment?</legend>
 
-  <p>
-    Photos are part of every great story.
-  </p>
+            <div class="memoryTravelerGrid">
+              ${memoryTravelerOptions()}
+            </div>
+          </fieldset>
 
-  <label class="memoryPhotoPicker">
-  <input
-    type="file"
-    id="memoryPhotos"
-    name="photos"
-    accept="image/*"
-    multiple
-  >
+          <label>
+            <span>Tell the story</span>
 
-  <span>📷 Add Photos</span>
-</label>
+            <textarea
+              name="note"
+              rows="5"
+              placeholder="A sentence or two is enough."
+            ></textarea>
+          </label>
 
-  <div
-    class="memoryPhotoPreview"
-    data-memory-photo-preview
-  >
-    No photos selected.
-  </div>
+          <section class="memoryPhotoPlaceholder">
+            <h4>📷 Photos</h4>
 
-</section>
+            <p>
+              Photos are part of every great story.
+            </p>
 
-  <button class="primary" type="submit">
-    💚 Add to Adventure Book
-  </button>
+            <label class="memoryPhotoPicker">
+              <input
+                type="file"
+                id="memoryPhotos"
+                name="photos"
+                accept="image/*"
+                multiple
+              >
 
-</form>
+              <span>📷 Add Photos</span>
+            </label>
+
+            <div
+              class="memoryPhotoPreview"
+              data-memory-photo-preview
+            >
+              No photos selected.
+            </div>
+          </section>
+
+          <button
+            class="primary"
+            type="submit"
+          >
+            💚 Add to Adventure Book
+          </button>
+        </form>
+      </section>
 
       <section class="memoryJournalList">
-        <h4>Adventure Journal</h4>
-        ${memoryList}
+        <header class="memoryTimelineHead">
+          <div>
+            <span class="eyebrow">
+              FAMILY TIMELINE
+            </span>
+
+            <h4>Our Adventure Story</h4>
+          </div>
+
+          <p>
+            Memories appear in chronological order
+            by Adventure day.
+          </p>
+        </header>
+
+        ${memoryTimeline}
       </section>
     </section>
   `;
