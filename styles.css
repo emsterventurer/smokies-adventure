@@ -4002,3 +4002,148 @@ button[disabled] {
     align-items: flex-start;
   }
 }
+
+/* ==========================================================
+   Adventure Book Experience
+   ========================================================== */
+
+.memoryJournal {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  border-radius: 24px;
+  background: #faf7f0;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.memoryJournalHead {
+  margin-bottom: 1.75rem;
+}
+
+.memoryJournalHead h3 {
+  margin: 0.35rem 0;
+}
+
+.memoryCaptureForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.memoryJournalRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.memoryCaptureForm label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.memoryCaptureForm input,
+.memoryCaptureForm textarea {
+  width: 100%;
+  border: 1px solid #d8d2c3;
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  font: inherit;
+  background: #fffdf8;
+}
+
+.memoryCaptureForm textarea {
+  min-height: 180px;
+  resize: vertical;
+}
+
+.memoryCaptureForm fieldset {
+  border: 1px solid #ddd6c8;
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.memoryTravelerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.memoryTravelerGrid label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+
+.memoryTravelerGrid input[type="checkbox"] {
+  margin: 0;
+}
+
+.memoryPhotoPlaceholder {
+  display: grid;
+  gap: 0.4rem;
+  border: 2px dashed #cfc6b3;
+  border-radius: 16px;
+  padding: 1.25rem;
+  background: #fffdf9;
+}
+
+.memoryPhotoPlaceholder h4,
+.memoryPhotoPlaceholder p,
+.memoryPhotoPlaceholder small {
+  margin: 0;
+}
+
+.memoryPhotoPlaceholder small {
+  color: #647267;
+}
+
+.memoryJournalList {
+  margin-top: 2rem;
+}
+
+.memoryJournalCard {
+  background: white;
+  border-radius: 16px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 700px) {
+  .memoryJournalRow {
+    grid-template-columns: 1fr;
+  }
+}
+/* Keep each Adventure Book traveler checkbox beside the name. */
+.memoryCaptureForm .memoryTravelerOption {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  cursor: pointer;
+}
+
+.memoryCaptureForm .memoryTravelerOption input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.memoryCaptureForm .memoryTravelerOption span {
+  display: inline;
+}
+
+.memoryTravelerGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 700px) {
+  .memoryTravelerGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

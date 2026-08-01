@@ -370,7 +370,8 @@ function memoryJournalMarkup() {
 
       <form data-memory-form class="memoryCaptureForm">
 
-  <label>
+  <div class="memoryJournalRow">
+    <label>
     <span>Adventure Date</span>
     <input
       type="date"
@@ -393,6 +394,7 @@ function memoryJournalMarkup() {
       )}"
     >
   </label>
+</div>
 
   <fieldset>
     <legend>Who shared this moment?</legend>
@@ -418,7 +420,7 @@ function memoryJournalMarkup() {
     </p>
 
     <small>
-      Photo memories arrive in the next update.
+      Add photos to this memory here.
     </small>
   </section>
 
