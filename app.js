@@ -330,8 +330,73 @@ function getMemoryTitleSuggestion(adventureDate) {
     (day) => day.date === adventureDate,
   );
 
-  return plannedDay?.title ?? "";
+    return plannedDay?.title ?? "";
 }
+
+function renderMemoryCard(memory) {
+  return `
+    <article
+      class="memoryJournalCard"
+      data-memory-id="${escapeMemoryText(
+        memory.id,
+      )}"
+    >
+      <div class="memoryJournalCardHead">
+        <div>
+          <small>
+            ${escapeMemoryText(
+              memory.adventureDate || "Undated",
+            )}
+          </small>
+
+          <h4>
+            ${escapeMemoryText(
+              memory.title || "Untitled memory",
+            )}
+          </h4>
+        </div>
+
+        <button
+          type="button"
+          class="memoryDeleteButton"
+          data-delete-memory="${escapeMemoryText(
+            memory.id,
+          )}"
+          aria-label="Delete ${escapeMemoryText(
+            memory.title || "memory",
+          )}"
+        >
+          Delete
+        </button>
+      </div>
+
+      ${
+        memory.note
+          ? `<p>${escapeMemoryText(
+              memory.note,
+            )}</p>`
+          : ""
+      }
+
+      ${
+        Array.isArray(memory.mediaIds) &&
+        memory.mediaIds.length
+          ? `
+            <div
+              class="memorySavedPhotoGrid"
+              data-memory-photo-gallery="${escapeMemoryText(
+                memory.id,
+              )}"
+            >
+              <small>Loading photos…</small>
+            </div>
+          `
+          : ""
+      }
+    </article>
+  `;
+}
+
 function memoryJournalMarkup() {
   const memories =
     MEMORY_JOURNAL?.listMemories() ?? [];
@@ -420,68 +485,6 @@ function memoryJournalMarkup() {
       },
     );
   };
-
-  const renderMemoryCard = (memory) => `
-    <article
-      class="memoryJournalCard"
-      data-memory-id="${escapeMemoryText(
-        memory.id,
-      )}"
-    >
-      <div class="memoryJournalCardHead">
-        <div>
-          <small>
-            ${escapeMemoryText(
-              memory.adventureDate || "Undated",
-            )}
-          </small>
-
-          <h4>
-            ${escapeMemoryText(
-              memory.title || "Untitled memory",
-            )}
-          </h4>
-        </div>
-
-        <button
-          type="button"
-          class="memoryDeleteButton"
-          data-delete-memory="${escapeMemoryText(
-            memory.id,
-          )}"
-          aria-label="Delete ${escapeMemoryText(
-            memory.title || "memory",
-          )}"
-        >
-          Delete
-        </button>
-      </div>
-
-      ${
-        memory.note
-          ? `<p>${escapeMemoryText(
-              memory.note,
-            )}</p>`
-          : ""
-      }
-
-      ${
-        Array.isArray(memory.mediaIds) &&
-        memory.mediaIds.length
-          ? `
-            <div
-              class="memorySavedPhotoGrid"
-              data-memory-photo-gallery="${escapeMemoryText(
-                memory.id,
-              )}"
-            >
-              <small>Loading photos…</small>
-            </div>
-          `
-          : ""
-      }
-    </article>
-  `;
 
   const memoryTimeline = groupedMemories.size
     ? [...groupedMemories.entries()]
