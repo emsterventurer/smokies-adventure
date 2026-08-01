@@ -1,7 +1,7 @@
 (function () {
 "use strict";
 
-function isAdventureStorage(value) {
+function isAdventureStorageModule(value) {
   return (
     value !== null &&
     typeof value === "object" &&
@@ -10,19 +10,55 @@ function isAdventureStorage(value) {
 }
 
 function createAdventureRepository(options = {}) {
-  const adventureStorage =
-    options.adventureStorage;
+  const adventureStorageModule =
+    options.adventureStorageModule;
 
-  if (!isAdventureStorage(adventureStorage)) {
-    throw new Error(
+  if (
+    !isAdventureStorageModule(
+      adventureStorageModule,
+    )
+  ) {
+    throw new TypeError(
       "AdventureRepository requires a valid AdventureStorage module.",
     );
   }
 
   const storage =
-    adventureStorage.createAdventureStorage();
+    options.storage ||
+    adventureStorageModule.createAdventureStorage({
+      storageProvider:
+        options.storageProvider,
+    });
 
   return Object.freeze({
+    loadAdventureRecord(adventureId) {
+      return storage.loadAdventureRecord(
+        adventureId,
+      );
+    },
+
+    saveAdventureRecord(record) {
+      return storage.saveAdventureRecord(
+        record,
+      );
+    },
+
+    listAdventureRecords() {
+      return storage.listAdventureRecords();
+    },
+
+    deleteAdventureRecord(adventureId) {
+      return storage.deleteAdventureRecord(
+        adventureId,
+      );
+    },
+
+    hasAdventureRecord(adventureId) {
+      return storage.hasAdventureRecord(
+        adventureId,
+      );
+    },
+
     loadAdventure(adventureId) {
       return storage.loadAdventureRecord(
         adventureId,
@@ -57,7 +93,10 @@ const AdventureRepository = Object.freeze({
   createAdventureRepository,
 });
 
-if (typeof module !== "undefined" && module.exports) {
+if (
+  typeof module !== "undefined" &&
+  module.exports
+) {
   module.exports = AdventureRepository;
 }
 

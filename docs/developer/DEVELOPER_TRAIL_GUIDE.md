@@ -214,6 +214,34 @@ Commit with confidence.
 
 ---
 
+# 🌎 Shared Adventure Repository
+
+## Purpose
+
+The Adventure Repository is the application-facing persistence boundary for Adventure Records.
+
+Application services use the repository contract without depending on local browser storage or a future cloud provider.
+
+---
+
+## Primary Files
+
+### `adventure/adventure-repository.js`
+
+Creates the Adventure Repository compatibility layer.
+
+Verified repository methods include:
+
+```js
+loadAdventureRecord(adventureId);
+saveAdventureRecord(record);
+listAdventureRecords();
+deleteAdventureRecord(adventureId);
+hasAdventureRecord(adventureId);
+```
+
+---
+
 # Repository Landmarks
 
 | Area                             | Purpose                                                           |
@@ -590,6 +618,7 @@ Current verified change:
 - Prepared memory cards for focused future enhancement
 
 ---
+
 ### M3-07.2 Commit 5
 
 Current verified change:
@@ -605,7 +634,9 @@ Current verified change:
 - Preserved timeline grouping and storage behavior
 - Verified 110 automated tests pass
 - Verified the rich memory card in the browser
+
 ---
+
 ## Related Architecture
 
 ```text

@@ -16,6 +16,11 @@ const AdventureStorage =
     ? require("./adventure-storage.js")
     : globalThis.AdventureStorage;
 
+const AdventureRepository =
+  typeof module === "object" && module.exports
+    ? require("./adventure-repository.js")
+    : globalThis.AdventureRepository;
+
 const ActiveAdventure =
   typeof module === "object" && module.exports
     ? require("./active-adventure.js")
@@ -28,9 +33,10 @@ function createAdventureStartup(options = {}) {
       ? window.localStorage
       : null);
 
-  const adventureStorage =
+   const adventureStorage =
     options.adventureStorage ||
-    AdventureStorage.createAdventureStorage({
+    AdventureRepository.createAdventureRepository({
+      adventureStorageModule: AdventureStorage,
       storageProvider,
     });
 
