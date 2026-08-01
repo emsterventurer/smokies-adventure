@@ -23,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Show tool versions
         run: |
@@ -112,5 +112,5 @@ jobs:
           grep -q 'src="reliability.js"' index.html
           grep -q 'AdventureCompanionBuild' app.js
           grep -q 'importScripts("./config.js","./version.js")' service-worker.js
-          grep -q 'adventure-companion-m3-05-0b-build-2' version.js
+          grep -q 'adventure-companion-m3-07-1-build-1' version.js
           echo "Critical startup protection is present."
