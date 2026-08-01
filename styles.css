@@ -4340,7 +4340,27 @@ button[disabled] {
 .memoryDayHeader h4 {
   margin: 0.2rem 0 0;
 }
+.memoryDayPlan {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+}
 
+.memoryDayPlan strong {
+  color: #253d32;
+  font-size: 1rem;
+}
+
+.memoryDayPlan span {
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(49, 92, 72, 0.1);
+  color: #315c48;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
 .memoryDayCount {
   padding: 0.4rem 0.7rem;
   border-radius: 999px;

@@ -486,45 +486,90 @@ function memoryJournalMarkup() {
   const memoryTimeline = groupedMemories.size
     ? [...groupedMemories.entries()]
         .map(
-          ([adventureDate, dayMemories]) => `
-            <section
-              class="memoryDaySection"
-              data-memory-day="${escapeMemoryText(
-                adventureDate,
-              )}"
-            >
-              <header class="memoryDayHeader">
-                <div>
-                  <span class="eyebrow">
-                    ADVENTURE DAY
+          ([adventureDate, dayMemories]) => {
+            const plannedDay = Array.isArray(
+              DATA?.days,
+            )
+              ? DATA.days.find(
+                  (day) =>
+                    day.date === adventureDate,
+                )
+              : null;
+
+            return `
+              <section
+                class="memoryDaySection"
+                data-memory-day="${escapeMemoryText(
+                  adventureDate,
+                )}"
+              >
+                <header class="memoryDayHeader">
+                  <div>
+                    <span class="eyebrow">
+                      ${
+                        plannedDay
+                          ? `ADVENTURE DAY ${dayNumber(
+                              adventureDate,
+                            )}`
+                          : "ADVENTURE DAY"
+                      }
+                    </span>
+
+                    <h4>
+                      ${escapeMemoryText(
+                        formatAdventureBookDate(
+                          adventureDate,
+                        ),
+                      )}
+                    </h4>
+
+                    ${
+                      plannedDay
+                        ? `
+                          <div class="memoryDayPlan">
+                            <strong>
+                              ${escapeMemoryText(
+                                plannedDay.title ||
+                                  plannedDay.theme ||
+                                  "Adventure Day",
+                              )}
+                            </strong>
+
+                            ${
+                              plannedDay.theme
+                                ? `
+                                  <span>
+                                    ${escapeMemoryText(
+                                      plannedDay.theme,
+                                    )}
+                                  </span>
+                                `
+                                : ""
+                            }
+                          </div>
+                        `
+                        : ""
+                    }
+                  </div>
+
+                  <span class="memoryDayCount">
+                    ${dayMemories.length}
+                    ${
+                      dayMemories.length === 1
+                        ? "memory"
+                        : "memories"
+                    }
                   </span>
+                </header>
 
-                  <h4>
-                    ${escapeMemoryText(
-                      formatAdventureBookDate(
-                        adventureDate,
-                      ),
-                    )}
-                  </h4>
+                <div class="memoryDayEntries">
+                  ${dayMemories
+                    .map(renderMemoryCard)
+                    .join("")}
                 </div>
-
-                <span class="memoryDayCount">
-                  ${dayMemories.length}
-                  ${
-                    dayMemories.length === 1
-                      ? "memory"
-                      : "memories"
-                  }
-                </span>
-              </header>
-
-              <div class="memoryDayEntries">
-                ${dayMemories
-                  .map(renderMemoryCard)
-                  .join("")}
-              </div>
-            </section>
-          `,
+              </section>
+            `;
+          },
         )
         .join("")
     : `
