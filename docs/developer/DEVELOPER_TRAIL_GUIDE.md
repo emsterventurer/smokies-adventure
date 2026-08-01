@@ -242,6 +242,54 @@ hasAdventureRecord(adventureId);
 
 ---
 
+## Adventure Provider Contract
+
+The shared provider contract lives in:
+
+```text
+adventure/adventure-provider.js
+```
+
+It defines the required Adventure persistence methods:
+
+```js
+loadAdventureRecord(adventureId);
+saveAdventureRecord(record);
+listAdventureRecords();
+deleteAdventureRecord(adventureId);
+hasAdventureRecord(adventureId);
+```
+
+Verified browser export:
+
+```js
+globalThis.AdventureProvider;
+```
+
+The contract provides:
+
+```js
+AdventureProvider.isAdventureProvider(value);
+AdventureProvider.requireAdventureProvider(value);
+```
+
+Related tests:
+
+```text
+adventure-provider.test.js
+```
+
+Current verification:
+
+```text
+4 focused provider tests pass
+114 total tests pass
+```
+
+The provider contract is now available, but the active application provider remains the local Adventure Repository backed by `AdventureStorage`.
+
+---
+
 ## Firebase Foundation
 
 Firebase initialization currently lives in:
