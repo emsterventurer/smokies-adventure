@@ -346,6 +346,31 @@ Current verification:
 
 The synchronization controller is implemented and verified, but normal application startup does not activate cloud synchronization yet.
 
+### Verified Cloud Persistence
+
+The Adventure Book now automatically saves Adventure Record changes to the Cloud Adventure Provider whenever memories are created, updated, or deleted.
+
+Verified end-to-end flow:
+
+```text
+Adventure Book
+        ↓
+Memory Journal
+        ↓
+Active Adventure Service
+        ↓
+Cloud Adventure Provider
+        ↓
+Cloud Firestore
+```
+
+Development verification completed:
+
+- Memory creation successfully writes the Adventure Record to Cloud Firestore.
+- Memory deletion removes the corresponding entries from Cloud Firestore.
+- Service Worker bypasses non-GET Firebase requests to avoid Cache API errors.
+- Full automated test suite remains green.
+
 ---
 
 ## Cloud Foundation

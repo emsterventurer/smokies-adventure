@@ -262,6 +262,23 @@ function initializeMemoryJournal() {
       globalThis.MemoryJournal.createMemoryJournal({
         activeAdventureService:
           ADVENTURE_STARTUP_RESULT.activeAdventureService,
+
+        onAdventureSaved: (adventure) => {
+          if (
+            globalThis.CloudAdventureProvider &&
+            typeof globalThis.CloudAdventureProvider
+              .saveAdventureRecord === "function"
+          ) {
+            globalThis.CloudAdventureProvider
+              .saveAdventureRecord(adventure)
+              .catch((error) => {
+                console.warn(
+                  "Cloud Adventure synchronization failed.",
+                  error,
+                );
+              });
+          }
+        },
       });
 
     return MEMORY_JOURNAL;
