@@ -84,6 +84,44 @@ test("saves an Adventure Record and makes it active", () => {
   assert.deepEqual(manager.getActiveAdventure(), saved);
 });
 
+test("pushes the active Adventure when shared sync is available", async () => {
+  const { manager } = createTestManager();
+
+  const record =
+    AdventureData.createSmokiesAdventureRecord();
+
+  let pushCount = 0;
+
+  const previousSync =
+    globalThis.AdventureSharedSync;
+
+  globalThis.AdventureSharedSync = {
+    async pushActiveAdventure() {
+      pushCount += 1;
+      return record;
+    },
+  };
+
+  try {
+    manager.saveActiveAdventure(record);
+
+    await Promise.resolve();
+
+    assert.equal(
+      pushCount,
+      1,
+      "Saving the active Adventure should request one cloud push",
+    );
+  } finally {
+    if (previousSync === undefined) {
+      delete globalThis.AdventureSharedSync;
+    } else {
+      globalThis.AdventureSharedSync =
+        previousSync;
+    }
+  }
+});
+
 test("switches between stored Adventure Records", () => {
   const { adventureStorage, manager } =
     createTestManager();
