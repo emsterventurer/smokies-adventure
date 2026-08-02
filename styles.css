@@ -4008,26 +4008,106 @@ button[disabled] {
    ========================================================== */
 
 .memoryJournal {
-  max-width: 760px;
+  max-width: 980px;
   margin: 0 auto;
   padding: 1.5rem;
-  border-radius: 24px;
-  background: #faf7f0;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  border-radius: 28px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82),
+    rgba(250, 247, 240, 0.96)
+  );
+  box-shadow: 0 16px 40px rgba(25, 46, 36, 0.1);
 }
 
 .memoryJournalHead {
-  margin-bottom: 1.75rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .memoryJournalHead h3 {
   margin: 0.35rem 0;
+  font-size: clamp(1.65rem, 4vw, 2.3rem);
+}
+
+.memoryJournalHead p {
+  max-width: 520px;
+  margin: 0;
+  color: #526158;
+}
+
+.memoryBookSummary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(90px, 1fr));
+  gap: 0.7rem;
+  min-width: min(100%, 330px);
+}
+
+.memoryBookSummary div {
+  display: grid;
+  gap: 0.15rem;
+  min-height: 84px;
+  padding: 0.8rem;
+  border: 1px solid rgba(49, 92, 72, 0.14);
+  border-radius: 16px;
+  background: rgba(255, 253, 248, 0.88);
+  text-align: center;
+}
+
+.memoryBookSummary strong {
+  color: #315c48;
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.memoryBookSummary span {
+  color: #647267;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.memoryCapturePanel {
+  padding: 1.25rem;
+  border: 1px solid rgba(49, 92, 72, 0.16);
+  border-radius: 22px;
+  background: rgba(255, 253, 248, 0.92);
+}
+
+.memoryCaptureIntro {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.memoryCaptureIntro > span {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: 14px;
+  background: #eef4ef;
+  font-size: 1.35rem;
+}
+
+.memoryCaptureIntro h4,
+.memoryCaptureIntro p {
+  margin: 0;
+}
+
+.memoryCaptureIntro p {
+  margin-top: 0.25rem;
+  color: #647267;
 }
 
 .memoryCaptureForm {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.35rem;
 }
 
 .memoryJournalRow {
@@ -4042,88 +4122,63 @@ button[disabled] {
   gap: 0.45rem;
 }
 
+.memoryCaptureForm label > span,
+.memoryCaptureForm legend {
+  color: #253d32;
+  font-weight: 700;
+}
+
 .memoryCaptureForm input,
 .memoryCaptureForm textarea {
   width: 100%;
   border: 1px solid #d8d2c3;
   border-radius: 12px;
-  padding: 0.75rem 0.9rem;
+  padding: 0.78rem 0.9rem;
   font: inherit;
-  background: #fffdf8;
+  background: #fff;
+}
+
+.memoryCaptureForm input:focus,
+.memoryCaptureForm textarea:focus {
+  border-color: #315c48;
+  outline: 3px solid rgba(49, 92, 72, 0.14);
 }
 
 .memoryCaptureForm textarea {
-  min-height: 180px;
+  min-height: 160px;
   resize: vertical;
 }
 
 .memoryCaptureForm fieldset {
   border: 1px solid #ddd6c8;
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 1rem;
+  background: rgba(250, 247, 240, 0.72);
 }
 
 .memoryTravelerGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.7rem;
 }
 
-.memoryTravelerGrid label {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  cursor: pointer;
-}
-
-.memoryTravelerGrid input[type="checkbox"] {
-  margin: 0;
-}
-
-.memoryPhotoPlaceholder {
-  display: grid;
-  gap: 0.4rem;
-  border: 2px dashed #cfc6b3;
-  border-radius: 16px;
-  padding: 1.25rem;
-  background: #fffdf9;
-}
-
-.memoryPhotoPlaceholder h4,
-.memoryPhotoPlaceholder p,
-.memoryPhotoPlaceholder small {
-  margin: 0;
-}
-
-.memoryPhotoPlaceholder small {
-  color: #647267;
-}
-
-.memoryJournalList {
-  margin-top: 2rem;
-}
-
-.memoryJournalCard {
-  background: white;
-  border-radius: 16px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-}
-
-@media (max-width: 700px) {
-  .memoryJournalRow {
-    grid-template-columns: 1fr;
-  }
-}
-/* Keep each Adventure Book traveler checkbox beside the name. */
 .memoryCaptureForm .memoryTravelerOption {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
   gap: 0.55rem;
+  min-height: 44px;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #ddd6c8;
+  border-radius: 12px;
+  background: #fffdf8;
   cursor: pointer;
+}
+
+.memoryCaptureForm .memoryTravelerOption:has(input:checked) {
+  border-color: #315c48;
+  background: #eef4ef;
 }
 
 .memoryCaptureForm .memoryTravelerOption input[type="checkbox"] {
@@ -4136,24 +4191,35 @@ button[disabled] {
   display: inline;
 }
 
-.memoryTravelerGrid {
+.memoryPhotoPlaceholder {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.75rem;
+  gap: 0.55rem;
+  border: 2px dashed #cfc6b3;
+  border-radius: 18px;
+  padding: 1.2rem;
+  background: #fffdf9;
 }
 
-@media (max-width: 700px) {
-  .memoryTravelerGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.memoryPhotoPlaceholder h4,
+.memoryPhotoPlaceholder p,
+.memoryPhotoPlaceholder small {
+  margin: 0;
 }
+
+.memoryPhotoPlaceholder p,
+.memoryPhotoPlaceholder small {
+  color: #647267;
+}
+
 .memoryPhotoPreview {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 0.75rem;
+  margin-top: 0.35rem;
 }
 
 .memoryPhotoPreviewItem {
+  position: relative;
   margin: 0;
 }
 
@@ -4165,28 +4231,10 @@ button[disabled] {
   border-radius: 12px;
 }
 
-.memorySavedPhotoGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.memorySavedPhoto {
-  width: 180px;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 0.75rem;
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-soft);
-}
 .memoryPhotoPreviewItem figcaption {
   margin-top: 0.35rem;
   font-size: 0.8rem;
   overflow-wrap: anywhere;
-}
-.memoryPhotoPreviewItem {
-  position: relative;
 }
 
 .memoryPhotoRemoveButton {
@@ -4208,6 +4256,7 @@ button[disabled] {
 .memoryPhotoRemoveButton:focus-visible {
   transform: scale(1.05);
 }
+
 .memoryPhotoPicker {
   display: inline-flex;
   align-items: center;
@@ -4235,4 +4284,322 @@ button[disabled] {
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
+}
+
+.memoryJournalList {
+  margin-top: 2rem;
+}
+
+.memoryTimelineHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.memoryTimelineHead h4,
+.memoryTimelineHead p {
+  margin: 0;
+}
+
+.memoryTimelineHead p {
+  max-width: 340px;
+  color: #647267;
+  text-align: right;
+}
+
+.memoryDaySection {
+  position: relative;
+  padding-left: 1.2rem;
+  margin-bottom: 1.5rem;
+  border-left: 3px solid rgba(49, 92, 72, 0.2);
+}
+
+.memoryDaySection::before {
+  content: "";
+  position: absolute;
+  top: 1.15rem;
+  left: -0.52rem;
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 3px solid #faf7f0;
+  border-radius: 999px;
+  background: #315c48;
+  box-shadow: 0 0 0 2px rgba(49, 92, 72, 0.18);
+}
+
+.memoryDayHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.memoryDayHeader h4 {
+  margin: 0.2rem 0 0;
+}
+.memoryDayPlan {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+}
+
+.memoryDayPlan strong {
+  color: #253d32;
+  font-size: 1rem;
+}
+
+.memoryDayPlan span {
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(49, 92, 72, 0.1);
+  color: #315c48;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+.memoryDayCount {
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  background: #eef4ef;
+  color: #315c48;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.memoryDayEntries {
+  display: grid;
+  gap: 1rem;
+}
+
+.memoryJournalCard {
+  padding: 1rem;
+  border: 1px solid rgba(49, 92, 72, 0.12);
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.055);
+}
+
+.memoryJournalCardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.memoryJournalCardHead h4 {
+  margin: 0.2rem 0 0;
+}
+.memoryCardHeading {
+  min-width: 0;
+}
+
+.memoryCardDate {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(49, 92, 72, 0.09);
+  color: #526158;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.memoryCardStory {
+  margin: 0.9rem 0 0;
+  color: #33463d;
+  font-size: 1rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.memoryCardTravelers {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.memoryCardMetaLabel {
+  color: #647267;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.memoryCardTravelerList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.memoryCardTraveler {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 36px;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid rgba(49, 92, 72, 0.14);
+  border-radius: 999px;
+  background: #eef4ef;
+  color: #315c48;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.memoryCardPhotoSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(49, 92, 72, 0.08);
+  color: #526158;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.memoryJournalCardHead small {
+  color: #647267;
+}
+
+.memoryJournalCard > p {
+  margin: 0.85rem 0 0;
+  line-height: 1.6;
+}
+
+.memoryDeleteButton {
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d6b9b4;
+  border-radius: 999px;
+  background: #fff8f7;
+  color: #8d3f35;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.memoryDeleteButton:hover,
+.memoryDeleteButton:focus-visible {
+  background: #fceceb;
+}
+
+.memorySavedPhotoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.memorySavedPhoto {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  height: auto;
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+}
+
+.memoryBookEmptyState {
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+  padding: 2.5rem 1.25rem;
+  border: 1px dashed #cfc6b3;
+  border-radius: 20px;
+  background: rgba(255, 253, 248, 0.7);
+  text-align: center;
+}
+
+.memoryBookEmptyState > span {
+  font-size: 2rem;
+}
+
+.memoryBookEmptyState h4,
+.memoryBookEmptyState p {
+  margin: 0;
+}
+
+.memoryBookEmptyState p {
+  max-width: 440px;
+  color: #647267;
+}
+
+@media (max-width: 800px) {
+  .memoryJournalHead {
+    flex-direction: column;
+  }
+
+  .memoryBookSummary {
+    width: 100%;
+  }
+
+  .memoryTravelerGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .memoryTimelineHead {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .memoryTimelineHead p {
+    text-align: left;
+  }
+}
+
+@media (max-width: 700px) {
+  .memoryJournal {
+    padding: 1rem;
+    border-radius: 22px;
+  }
+
+  .memoryJournalRow {
+    grid-template-columns: 1fr;
+  }
+
+  .memoryCapturePanel {
+    padding: 1rem;
+  }
+
+  .memoryDaySection {
+    padding-left: 0.9rem;
+  }
+
+  .memoryDayHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .memoryBookSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .memoryBookSummary div {
+    min-height: auto;
+  }
+
+  .memoryTravelerGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .memoryJournalCardHead {
+    flex-direction: column;
+  }
+
+  .memoryDeleteButton {
+    align-self: flex-start;
+  }
 }

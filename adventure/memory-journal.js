@@ -37,6 +37,10 @@ function createMemoryJournal(options = {}) {
           `memory-${Date.now()}-${Math.random()
             .toString(36)
             .slice(2, 8)}`;
+  const onAdventureSaved =
+    typeof options.onAdventureSaved === "function"
+      ? options.onAdventureSaved
+      : null;
 
   function requireActiveAdventure() {
     const adventure =
@@ -153,9 +157,16 @@ function createMemoryJournal(options = {}) {
       },
     };
 
-    return activeAdventureService.saveActiveAdventure(
-      nextAdventure,
-    );
+    const savedAdventure =
+      activeAdventureService.saveActiveAdventure(
+        nextAdventure,
+      );
+
+    if (onAdventureSaved) {
+      onAdventureSaved(savedAdventure);
+    }
+
+    return savedAdventure;
   }
 
   function createMemory(input = {}) {
