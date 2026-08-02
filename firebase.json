@@ -1,0 +1,34 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      ".gitignore",
+      ".git/**",
+      ".github/**",
+      ".firebase/**",
+      ".agents/**",
+      ".vscode/**",
+      "**/node_modules/**",
+      "**/*.test.js",
+      "**/*.md",
+      "docs/**",
+      "download/**",
+      "quality-checks.yml",
+      "skills-lock.json"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

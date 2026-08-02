@@ -83,14 +83,36 @@ function createActiveAdventureManager(options = {}) {
     return adventure;
   }
 
-  function saveActiveAdventure(record) {
-    const saved =
-      adventureStorage.saveAdventureRecord(record);
+function saveActiveAdventure(
+  record,
+  options = {},
+) {
+  const saved =
+    adventureStorage.saveAdventureRecord(record);
 
-    setActiveAdventureId(saved.id);
+  setActiveAdventureId(saved.id);
 
-    return saved;
+  const shouldPushToCloud =
+    options.pushToCloud !== false;
+
+  if (
+    shouldPushToCloud &&
+    globalThis.AdventureSharedSync &&
+    typeof globalThis.AdventureSharedSync
+      .pushActiveAdventure === "function"
+  ) {
+    globalThis.AdventureSharedSync
+      .pushActiveAdventure()
+      .catch((error) => {
+        console.warn(
+          "Shared Adventure push failed safely.",
+          error,
+        );
+      });
   }
+
+  return saved;
+}
 
   function clearActiveAdventure() {
     const hadActiveAdventure =

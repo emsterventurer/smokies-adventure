@@ -112,3 +112,46 @@ test("pulls an Adventure", async () => {
     "cloud-trip",
   );
 });
+
+test("pulls an Adventure without pushing it back to the cloud", async () => {
+  const provider =
+    createCloudProvider();
+
+  await provider.saveAdventureRecord({
+    id: "cloud-trip",
+  });
+
+  let pushToCloud = false;
+
+  const activeAdventureService =
+    createActiveAdventureService();
+
+  const originalSave =
+    activeAdventureService.saveActiveAdventure;
+
+  activeAdventureService.saveActiveAdventure =
+    (record, options) => {
+      pushToCloud =
+        options?.pushToCloud !== false;
+
+      return originalSave.call(
+        activeAdventureService,
+        record,
+        options,
+      );
+    };
+
+  const sync =
+    SharedAdventureSync.createSharedAdventureSync({
+      activeAdventureService,
+      cloudProvider: provider,
+    });
+
+  await sync.pullAdventure("cloud-trip");
+
+  assert.equal(
+    pushToCloud,
+    false,
+    "Cloud pulls should not request another cloud push",
+  );
+});

@@ -173,6 +173,7 @@ window.addEventListener("load",()=>{
 let DATA;
 let ACTIVE_ADVENTURE = null;
 let ADVENTURE_STARTUP_RESULT = null;
+let CURRENT_VIEW = "home";
 
 function initializeDurableAdventureData() {
   try {
@@ -216,21 +217,49 @@ function initializeDurableAdventureData() {
 }
 
 initializeDurableAdventureData();
+if (
+  ADVENTURE_STARTUP_RESULT
+    ?.activeAdventureService
+) {
+    globalThis.ActiveAdventureService =
+     ADVENTURE_STARTUP_RESULT
+      .activeAdventureService;
+  globalThis.dispatchEvent(
+    new CustomEvent(
+      "adventure:active-service-ready",
+      {
+        detail: {
+          activeAdventureService:
+            ADVENTURE_STARTUP_RESULT
+              .activeAdventureService,
+        },
+      },
+    ),
+  );
+}
 let ADVENTURE_MEDIA_STORE = null;
 let MEMORY_JOURNAL = null;
 
-function initializeAdventureMediaStore() {
+function initializeAdventureMediaStore(
+  provider = null,
+) {
   try {
-  if (
-    !globalThis.MediaStore ||
-    typeof globalThis.MediaStore
-     .createMediaStore !== "function"
-  ) {
-    return null;
-  }
+    if (
+      !globalThis.MediaStore ||
+      typeof globalThis.MediaStore
+        .createMediaStore !== "function"
+    ) {
+      return null;
+    }
 
-  ADVENTURE_MEDIA_STORE =
-    globalThis.MediaStore.createMediaStore();
+    ADVENTURE_MEDIA_STORE =
+      globalThis.MediaStore.createMediaStore(
+        provider
+          ? {
+              provider,
+            }
+          : {},
+      );
 
     return ADVENTURE_MEDIA_STORE;
   } catch (error) {
@@ -244,7 +273,30 @@ function initializeAdventureMediaStore() {
   }
 }
 
-initializeAdventureMediaStore();
+initializeAdventureMediaStore(
+  globalThis.FirebaseMediaProvider ??
+    null,
+);
+
+globalThis.addEventListener(
+  "adventure:firebase-media-provider-ready",
+  (event) => {
+    const provider =
+      event.detail?.provider;
+
+    if (!provider) {
+      return;
+    }
+
+    initializeAdventureMediaStore(
+      provider,
+    );
+
+    if (CURRENT_VIEW === "memories") {
+      hydrateSavedMemoryPhotos();
+    }
+  },
+);
 
 
 
@@ -262,23 +314,6 @@ function initializeMemoryJournal() {
       globalThis.MemoryJournal.createMemoryJournal({
         activeAdventureService:
           ADVENTURE_STARTUP_RESULT.activeAdventureService,
-
-        onAdventureSaved: (adventure) => {
-          if (
-            globalThis.CloudAdventureProvider &&
-            typeof globalThis.CloudAdventureProvider
-              .saveAdventureRecord === "function"
-          ) {
-            globalThis.CloudAdventureProvider
-              .saveAdventureRecord(adventure)
-              .catch((error) => {
-                console.warn(
-                  "Cloud Adventure synchronization failed.",
-                  error,
-                );
-              });
-          }
-        },
       });
 
     return MEMORY_JOURNAL;
@@ -958,18 +993,33 @@ async function hydrateSavedMemoryPhotos() {
           record.fileName ||
           "Adventure Book photo";
 
-        const objectUrl =
-          URL.createObjectURL(record.data);
+        if (
+          typeof record.downloadUrl ===
+            "string" &&
+          record.downloadUrl
+        ) {
+          image.src =
+            record.downloadUrl;
+        } else if (record.data) {
+          const objectUrl =
+            URL.createObjectURL(
+              record.data,
+            );
 
-        image.src = objectUrl;
+          image.src = objectUrl;
 
-        image.addEventListener(
-          "load",
-          () => {
-            URL.revokeObjectURL(objectUrl);
-          },
-          { once: true },
-        );
+          image.addEventListener(
+            "load",
+            () => {
+              URL.revokeObjectURL(
+                objectUrl,
+              );
+            },
+            { once: true },
+          );
+        } else {
+          return;
+        }
 
         gallery.appendChild(image);
       });
@@ -1955,6 +2005,7 @@ function bindCompletion(){
   });
 }
 function view(v) {
+  CURRENT_VIEW = v;
   $$("nav button,.desktopSideNav [data-view]")
     .forEach((button) =>
       button.classList.toggle(
@@ -2371,15 +2422,168 @@ inp.onchange=()=>{const d=new Date(inp.value+"T12:00:00");drawPhase(d);renderJou
 $("#today").onclick=()=>{const n=new Date();inp.value=localISO(n);drawPhase(n);renderJourney(n)};
 
 $$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));
+globalThis.addEventListener(
+  "adventure:cloud-update-received",
+  (event) => {
+    const cloudAdventure =
+      event.detail?.adventure;
+
+    if (!cloudAdventure) {
+      return;
+    }
+
+    ACTIVE_ADVENTURE =
+      cloudAdventure;
+
+    if (CURRENT_VIEW === "memories") {
+      view("memories");
+    }
+  },
+);
 setupWelcome();
 renderJourney(new Date());
-function setupWelcome(){
-  const modal=$("#welcomeModal");
-  const skipped=localStorage.getItem("acSkipWelcome")==="1";
-  if(!skipped) modal.hidden=false;
-  $("#enterAdventure").onclick=()=>modal.hidden=true;
-  $("#skipWelcome").onclick=()=>{localStorage.setItem("acSkipWelcome","1");modal.hidden=true};
+
+function setupWelcome() {
+  const modal =
+    $("#welcomeModal");
+
+  const choicesHost =
+    $("#welcomeIdentityChoices");
+
+  const enterButton =
+    $("#enterAdventure");
+
+  const skipButton =
+    $("#skipWelcome");
+
+  const identityService =
+    globalThis.AdventurerIdentity;
+
+  if (
+    !modal ||
+    !choicesHost ||
+    !enterButton ||
+    !identityService
+  ) {
+    return;
+  }
+
+  const savedIdentity =
+    identityService.readIdentity();
+
+  const skipped =
+    localStorage.getItem(
+      "acSkipWelcome",
+    ) === "1";
+
+  let selectedAdventurerId =
+    savedIdentity?.id ?? null;
+
+  const adventurers =
+    identityService.getAdventurers();
+
+  function updateSelection() {
+    choicesHost
+      .querySelectorAll(
+        "[data-adventurer-identity]",
+      )
+      .forEach((button) => {
+        const isSelected =
+          button.dataset
+            .adventurerIdentity ===
+          selectedAdventurerId;
+
+        button.classList.toggle(
+          "selected",
+          isSelected,
+        );
+
+        button.setAttribute(
+          "aria-pressed",
+          String(isSelected),
+        );
+      });
+
+    enterButton.disabled =
+      !selectedAdventurerId;
+
+    enterButton.textContent =
+      selectedAdventurerId
+        ? "Enter our adventure"
+        : "Choose your name to continue";
+  }
+
+  choicesHost.innerHTML =
+    adventurers
+      .map(
+        (adventurer) => `
+          <button
+            type="button"
+            class="welcomeIdentityChoice"
+            data-adventurer-identity="${adventurer.id}"
+            aria-pressed="false"
+          >
+            <strong>
+              ${adventurer.displayName}
+            </strong>
+
+            ${
+              adventurer.relationshipLabel
+                ? `
+                  <small>
+                    ${adventurer.relationshipLabel}
+                  </small>
+                `
+                : ""
+            }
+          </button>
+        `,
+      )
+      .join("");
+
+  choicesHost
+    .querySelectorAll(
+      "[data-adventurer-identity]",
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          selectedAdventurerId =
+            button.dataset
+              .adventurerIdentity;
+
+          updateSelection();
+        },
+      );
+    });
+
+  enterButton.onclick = () => {
+    const selectedIdentity =
+      identityService.selectIdentity(
+        selectedAdventurerId,
+      );
+
+    if (!selectedIdentity) {
+      return;
+    }
+
+    modal.hidden = true;
+  };
+
+  if (skipButton) {
+    skipButton.hidden = true;
+  }
+
+  updateSelection();
+
+  modal.hidden =
+    Boolean(
+      savedIdentity &&
+      skipped,
+    );
 }
+
 function renderJourney(date){
   const current=localISO(date),done=completedDays();
   const trail=$("#journeyTrail");
