@@ -131,6 +131,39 @@ assert(
     ),
   "Only restored approved members should unlock the welcome flow",
 );
+assert(
+  app.includes(
+    "waitForWelcomeDependency",
+  ),
+  "Welcome setup should wait for required startup dependencies",
+);
+
+assert(
+  app.includes(
+    '"AdventureFirebase"',
+  ) &&
+    app.includes(
+      '"AdventureMembershipService"',
+    ),
+  "Welcome setup should wait for Firebase and Membership Service",
+);
+
+assert(
+  app.includes(
+    '"adventure:firebase-auth-ready"',
+  ) &&
+    app.includes(
+      '"adventure:membership-service-ready"',
+    ),
+  "Welcome setup should listen for both dependency readiness events",
+);
+
+assert(
+  app.includes(
+    "Promise.all([",
+  ),
+  "Welcome setup should initialize only after all dependencies are ready",
+);
 console.log(
   "Adventure membership service tests passed.",
 );

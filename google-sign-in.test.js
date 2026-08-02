@@ -106,6 +106,29 @@ assert(
     ),
   "Successful Google sign-in should refresh the welcome state",
 );
+assert(
+  firebaseClient.includes(
+    "onAuthStateChanged(",
+  ),
+  "Firebase startup should wait for authentication state restoration",
+);
+
+assert(
+  firebaseClient.includes(
+    "unsubscribe();",
+  ) &&
+    firebaseClient.includes(
+      "resolve(user);",
+    ),
+  "Firebase startup should resolve the restored user exactly once",
+);
+
+assert(
+  !firebaseClient.includes(
+    "const currentUser =\n  auth.currentUser;",
+  ),
+  "Firebase startup should not trust auth.currentUser before restoration completes",
+);
 console.log(
   "Google sign-in tests passed.",
 );

@@ -118,6 +118,22 @@ assert(
     ),
   "Scoped memory queries should filter by Adventure and Memory ID",
 );
+assert(
+  app.includes(
+    "activeAdventure?.id ?? null",
+  ),
+  "Memory deletion should scope media lookup to the active Adventure",
+);
+
+assert(
+  app.includes(
+    ".listMediaForMemory(",
+  ) &&
+    app.includes(
+      "memoryId,",
+    ),
+  "Memory deletion should use the scoped media lookup",
+);
 console.log(
   "Firebase media provider tests passed.",
 );

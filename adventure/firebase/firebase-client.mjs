@@ -17,7 +17,6 @@ import {
 import {
   getAuth,
   GoogleAuthProvider,
-  signInAnonymously,
   signInWithPopup,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-auth.js";
@@ -41,12 +40,17 @@ const app = getApps().length
 const auth =
   getAuth(app);
 
-const userCredential =
-  auth.currentUser
-    ? {
-        user: auth.currentUser,
-      }
-    : await signInAnonymously(auth);
+const currentUser =
+  await new Promise((resolve) => {
+    const unsubscribe =
+      onAuthStateChanged(
+        auth,
+        (user) => {
+          unsubscribe();
+          resolve(user);
+        },
+      );
+  });
 
 async function signInWithGoogle() {
   const provider =
@@ -82,12 +86,12 @@ globalThis.AdventureFirebase =
     database,
     storage,
     user:
-      userCredential.user,
+      currentUser,
     signInWithGoogle,
     isInitialized: true,
     isAuthenticated: true,
     isAnonymous:
-      userCredential.user.isAnonymous,
+      currentUser?.isAnonymous ?? false,
     isFirestoreInitialized: true,
     isStorageInitialized: true,
   });
@@ -98,7 +102,7 @@ globalThis.dispatchEvent(
     {
       detail: {
         user:
-          userCredential.user,
+          currentUser,
       },
     },
   ),

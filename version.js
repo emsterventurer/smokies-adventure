@@ -19,13 +19,13 @@
     "use strict";
 
     const build=Object.freeze({
-      version:"M3-09",
+      version:"M3-10",
       milestone:"Milestone 3",
       feature:"Family Pilot & Shared Photos",
-      build:"Build 2",
+      build:"Build 1",
       updated:"August 2, 2026",
-      cache:"adventure-companion-m3-09-build-2",
-      eyebrow:"M3-09 · FAMILY PILOT",
+      cache:"adventure-companion-m3-10-build-1",
+      eyebrow:"M3-10 · FAMILY SECURITY",
       description:
         "Adventure Companion is preparing for its first family pilot with secure hosting, adventurer identity, shared access, cloud photos, and visible synchronization status."
     });

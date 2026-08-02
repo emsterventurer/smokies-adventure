@@ -1394,14 +1394,22 @@ adventureDateInput?.addEventListener(
          )
        ) {
          try {
-          if (ADVENTURE_MEDIA_STORE) {
+         if (ADVENTURE_MEDIA_STORE) {
+            const activeAdventure =
+              ADVENTURE_STARTUP_RESULT
+                ?.activeAdventureService
+                ?.getActiveAdventure();
+
             const mediaRecords =
-             await ADVENTURE_MEDIA_STORE
-              .listMediaForMemory(memoryId);
+              await ADVENTURE_MEDIA_STORE
+                .listMediaForMemory(
+                  memoryId,
+                  activeAdventure?.id ?? null,
+                );
 
             for (const mediaRecord of mediaRecords) {
-             await ADVENTURE_MEDIA_STORE
-              .deleteMedia(mediaRecord.id);
+              await ADVENTURE_MEDIA_STORE
+                .deleteMedia(mediaRecord.id);
             }
           }
 
@@ -2446,7 +2454,41 @@ globalThis.addEventListener(
     }
   },
 );
-void setupWelcome();
+function waitForWelcomeDependency(
+  globalName,
+  readyEventName,
+) {
+  if (globalThis[globalName]) {
+    return Promise.resolve(
+      globalThis[globalName],
+    );
+  }
+
+  return new Promise((resolve) => {
+    globalThis.addEventListener(
+      readyEventName,
+      () => {
+        resolve(
+          globalThis[globalName],
+        );
+      },
+      {
+        once: true,
+      },
+    );
+  });
+}
+
+void Promise.all([
+  waitForWelcomeDependency(
+    "AdventureFirebase",
+    "adventure:firebase-auth-ready",
+  ),
+  waitForWelcomeDependency(
+    "AdventureMembershipService",
+    "adventure:membership-service-ready",
+  ),
+]).then(() => setupWelcome());
 renderJourney(new Date());
 
 async function setupWelcome() {
