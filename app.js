@@ -295,6 +295,46 @@ function initializeMemoryJournal() {
 
 initializeMemoryJournal();
 
+let SHARED_ADVENTURE_SYNC = null;
+
+function initializeSharedAdventureSync() {
+  if (
+    SHARED_ADVENTURE_SYNC ||
+    !globalThis.SharedAdventureSync ||
+    !globalThis.CloudAdventureProvider ||
+    !ADVENTURE_STARTUP_RESULT?.activeAdventureService ||
+    !ACTIVE_ADVENTURE?.id
+  ) {
+    return SHARED_ADVENTURE_SYNC;
+  }
+
+  SHARED_ADVENTURE_SYNC =
+    globalThis.SharedAdventureSync
+      .createSharedAdventureSync({
+        activeAdventureService:
+          ADVENTURE_STARTUP_RESULT
+            .activeAdventureService,
+        cloudProvider:
+          globalThis.CloudAdventureProvider,
+      });
+
+  SHARED_ADVENTURE_SYNC.subscribe(
+    ACTIVE_ADVENTURE.id,
+  );
+
+  globalThis.AdventureSharedSync =
+    SHARED_ADVENTURE_SYNC;
+
+  return SHARED_ADVENTURE_SYNC;
+}
+
+globalThis.addEventListener(
+  "adventure:cloud-provider-ready",
+  initializeSharedAdventureSync,
+);
+
+initializeSharedAdventureSync();
+
 function escapeMemoryText(value) {
   return String(value ?? "").replace(
     /[&<>"']/g,

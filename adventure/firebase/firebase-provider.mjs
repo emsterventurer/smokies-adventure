@@ -139,6 +139,19 @@ const CloudAdventureProvider =
 globalThis.CloudAdventureProvider =
   CloudAdventureProvider;
 
+globalThis.dispatchEvent(
+  new CustomEvent(
+    "adventure:cloud-provider-ready",
+    {
+      detail: {
+        provider:
+          CloudAdventureProvider,
+      },
+    },
+  ),
+);
+
 export {
   CloudAdventureProvider,
 };
+

@@ -373,6 +373,15 @@ Development verification completed:
 
 ---
 
+### Deployment Notes
+
+During M3-08 verification, two important deployment behaviors were confirmed:
+
+- The Service Worker must bypass non-GET requests. Cloud Firestore uses POST requests that cannot be cached by the Cache API.
+- Firestore Security Rules must permit development writes before cloud synchronization can be verified.
+
+## These deployment considerations are now part of the Adventure Companion cloud deployment checklist.
+
 ## Cloud Foundation
 
 Firebase initialization currently lives in:
