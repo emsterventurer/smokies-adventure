@@ -2450,6 +2450,9 @@ function setupWelcome() {
   const choicesHost =
     $("#welcomeIdentityChoices");
 
+  const googleSignInButton =
+    $("#googleSignIn");
+
   const enterButton =
     $("#enterAdventure");
 
@@ -2462,6 +2465,7 @@ function setupWelcome() {
   if (
     !modal ||
     !choicesHost ||
+    !googleSignInButton ||
     !enterButton ||
     !identityService
   ) {
@@ -2476,13 +2480,25 @@ function setupWelcome() {
       "acSkipWelcome",
     ) === "1";
 
-  let selectedAdventurerId =
+    let selectedAdventurerId =
     savedIdentity?.id ?? null;
+
+  let googleUser =
+    globalThis.AdventureFirebase
+      ?.user?.isAnonymous === false
+      ? globalThis.AdventureFirebase.user
+      : null;
 
   const adventurers =
     identityService.getAdventurers();
 
   function updateSelection() {
+    const isGoogleSignedIn =
+      Boolean(
+        googleUser &&
+        googleUser.isAnonymous === false,
+      );
+
     choicesHost
       .querySelectorAll(
         "[data-adventurer-identity]",
@@ -2492,6 +2508,9 @@ function setupWelcome() {
           button.dataset
             .adventurerIdentity ===
           selectedAdventurerId;
+
+        button.disabled =
+          !isGoogleSignedIn;
 
         button.classList.toggle(
           "selected",
@@ -2504,13 +2523,30 @@ function setupWelcome() {
         );
       });
 
+    googleSignInButton.disabled =
+      isGoogleSignedIn;
+
+    googleSignInButton.textContent =
+      isGoogleSignedIn
+        ? googleUser.email
+          ? `Signed in as ${googleUser.email}`
+          : "Signed in with Google"
+        : "🔐 Sign in with Google";
+
     enterButton.disabled =
+      !isGoogleSignedIn ||
       !selectedAdventurerId;
 
-    enterButton.textContent =
-      selectedAdventurerId
-        ? "Enter our adventure"
-        : "Choose your name to continue";
+    if (!isGoogleSignedIn) {
+      enterButton.textContent =
+        "Sign in with Google to continue";
+    } else if (!selectedAdventurerId) {
+      enterButton.textContent =
+        "Choose your name to continue";
+    } else {
+      enterButton.textContent =
+        "Enter our adventure";
+    }
   }
 
   choicesHost.innerHTML =
@@ -2558,7 +2594,49 @@ function setupWelcome() {
       );
     });
 
-  enterButton.onclick = () => {
+  googleSignInButton.onclick =
+    async () => {
+      const firebase =
+        globalThis.AdventureFirebase;
+
+      if (
+        !firebase ||
+        typeof firebase.signInWithGoogle !==
+          "function"
+      ) {
+        alert(
+          "Google Sign-In is not available yet. Please refresh and try again.",
+        );
+        return;
+      }
+
+      googleSignInButton.disabled = true;
+      googleSignInButton.textContent =
+        "Signing in with Google…";
+
+      try {
+        const user =
+          await firebase.signInWithGoogle();
+
+        googleUser = user;
+
+        updateSelection();
+      } catch (error) {
+        console.error(
+          "Google Sign-In failed.",
+          error,
+        );
+
+        googleSignInButton.disabled = false;
+        googleSignInButton.textContent =
+          "🔐 Sign in with Google";
+
+        alert(
+          "Google Sign-In could not be completed. Please try again.",
+        );
+      }
+    };
+    enterButton.onclick = () => {
     const selectedIdentity =
       identityService.selectIdentity(
         selectedAdventurerId,
