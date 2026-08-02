@@ -970,9 +970,15 @@ async function hydrateSavedMemoryPhotos() {
     }
 
     try {
+      const activeAdventure =
+        ADVENTURE_STARTUP_RESULT
+          ?.activeAdventureService
+          ?.getActiveAdventure();
+
       const mediaRecords =
         await ADVENTURE_MEDIA_STORE.listMediaForMemory(
           memoryId,
+          activeAdventure?.id ?? null,
         );
 
       gallery.innerHTML = "";
@@ -1388,14 +1394,22 @@ adventureDateInput?.addEventListener(
          )
        ) {
          try {
-          if (ADVENTURE_MEDIA_STORE) {
+         if (ADVENTURE_MEDIA_STORE) {
+            const activeAdventure =
+              ADVENTURE_STARTUP_RESULT
+                ?.activeAdventureService
+                ?.getActiveAdventure();
+
             const mediaRecords =
-             await ADVENTURE_MEDIA_STORE
-              .listMediaForMemory(memoryId);
+              await ADVENTURE_MEDIA_STORE
+                .listMediaForMemory(
+                  memoryId,
+                  activeAdventure?.id ?? null,
+                );
 
             for (const mediaRecord of mediaRecords) {
-             await ADVENTURE_MEDIA_STORE
-              .deleteMedia(mediaRecord.id);
+              await ADVENTURE_MEDIA_STORE
+                .deleteMedia(mediaRecord.id);
             }
           }
 
@@ -2440,15 +2454,52 @@ globalThis.addEventListener(
     }
   },
 );
-setupWelcome();
+function waitForWelcomeDependency(
+  globalName,
+  readyEventName,
+) {
+  if (globalThis[globalName]) {
+    return Promise.resolve(
+      globalThis[globalName],
+    );
+  }
+
+  return new Promise((resolve) => {
+    globalThis.addEventListener(
+      readyEventName,
+      () => {
+        resolve(
+          globalThis[globalName],
+        );
+      },
+      {
+        once: true,
+      },
+    );
+  });
+}
+
+void Promise.all([
+  waitForWelcomeDependency(
+    "AdventureFirebase",
+    "adventure:firebase-auth-ready",
+  ),
+  waitForWelcomeDependency(
+    "AdventureMembershipService",
+    "adventure:membership-service-ready",
+  ),
+]).then(() => setupWelcome());
 renderJourney(new Date());
 
-function setupWelcome() {
+async function setupWelcome() {
   const modal =
     $("#welcomeModal");
 
   const choicesHost =
     $("#welcomeIdentityChoices");
+
+  const googleSignInButton =
+    $("#googleSignIn");
 
   const enterButton =
     $("#enterAdventure");
@@ -2462,6 +2513,7 @@ function setupWelcome() {
   if (
     !modal ||
     !choicesHost ||
+    !googleSignInButton ||
     !enterButton ||
     !identityService
   ) {
@@ -2476,13 +2528,25 @@ function setupWelcome() {
       "acSkipWelcome",
     ) === "1";
 
-  let selectedAdventurerId =
+    let selectedAdventurerId =
     savedIdentity?.id ?? null;
+
+    let googleUser = null;
+
+  const restoredGoogleUser =
+    globalThis.AdventureFirebase
+      ?.auth?.currentUser;
 
   const adventurers =
     identityService.getAdventurers();
 
   function updateSelection() {
+    const isGoogleSignedIn =
+      Boolean(
+        googleUser &&
+        googleUser.isAnonymous === false,
+      );
+
     choicesHost
       .querySelectorAll(
         "[data-adventurer-identity]",
@@ -2492,6 +2556,9 @@ function setupWelcome() {
           button.dataset
             .adventurerIdentity ===
           selectedAdventurerId;
+
+        button.disabled =
+          !isGoogleSignedIn;
 
         button.classList.toggle(
           "selected",
@@ -2504,13 +2571,30 @@ function setupWelcome() {
         );
       });
 
+    googleSignInButton.disabled =
+      isGoogleSignedIn;
+
+    googleSignInButton.textContent =
+      isGoogleSignedIn
+        ? googleUser.email
+          ? `Signed in as ${googleUser.email}`
+          : "Signed in with Google"
+        : "🔐 Sign in with Google";
+
     enterButton.disabled =
+      !isGoogleSignedIn ||
       !selectedAdventurerId;
 
-    enterButton.textContent =
-      selectedAdventurerId
-        ? "Enter our adventure"
-        : "Choose your name to continue";
+    if (!isGoogleSignedIn) {
+      enterButton.textContent =
+        "Sign in with Google to continue";
+    } else if (!selectedAdventurerId) {
+      enterButton.textContent =
+        "Choose your name to continue";
+    } else {
+      enterButton.textContent =
+        "Enter our adventure";
+    }
   }
 
   choicesHost.innerHTML =
@@ -2558,7 +2642,81 @@ function setupWelcome() {
       );
     });
 
-  enterButton.onclick = () => {
+  googleSignInButton.onclick =
+    async () => {
+      const firebase =
+        globalThis.AdventureFirebase;
+
+      if (
+        !firebase ||
+        typeof firebase.signInWithGoogle !==
+          "function"
+      ) {
+        alert(
+          "Google Sign-In is not available yet. Please refresh and try again.",
+        );
+        return;
+      }
+
+      googleSignInButton.disabled = true;
+      googleSignInButton.textContent =
+        "Signing in with Google…";
+
+      try {
+                const user =
+          await firebase.signInWithGoogle();
+
+        const membershipService =
+          globalThis.AdventureMembershipService;
+
+        const isMember =
+          membershipService &&
+          typeof membershipService
+            .isCurrentUserMember ===
+            "function"
+            ? await membershipService
+                .isCurrentUserMember(
+                  "smokies-2026",
+                )
+            : false;
+
+        if (!isMember) {
+          googleUser = null;
+
+          googleSignInButton.disabled =
+            false;
+
+          googleSignInButton.textContent =
+            "🔐 Sign in with Google";
+
+          updateSelection();
+
+          alert(
+            "This adventure is private. Your Google account has not been approved yet.",
+          );
+
+          return;
+        }
+
+        googleUser = user;
+
+        updateSelection();
+      } catch (error) {
+        console.error(
+          "Google Sign-In failed.",
+          error,
+        );
+
+        googleSignInButton.disabled = false;
+        googleSignInButton.textContent =
+          "🔐 Sign in with Google";
+
+        alert(
+          "Google Sign-In could not be completed. Please try again.",
+        );
+      }
+    };
+    enterButton.onclick = () => {
     const selectedIdentity =
       identityService.selectIdentity(
         selectedAdventurerId,
@@ -2577,11 +2735,39 @@ function setupWelcome() {
 
   updateSelection();
 
-  modal.hidden =
-    Boolean(
-      savedIdentity &&
-      skipped,
-    );
+  modal.hidden = false;
+
+  if (
+    restoredGoogleUser &&
+    restoredGoogleUser.isAnonymous === false
+  ) {
+    const membershipService =
+      globalThis.AdventureMembershipService;
+
+    const isMember =
+      membershipService &&
+      typeof membershipService
+        .isCurrentUserMember ===
+        "function"
+        ? await membershipService
+            .isCurrentUserMember(
+              "smokies-2026",
+            )
+        : false;
+
+    if (isMember) {
+      googleUser =
+        restoredGoogleUser;
+
+      updateSelection();
+
+      modal.hidden =
+        Boolean(
+          savedIdentity &&
+          skipped,
+        );
+    }
+  }
 }
 
 function renderJourney(date){

@@ -5,11 +5,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
 
 import {
-  getAuth,
-  signInAnonymously,
-} from "https://www.gstatic.com/firebasejs/12.17.0/firebase-auth.js";
-
-import {
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
@@ -18,6 +13,13 @@ import {
 import {
   getStorage,
 } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-storage.js";
+
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/12.17.0/firebase-auth.js";
 
 const firebaseConfig =
   globalThis.ADVENTURE_FIREBASE_CONFIG;
@@ -38,12 +40,34 @@ const app = getApps().length
 const auth =
   getAuth(app);
 
-const userCredential =
-  auth.currentUser
-    ? {
-        user: auth.currentUser,
-      }
-    : await signInAnonymously(auth);
+const currentUser =
+  await new Promise((resolve) => {
+    const unsubscribe =
+      onAuthStateChanged(
+        auth,
+        (user) => {
+          unsubscribe();
+          resolve(user);
+        },
+      );
+  });
+
+async function signInWithGoogle() {
+  const provider =
+    new GoogleAuthProvider();
+
+  provider.setCustomParameters({
+    prompt: "select_account",
+  });
+
+  const result =
+    await signInWithPopup(
+      auth,
+      provider,
+    );
+
+  return result.user;
+}
 
 const database = initializeFirestore(app, {
   localCache: persistentLocalCache({
@@ -62,11 +86,12 @@ globalThis.AdventureFirebase =
     database,
     storage,
     user:
-      userCredential.user,
+      currentUser,
+    signInWithGoogle,
     isInitialized: true,
     isAuthenticated: true,
     isAnonymous:
-      userCredential.user.isAnonymous,
+      currentUser?.isAnonymous ?? false,
     isFirestoreInitialized: true,
     isStorageInitialized: true,
   });
@@ -77,7 +102,7 @@ globalThis.dispatchEvent(
     {
       detail: {
         user:
-          userCredential.user,
+          currentUser,
       },
     },
   ),
@@ -88,4 +113,5 @@ export {
   auth,
   database,
   storage,
+  signInWithGoogle,
 };

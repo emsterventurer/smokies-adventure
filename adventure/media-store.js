@@ -415,7 +415,10 @@ function createMediaStore(options = {}) {
     return requireProvider().list();
   }
 
-  async function listMediaForMemory(memoryId) {
+  async function listMediaForMemory(
+    memoryId,
+    adventureId = null,
+  ) {
     if (
       typeof memoryId !== "string" ||
       memoryId.trim() === ""
@@ -423,10 +426,27 @@ function createMediaStore(options = {}) {
       return [];
     }
 
-    const records = await listMedia();
+    const provider =
+      requireProvider();
+
+    if (
+      typeof adventureId === "string" &&
+      adventureId.trim() !== "" &&
+      typeof provider.listForMemory ===
+        "function"
+    ) {
+      return provider.listForMemory(
+        adventureId,
+        memoryId,
+      );
+    }
+
+    const records =
+      await listMedia();
 
     return records.filter(
-      (record) => record.memoryId === memoryId,
+      (record) =>
+        record.memoryId === memoryId,
     );
   }
 

@@ -101,6 +101,39 @@ assert(
   "Adventure Book should retain local IndexedDB photo support",
 );
 
+
+assert(
+  firebaseMediaProvider.includes(
+    "listForMemory",
+  ),
+  "Firebase media provider should support scoped memory queries",
+);
+
+assert(
+  firebaseMediaProvider.includes(
+    '"adventureId"',
+  ) &&
+    firebaseMediaProvider.includes(
+      '"memoryId"',
+    ),
+  "Scoped memory queries should filter by Adventure and Memory ID",
+);
+assert(
+  app.includes(
+    "activeAdventure?.id ?? null",
+  ),
+  "Memory deletion should scope media lookup to the active Adventure",
+);
+
+assert(
+  app.includes(
+    ".listMediaForMemory(",
+  ) &&
+    app.includes(
+      "memoryId,",
+    ),
+  "Memory deletion should use the scoped media lookup",
+);
 console.log(
   "Firebase media provider tests passed.",
 );

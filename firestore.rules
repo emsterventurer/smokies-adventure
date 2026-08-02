@@ -2,14 +2,60 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function membershipPath(adventureId, uid) {
+      return /databases/$(database)/documents/adventures/$(adventureId)/members/$(uid);
+    }
+
+    function isAdventureMember(adventureId) {
+      return isSignedIn() &&
+        exists(
+          membershipPath(
+            adventureId,
+            request.auth.uid
+          )
+        );
+    }
+
     match /adventures/{adventureId} {
       allow read, write:
-        if request.auth != null;
+        if isAdventureMember(adventureId);
+
+      match /members/{memberUid} {
+        allow read:
+          if isSignedIn() &&
+          request.auth.uid == memberUid;
+
+        allow create, update, delete:
+          if false;
+      }
     }
 
     match /adventureMedia/{mediaId} {
-      allow read, write:
-        if request.auth != null;
+      allow read:
+        if isAdventureMember(
+          resource.data.adventureId
+        );
+
+      allow create:
+        if isAdventureMember(
+          request.resource.data.adventureId
+        );
+
+      allow update:
+        if isAdventureMember(
+          resource.data.adventureId
+        ) &&
+        request.resource.data.adventureId ==
+          resource.data.adventureId;
+
+      allow delete:
+        if isAdventureMember(
+          resource.data.adventureId
+        );
     }
   }
 }
