@@ -216,6 +216,26 @@ function initializeDurableAdventureData() {
 }
 
 initializeDurableAdventureData();
+if (
+  ADVENTURE_STARTUP_RESULT
+    ?.activeAdventureService
+) {
+    globalThis.ActiveAdventureService =
+     ADVENTURE_STARTUP_RESULT
+      .activeAdventureService;
+  globalThis.dispatchEvent(
+    new CustomEvent(
+      "adventure:active-service-ready",
+      {
+        detail: {
+          activeAdventureService:
+            ADVENTURE_STARTUP_RESULT
+              .activeAdventureService,
+        },
+      },
+    ),
+  );
+}
 let ADVENTURE_MEDIA_STORE = null;
 let MEMORY_JOURNAL = null;
 
