@@ -2168,11 +2168,58 @@ function view(v) {
     `;
   }
 
-  if (v === "companion") {
-    const campfire =
-      localStorage.getItem(
-        "adventureCompanionCampfireUnlocked",
-      ) === "true";
+    if (v === "companion") {
+    const previewDate =
+      $("#previewDate")?.value;
+
+    const progression =
+      globalThis.CampfireProgression.evaluate({
+        startDate: DATA.trip.start,
+        endDate: DATA.trip.end,
+        now: previewDate
+          ? `${previewDate}T12:00:00`
+          : new Date(),
+        packingComplete:
+          globalThis.AdventurePacking
+            ?.familyReady?.() ?? false,
+        adventureStarted: false,
+      });
+
+    const currentPhase =
+      progression.currentPhase;
+
+    const featuredCampfire =
+      progression.featuredCampfire;
+
+    const currentAchievement =
+      progression.currentAchievement;
+
+    const milestoneMarkup =
+      progression.milestones
+        .map((milestone) => {
+          const statusIcon =
+            milestone.unlocked
+              ? milestone.icon
+              : "🔒";
+
+          const statusLabel =
+            milestone.unlocked
+              ? "Unlocked"
+              : "Locked";
+
+          return `
+            <span class="${
+              milestone.unlocked
+                ? "unlocked"
+                : "locked"
+            }">
+              ${statusIcon}
+              ${milestone.title}
+              · ${statusLabel}
+            </span>
+          `;
+        })
+        .join("");
 
     screen.innerHTML = `
       <div class="remysCornerHead">
@@ -2200,7 +2247,15 @@ function view(v) {
       <section class="cornerPhase">
         <small>ADVENTURE PHASE</small>
         <strong>
-          🌿 Planning · The adventure is taking shape
+          ${currentPhase?.icon ?? "🌿"}
+          ${currentPhase?.title ??
+          "Planning"}
+          · ${
+            currentPhase?.id ===
+            "one-week-left"
+              ? "The countdown has begun"
+              : "The adventure is taking shape"
+          }
         </strong>
       </section>
 
@@ -2208,54 +2263,72 @@ function view(v) {
         🔥 Campfire Stories
       </h4>
 
+      <section class="campfireUnlocked">
+        <span aria-hidden="true">
+          ${featuredCampfire?.icon ?? "🌱"}
+        </span>
+
+        <div>
+          <small>
+            UNLOCKED · ${(
+              featuredCampfire?.title ??
+              "The Journey Begins"
+            ).toUpperCase()}
+          </small>
+
+          <h4>
+            The adventure begins long before
+            departure day.
+          </h4>
+
+          <p>
+            Every plan, conversation, and shared
+            moment is already part of the journey.
+            Packing does not have to be perfect for
+            this Adventure to be real.
+          </p>
+
+          <em>— Remy 💚</em>
+        </div>
+      </section>
+
       ${
-        campfire
+        currentAchievement
           ? `
             <section class="campfireUnlocked">
-              <span aria-hidden="true">🔥</span>
+              <span aria-hidden="true">
+                ${currentAchievement.icon}
+              </span>
+
               <div>
                 <small>
-                  UNLOCKED · THE JOURNEY BEGINS
+                  ACHIEVEMENT UNLOCKED ·
+                  ${currentAchievement.title.toUpperCase()}
                 </small>
+
                 <h4>
-                  Packing is the moment a dream
-                  becomes real.
+                  Everyone is Adventure Ready.
                 </h4>
+
                 <p>
-                  Soon you’ll be standing together in
-                  the Smoky Mountains. Laugh often.
-                  Take pictures. Be present. These
-                  moments become memories faster than
-                  we expect.
+                  The packing lists are complete.
+                  The family can turn its attention
+                  from preparation toward the road
+                  ahead.
                 </p>
+
                 <em>— Remy 💚</em>
               </div>
             </section>
           `
-          : `
-            <section class="campfireLocked">
-              <span>🔒</span>
-              <div>
-                <strong>
-                  The Journey Begins
-                </strong>
-                <p>
-                  Complete every adventurer’s packing
-                  list to unlock this Campfire.
-                </p>
-              </div>
-            </section>
-          `
+          : ""
       }
 
       <section class="futureCampfires">
-        <span>🔒 One Week Left</span>
-        <span>🔒 Road Trip Begins</span>
-        <span>🔒 First Sunrise</span>
+        ${milestoneMarkup}
       </section>
     `;
   }
-
   hydrateDayWeather();
 
   $$("[data-open]").forEach(

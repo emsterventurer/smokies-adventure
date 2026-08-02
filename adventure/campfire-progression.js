@@ -197,7 +197,7 @@
             milestone.unlocked,
         );
 
-      const currentMilestone =
+      const currentPhase =
         unlockedJourneyMilestones.at(-1) ??
         null;
 
@@ -210,6 +210,16 @@
       const currentAchievement =
         unlockedAchievements.at(-1) ??
         null;
+
+      const featuredCampfire =
+        currentPhase?.id ===
+          "one-week-left"
+          ? journeyMilestones.find(
+              (milestone) =>
+                milestone.id ===
+                "journey-begins",
+            ) ?? currentPhase
+          : currentPhase;
 
       return {
         milestones,
@@ -226,7 +236,10 @@
               !milestone.unlocked,
           ),
 
-        currentMilestone,
+        currentMilestone:
+          currentPhase,
+        currentPhase,
+        featuredCampfire,
         nextMilestone,
         currentAchievement,
       };

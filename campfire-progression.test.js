@@ -185,9 +185,15 @@ function runTests() {
   );
 
   assert.equal(
-    oneWeekProgression.currentMilestone.id,
+    oneWeekProgression.currentPhase.id,
     "one-week-left",
-    "One Week Left should become the current journey milestone",
+    "One Week Left should become the current Adventure phase",
+  );
+
+  assert.equal(
+    oneWeekProgression.featuredCampfire.id,
+    "journey-begins",
+    "The Journey Begins should remain the featured Campfire until departure day",
   );
 
   assert.equal(
