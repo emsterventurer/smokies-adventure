@@ -26,7 +26,8 @@ service cloud.firestore {
 
       match /members/{memberUid} {
         allow read:
-          if isAdventureMember(adventureId);
+          if isSignedIn() &&
+          request.auth.uid == memberUid;
 
         allow create, update, delete:
           if false;
