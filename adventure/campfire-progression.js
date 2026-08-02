@@ -55,9 +55,28 @@
       }),
     ]);
 
-    function toLocalDate(value) {
+  function toLocalDate(value) {
       if (!value) {
         return null;
+      }
+
+      if (
+        typeof value === "string" &&
+        /^\d{4}-\d{2}-\d{2}$/.test(value)
+      ) {
+        const [
+          year,
+          month,
+          day,
+        ] = value
+          .split("-")
+          .map(Number);
+
+        return new Date(
+          year,
+          month - 1,
+          day,
+        );
       }
 
       const date = new Date(value);
@@ -154,18 +173,62 @@
         }),
       );
 
+            const journeyMilestones =
+        milestones.filter(
+          (milestone) =>
+            milestone.type === "journey",
+        );
+
+      const achievementMilestones =
+        milestones.filter(
+          (milestone) =>
+            milestone.type === "achievement",
+        );
+
+      const unlockedJourneyMilestones =
+        journeyMilestones.filter(
+          (milestone) =>
+            milestone.unlocked,
+        );
+
+      const unlockedAchievements =
+        achievementMilestones.filter(
+          (milestone) =>
+            milestone.unlocked,
+        );
+
+      const currentMilestone =
+        unlockedJourneyMilestones.at(-1) ??
+        null;
+
+      const nextMilestone =
+        journeyMilestones.find(
+          (milestone) =>
+            !milestone.unlocked,
+        ) ?? null;
+
+      const currentAchievement =
+        unlockedAchievements.at(-1) ??
+        null;
+
       return {
         milestones,
+
         unlockedMilestones:
           milestones.filter(
             (milestone) =>
               milestone.unlocked,
           ),
+
         lockedMilestones:
           milestones.filter(
             (milestone) =>
               !milestone.unlocked,
           ),
+
+        currentMilestone,
+        nextMilestone,
+        currentAchievement,
       };
     }
 

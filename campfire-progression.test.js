@@ -172,6 +172,60 @@ function runTests() {
     "Campfire milestones should remain in journey order",
   );
 
+  assert.equal(
+    planningProgression.currentMilestone.id,
+    "journey-begins",
+    "The current milestone should be the latest unlocked journey milestone",
+  );
+
+  assert.equal(
+    planningProgression.nextMilestone.id,
+    "one-week-left",
+    "The next milestone should be the first locked journey milestone",
+  );
+
+  assert.equal(
+    oneWeekProgression.currentMilestone.id,
+    "one-week-left",
+    "One Week Left should become the current journey milestone",
+  );
+
+  assert.equal(
+    oneWeekProgression.nextMilestone.id,
+    "road-trip-begins",
+    "Achievement milestones should not block the emotional journey sequence",
+  );
+
+  assert.equal(
+    packedProgression.currentMilestone.id,
+    "one-week-left",
+    "Packing completion should not replace the current journey milestone",
+  );
+
+  assert.equal(
+    packedProgression.currentAchievement.id,
+    "ready-to-roll",
+    "Ready to Roll should be reported as the current achievement",
+  );
+
+  assert.equal(
+    departureProgression.currentMilestone.id,
+    "road-trip-begins",
+    "Road Trip Begins should become the current milestone on departure day",
+  );
+
+  assert.equal(
+    finalDayProgression.currentMilestone.id,
+    "adventure-complete",
+    "Adventure Complete should become the current milestone on the final day",
+  );
+
+  assert.equal(
+    finalDayProgression.nextMilestone,
+    null,
+    "There should be no next journey milestone after Adventure Complete",
+  );
+
   console.log(
     "Campfire progression tests passed.",
   );
