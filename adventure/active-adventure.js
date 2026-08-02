@@ -83,13 +83,20 @@ function createActiveAdventureManager(options = {}) {
     return adventure;
   }
 
-  function saveActiveAdventure(record) {
+function saveActiveAdventure(
+  record,
+  options = {},
+) {
   const saved =
     adventureStorage.saveAdventureRecord(record);
 
   setActiveAdventureId(saved.id);
 
+  const shouldPushToCloud =
+    options.pushToCloud !== false;
+
   if (
+    shouldPushToCloud &&
     globalThis.AdventureSharedSync &&
     typeof globalThis.AdventureSharedSync
       .pushActiveAdventure === "function"

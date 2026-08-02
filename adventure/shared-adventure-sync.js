@@ -100,6 +100,9 @@ function createSharedAdventureSync(options = {}) {
       const saved =
         activeAdventureService.saveActiveAdventure(
           cloudAdventure,
+          {
+            pushToCloud: false,
+          },
         );
 
       status = "synced";
@@ -129,12 +132,34 @@ function createSharedAdventureSync(options = {}) {
             return;
           }
 
-          activeAdventureService.saveActiveAdventure(
-            cloudAdventure,
-          );
+                   const saved =
+            activeAdventureService.saveActiveAdventure(
+              cloudAdventure,
+              {
+                pushToCloud: false,
+              },
+            );
 
           status = "synced";
           lastError = null;
+
+          if (
+            typeof globalThis.dispatchEvent ===
+              "function" &&
+            typeof globalThis.CustomEvent ===
+              "function"
+          ) {
+            globalThis.dispatchEvent(
+              new CustomEvent(
+                "adventure:cloud-update-received",
+                {
+                  detail: {
+                    adventure: saved,
+                  },
+                },
+              ),
+            );
+          }
         },
         (error) => {
           status = "error";

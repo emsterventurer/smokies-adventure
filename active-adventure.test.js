@@ -122,6 +122,49 @@ test("pushes the active Adventure when shared sync is available", async () => {
   }
 });
 
+test("can save a cloud Adventure without pushing it back", async () => {
+  const { manager } = createTestManager();
+
+  const record =
+    AdventureData.createSmokiesAdventureRecord();
+
+  let pushCount = 0;
+
+  const previousSync =
+    globalThis.AdventureSharedSync;
+
+  globalThis.AdventureSharedSync = {
+    async pushActiveAdventure() {
+      pushCount += 1;
+      return record;
+    },
+  };
+
+  try {
+    manager.saveActiveAdventure(
+      record,
+      {
+        pushToCloud: false,
+      },
+    );
+
+    await Promise.resolve();
+
+    assert.equal(
+      pushCount,
+      0,
+      "Cloud-originated saves should not echo back to Firestore",
+    );
+  } finally {
+    if (previousSync === undefined) {
+      delete globalThis.AdventureSharedSync;
+    } else {
+      globalThis.AdventureSharedSync =
+        previousSync;
+    }
+  }
+});
+
 test("switches between stored Adventure Records", () => {
   const { adventureStorage, manager } =
     createTestManager();

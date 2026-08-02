@@ -173,6 +173,7 @@ window.addEventListener("load",()=>{
 let DATA;
 let ACTIVE_ADVENTURE = null;
 let ADVENTURE_STARTUP_RESULT = null;
+let CURRENT_VIEW = "home";
 
 function initializeDurableAdventureData() {
   try {
@@ -282,23 +283,6 @@ function initializeMemoryJournal() {
       globalThis.MemoryJournal.createMemoryJournal({
         activeAdventureService:
           ADVENTURE_STARTUP_RESULT.activeAdventureService,
-
-        onAdventureSaved: (adventure) => {
-          if (
-            globalThis.CloudAdventureProvider &&
-            typeof globalThis.CloudAdventureProvider
-              .saveAdventureRecord === "function"
-          ) {
-            globalThis.CloudAdventureProvider
-              .saveAdventureRecord(adventure)
-              .catch((error) => {
-                console.warn(
-                  "Cloud Adventure synchronization failed.",
-                  error,
-                );
-              });
-          }
-        },
       });
 
     return MEMORY_JOURNAL;
@@ -1975,6 +1959,7 @@ function bindCompletion(){
   });
 }
 function view(v) {
+  CURRENT_VIEW = v;
   $$("nav button,.desktopSideNav [data-view]")
     .forEach((button) =>
       button.classList.toggle(
@@ -2391,6 +2376,24 @@ inp.onchange=()=>{const d=new Date(inp.value+"T12:00:00");drawPhase(d);renderJou
 $("#today").onclick=()=>{const n=new Date();inp.value=localISO(n);drawPhase(n);renderJourney(n)};
 
 $$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));
+globalThis.addEventListener(
+  "adventure:cloud-update-received",
+  (event) => {
+    const cloudAdventure =
+      event.detail?.adventure;
+
+    if (!cloudAdventure) {
+      return;
+    }
+
+    ACTIVE_ADVENTURE =
+      cloudAdventure;
+
+    if (CURRENT_VIEW === "memories") {
+      view("memories");
+    }
+  },
+);
 setupWelcome();
 renderJourney(new Date());
 
