@@ -98,6 +98,39 @@ assert(
   "Welcome flow should block users without Adventure membership",
 );
 
+assert(
+  app.includes(
+    "async function setupWelcome()",
+  ),
+  "Welcome setup should support restored-session membership checks",
+);
+
+assert(
+  app.includes(
+    "const restoredGoogleUser =",
+  ),
+  "Welcome setup should inspect the restored Firebase user",
+);
+
+assert(
+  app.includes(
+    "modal.hidden = false;",
+  ),
+  "Welcome should remain visible until restored membership is verified",
+);
+
+assert(
+  app.includes(
+    "if (isMember) {",
+  ) &&
+    app.includes(
+      "googleUser =",
+    ) &&
+    app.includes(
+      "restoredGoogleUser;",
+    ),
+  "Only restored approved members should unlock the welcome flow",
+);
 console.log(
   "Adventure membership service tests passed.",
 );

@@ -2446,10 +2446,10 @@ globalThis.addEventListener(
     }
   },
 );
-setupWelcome();
+void setupWelcome();
 renderJourney(new Date());
 
-function setupWelcome() {
+async function setupWelcome() {
   const modal =
     $("#welcomeModal");
 
@@ -2489,11 +2489,11 @@ function setupWelcome() {
     let selectedAdventurerId =
     savedIdentity?.id ?? null;
 
-  let googleUser =
+    let googleUser = null;
+
+  const restoredGoogleUser =
     globalThis.AdventureFirebase
-      ?.user?.isAnonymous === false
-      ? globalThis.AdventureFirebase.user
-      : null;
+      ?.auth?.currentUser;
 
   const adventurers =
     identityService.getAdventurers();
@@ -2693,11 +2693,39 @@ function setupWelcome() {
 
   updateSelection();
 
-  modal.hidden =
-    Boolean(
-      savedIdentity &&
-      skipped,
-    );
+  modal.hidden = false;
+
+  if (
+    restoredGoogleUser &&
+    restoredGoogleUser.isAnonymous === false
+  ) {
+    const membershipService =
+      globalThis.AdventureMembershipService;
+
+    const isMember =
+      membershipService &&
+      typeof membershipService
+        .isCurrentUserMember ===
+        "function"
+        ? await membershipService
+            .isCurrentUserMember(
+              "smokies-2026",
+            )
+        : false;
+
+    if (isMember) {
+      googleUser =
+        restoredGoogleUser;
+
+      updateSelection();
+
+      modal.hidden =
+        Boolean(
+          savedIdentity &&
+          skipped,
+        );
+    }
+  }
 }
 
 function renderJourney(date){
