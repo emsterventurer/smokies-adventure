@@ -22,9 +22,9 @@
       version:"M3-09",
       milestone:"Milestone 3",
       feature:"Family Pilot & Shared Photos",
-      build:"Build 1",
+      build:"Build 2",
       updated:"August 2, 2026",
-      cache:"adventure-companion-m3-09-build-1",
+      cache:"adventure-companion-m3-09-build-2",
       eyebrow:"M3-09 · FAMILY PILOT",
       description:
         "Adventure Companion is preparing for its first family pilot with secure hosting, adventurer identity, shared access, cloud photos, and visible synchronization status."

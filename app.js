@@ -240,18 +240,26 @@ if (
 let ADVENTURE_MEDIA_STORE = null;
 let MEMORY_JOURNAL = null;
 
-function initializeAdventureMediaStore() {
+function initializeAdventureMediaStore(
+  provider = null,
+) {
   try {
-  if (
-    !globalThis.MediaStore ||
-    typeof globalThis.MediaStore
-     .createMediaStore !== "function"
-  ) {
-    return null;
-  }
+    if (
+      !globalThis.MediaStore ||
+      typeof globalThis.MediaStore
+        .createMediaStore !== "function"
+    ) {
+      return null;
+    }
 
-  ADVENTURE_MEDIA_STORE =
-    globalThis.MediaStore.createMediaStore();
+    ADVENTURE_MEDIA_STORE =
+      globalThis.MediaStore.createMediaStore(
+        provider
+          ? {
+              provider,
+            }
+          : {},
+      );
 
     return ADVENTURE_MEDIA_STORE;
   } catch (error) {
@@ -265,7 +273,30 @@ function initializeAdventureMediaStore() {
   }
 }
 
-initializeAdventureMediaStore();
+initializeAdventureMediaStore(
+  globalThis.FirebaseMediaProvider ??
+    null,
+);
+
+globalThis.addEventListener(
+  "adventure:firebase-media-provider-ready",
+  (event) => {
+    const provider =
+      event.detail?.provider;
+
+    if (!provider) {
+      return;
+    }
+
+    initializeAdventureMediaStore(
+      provider,
+    );
+
+    if (CURRENT_VIEW === "memories") {
+      hydrateSavedMemoryPhotos();
+    }
+  },
+);
 
 
 
@@ -962,18 +993,33 @@ async function hydrateSavedMemoryPhotos() {
           record.fileName ||
           "Adventure Book photo";
 
-        const objectUrl =
-          URL.createObjectURL(record.data);
+        if (
+          typeof record.downloadUrl ===
+            "string" &&
+          record.downloadUrl
+        ) {
+          image.src =
+            record.downloadUrl;
+        } else if (record.data) {
+          const objectUrl =
+            URL.createObjectURL(
+              record.data,
+            );
 
-        image.src = objectUrl;
+          image.src = objectUrl;
 
-        image.addEventListener(
-          "load",
-          () => {
-            URL.revokeObjectURL(objectUrl);
-          },
-          { once: true },
-        );
+          image.addEventListener(
+            "load",
+            () => {
+              URL.revokeObjectURL(
+                objectUrl,
+              );
+            },
+            { once: true },
+          );
+        } else {
+          return;
+        }
 
         gallery.appendChild(image);
       });
