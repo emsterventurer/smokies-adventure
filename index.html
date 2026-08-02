@@ -125,13 +125,62 @@
 
 <div id="welcomeModal" class="welcomeModal" hidden>
   <div class="welcomeBackdrop"></div>
-  <section class="welcomeSheet" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+
+  <section
+    class="welcomeSheet"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="welcomeTitle"
+  >
     <div class="welcomeMark">🏔️ 🌿 💚</div>
-    <span class="eyebrow light">OUR FAMILY ADVENTURE</span>
-    <h2 id="welcomeTitle">The Smokies are calling.</h2>
-    <p>Eight days to explore, eat well, laugh often, and begin traditions worth carrying home.</p>
-    <button id="enterAdventure" class="welcomeButton" type="button">Enter our adventure</button>
-    <button id="skipWelcome" class="welcomeSkip" type="button">Skip next time</button>
+
+    <span class="eyebrow light">
+      OUR FAMILY ADVENTURE
+    </span>
+
+    <h2 id="welcomeTitle">
+      The Smokies are calling.
+    </h2>
+
+    <p>
+      Eight days to explore, eat well, laugh often,
+      and begin traditions worth carrying home.
+    </p>
+
+    <fieldset
+      class="welcomeIdentity"
+      aria-describedby="welcomeIdentityHint"
+    >
+      <legend>Who is joining the adventure?</legend>
+
+      <p id="welcomeIdentityHint">
+        Choose your name so memories and shared
+        photos can show who added them.
+      </p>
+
+      <div
+        id="welcomeIdentityChoices"
+        class="welcomeIdentityChoices"
+      ></div>
+    </fieldset>
+
+    <button
+      id="enterAdventure"
+      class="welcomeButton"
+      type="button"
+      disabled
+    >
+      Choose your name to continue
+    </button>
+
+    <button
+      id="skipWelcome"
+      class="welcomeSkip"
+      type="button"
+      hidden
+    >
+      Skip next time
+    </button>
   </section>
 </div>
 
@@ -241,6 +290,7 @@
 <script src="weather-ui.js"></script>
 
 <script src="adventure/adventurer-directory.js"></script>
+<script src="adventure/adventurer-identity.js"></script>
 <script src="adventure/adventure-data.js"></script>
 <script src="adventure/adventure-normalization.js"></script>
 <script src="adventure/adventure-validation.js"></script>

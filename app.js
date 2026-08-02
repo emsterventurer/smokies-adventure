@@ -2373,13 +2373,148 @@ $("#today").onclick=()=>{const n=new Date();inp.value=localISO(n);drawPhase(n);r
 $$("[data-view]").forEach(b=>b.onclick=()=>view(b.dataset.view));
 setupWelcome();
 renderJourney(new Date());
-function setupWelcome(){
-  const modal=$("#welcomeModal");
-  const skipped=localStorage.getItem("acSkipWelcome")==="1";
-  if(!skipped) modal.hidden=false;
-  $("#enterAdventure").onclick=()=>modal.hidden=true;
-  $("#skipWelcome").onclick=()=>{localStorage.setItem("acSkipWelcome","1");modal.hidden=true};
+
+function setupWelcome() {
+  const modal =
+    $("#welcomeModal");
+
+  const choicesHost =
+    $("#welcomeIdentityChoices");
+
+  const enterButton =
+    $("#enterAdventure");
+
+  const skipButton =
+    $("#skipWelcome");
+
+  const identityService =
+    globalThis.AdventurerIdentity;
+
+  if (
+    !modal ||
+    !choicesHost ||
+    !enterButton ||
+    !identityService
+  ) {
+    return;
+  }
+
+  const savedIdentity =
+    identityService.readIdentity();
+
+  const skipped =
+    localStorage.getItem(
+      "acSkipWelcome",
+    ) === "1";
+
+  let selectedAdventurerId =
+    savedIdentity?.id ?? null;
+
+  const adventurers =
+    identityService.getAdventurers();
+
+  function updateSelection() {
+    choicesHost
+      .querySelectorAll(
+        "[data-adventurer-identity]",
+      )
+      .forEach((button) => {
+        const isSelected =
+          button.dataset
+            .adventurerIdentity ===
+          selectedAdventurerId;
+
+        button.classList.toggle(
+          "selected",
+          isSelected,
+        );
+
+        button.setAttribute(
+          "aria-pressed",
+          String(isSelected),
+        );
+      });
+
+    enterButton.disabled =
+      !selectedAdventurerId;
+
+    enterButton.textContent =
+      selectedAdventurerId
+        ? "Enter our adventure"
+        : "Choose your name to continue";
+  }
+
+  choicesHost.innerHTML =
+    adventurers
+      .map(
+        (adventurer) => `
+          <button
+            type="button"
+            class="welcomeIdentityChoice"
+            data-adventurer-identity="${adventurer.id}"
+            aria-pressed="false"
+          >
+            <strong>
+              ${adventurer.displayName}
+            </strong>
+
+            ${
+              adventurer.relationshipLabel
+                ? `
+                  <small>
+                    ${adventurer.relationshipLabel}
+                  </small>
+                `
+                : ""
+            }
+          </button>
+        `,
+      )
+      .join("");
+
+  choicesHost
+    .querySelectorAll(
+      "[data-adventurer-identity]",
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          selectedAdventurerId =
+            button.dataset
+              .adventurerIdentity;
+
+          updateSelection();
+        },
+      );
+    });
+
+  enterButton.onclick = () => {
+    const selectedIdentity =
+      identityService.selectIdentity(
+        selectedAdventurerId,
+      );
+
+    if (!selectedIdentity) {
+      return;
+    }
+
+    modal.hidden = true;
+  };
+
+  if (skipButton) {
+    skipButton.hidden = true;
+  }
+
+  updateSelection();
+
+  modal.hidden =
+    Boolean(
+      savedIdentity &&
+      skipped,
+    );
 }
+
 function renderJourney(date){
   const current=localISO(date),done=completedDays();
   const trail=$("#journeyTrail");
