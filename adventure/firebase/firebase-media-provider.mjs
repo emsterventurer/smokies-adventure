@@ -4,7 +4,9 @@ import {
   doc,
   getDoc,
   getDocs,
+  query,
   setDoc,
+  where,
 } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js";
 
 import {
@@ -197,6 +199,44 @@ async function list() {
       documentSnapshot.data(),
   );
 }
+async function listForMemory(
+  adventureId,
+  memoryId,
+) {
+  if (
+    typeof adventureId !== "string" ||
+    adventureId.trim() === "" ||
+    typeof memoryId !== "string" ||
+    memoryId.trim() === ""
+  ) {
+    return [];
+  }
+
+  const snapshot =
+    await getDocs(
+      query(
+        collection(
+          database,
+          MEDIA_COLLECTION,
+        ),
+        where(
+          "adventureId",
+          "==",
+          adventureId,
+        ),
+        where(
+          "memoryId",
+          "==",
+          memoryId,
+        ),
+      ),
+    );
+
+  return snapshot.docs.map(
+    (documentSnapshot) =>
+      documentSnapshot.data(),
+  );
+}
 
 async function remove(mediaId) {
   const existing =
@@ -243,6 +283,7 @@ const FirebaseMediaProvider =
     save,
     get,
     list,
+    listForMemory,
     delete: remove,
     clear,
     isAvailable,

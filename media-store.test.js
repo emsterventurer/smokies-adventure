@@ -203,6 +203,89 @@ test("lists media for a specific memory", async () => {
   );
 });
 
+test(
+  "uses a scoped provider lookup when an Adventure ID is supplied",
+  async () => {
+    const baseProvider =
+      MediaStore.createMemoryMediaProvider();
+
+    let receivedAdventureId = null;
+    let receivedMemoryId = null;
+
+    const provider = {
+      ...baseProvider,
+
+      async listForMemory(
+        adventureId,
+        memoryId,
+      ) {
+        receivedAdventureId =
+          adventureId;
+
+        receivedMemoryId =
+          memoryId;
+
+        const records =
+          await baseProvider.list();
+
+        return records.filter(
+          (record) =>
+            record.adventureId ===
+              adventureId &&
+            record.memoryId ===
+              memoryId,
+        );
+      },
+    };
+
+    const store =
+      MediaStore.createMediaStore({
+        provider,
+      });
+
+    await store.saveMedia(
+      createMediaRecord({
+        id: "photo-1",
+        adventureId:
+          "smokies-2026",
+        memoryId: "memory-1",
+      }),
+    );
+
+    await store.saveMedia(
+      createMediaRecord({
+        id: "photo-2",
+        adventureId:
+          "yellowstone-2027",
+        memoryId: "memory-1",
+      }),
+    );
+
+    const records =
+      await store.listMediaForMemory(
+        "memory-1",
+        "smokies-2026",
+      );
+
+    assert.equal(
+      receivedAdventureId,
+      "smokies-2026",
+    );
+
+    assert.equal(
+      receivedMemoryId,
+      "memory-1",
+    );
+
+    assert.deepEqual(
+      records.map(
+        (record) => record.id,
+      ),
+      ["photo-1"],
+    );
+  },
+);
+
 test("lists media for a specific adventure", async () => {
   const { store } = createTestStore();
 

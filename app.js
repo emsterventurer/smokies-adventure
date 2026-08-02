@@ -970,9 +970,15 @@ async function hydrateSavedMemoryPhotos() {
     }
 
     try {
+      const activeAdventure =
+        ADVENTURE_STARTUP_RESULT
+          ?.activeAdventureService
+          ?.getActiveAdventure();
+
       const mediaRecords =
         await ADVENTURE_MEDIA_STORE.listMediaForMemory(
           memoryId,
+          activeAdventure?.id ?? null,
         );
 
       gallery.innerHTML = "";
@@ -2615,8 +2621,40 @@ function setupWelcome() {
         "Signing in with Google…";
 
       try {
-        const user =
+                const user =
           await firebase.signInWithGoogle();
+
+        const membershipService =
+          globalThis.AdventureMembershipService;
+
+        const isMember =
+          membershipService &&
+          typeof membershipService
+            .isCurrentUserMember ===
+            "function"
+            ? await membershipService
+                .isCurrentUserMember(
+                  "smokies-2026",
+                )
+            : false;
+
+        if (!isMember) {
+          googleUser = null;
+
+          googleSignInButton.disabled =
+            false;
+
+          googleSignInButton.textContent =
+            "🔐 Sign in with Google";
+
+          updateSelection();
+
+          alert(
+            "This adventure is private. Your Google account has not been approved yet.",
+          );
+
+          return;
+        }
 
         googleUser = user;
 
