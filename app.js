@@ -1768,7 +1768,7 @@ function managerMarkup(){
       <button id="resetReservationDetails" class="managerSecondary" type="button">Reset saved edits</button>
     </div>
     <div class="managerNotice">
-      These details are stored in this browser. They are visible to anyone using this copy of the app, but they do not automatically sync to a different device.
+      Reservation details are shared with everyone in this Adventure. Changes automatically sync across signed-in family members and devices.
     </div>
     <div class="reservationManagerGroups">${groups.map(([date,items])=>`
       <section class="managerDay">
