@@ -330,6 +330,53 @@ function initializeMemoryJournal() {
 
 initializeMemoryJournal();
 
+let RESERVATION_JOURNAL = null;
+
+function initializeReservationJournal() {
+  try {
+    if (
+      !globalThis.ReservationJournal ||
+      typeof globalThis.ReservationJournal
+        .createReservationJournal !== "function" ||
+      !globalThis.ReservationSync ||
+      !ADVENTURE_STARTUP_RESULT
+        ?.activeAdventureService
+    ) {
+      return null;
+    }
+
+    RESERVATION_JOURNAL =
+      globalThis.ReservationJournal
+        .createReservationJournal({
+          activeAdventureService:
+            ADVENTURE_STARTUP_RESULT
+              .activeAdventureService,
+          reservationSync:
+            globalThis.ReservationSync,
+        });
+
+    RESERVATION_JOURNAL
+      .migrateLegacyOverrides();
+
+    ACTIVE_ADVENTURE =
+      ADVENTURE_STARTUP_RESULT
+        .activeAdventureService
+        .getActiveAdventure();
+
+    return RESERVATION_JOURNAL;
+  } catch (error) {
+    console.warn(
+      "Reservation Journal initialization failed safely.",
+      error,
+    );
+
+    RESERVATION_JOURNAL = null;
+    return null;
+  }
+}
+
+initializeReservationJournal();
+
 let SHARED_ADVENTURE_SYNC = null;
 
 function initializeSharedAdventureSync() {
@@ -1644,8 +1691,58 @@ function saveReservationOverrides(data){
 }
 
 function getReservationRecord(date,item,index){
+  const activeAdventure =
+    ADVENTURE_STARTUP_RESULT
+      ?.activeAdventureService
+      ?.getActiveAdventure() ||
+    ACTIVE_ADVENTURE;
+
+  const sharedItems =
+    activeAdventure?.reservations?.items;
+
+  if (
+    globalThis.ReservationSync &&
+    Array.isArray(sharedItems)
+  ) {
+    const sharedReservation =
+      globalThis.ReservationSync
+        .findSharedReservation(
+          sharedItems,
+          date,
+          item.name,
+        );
+
+    const merged =
+      globalThis.ReservationSync
+        .mergeReservation(
+          {
+            ...item,
+            date,
+            id:
+              globalThis.ReservationSync
+                .createReservationId(
+                  date,
+                  item.name,
+                ),
+          },
+          sharedReservation,
+        );
+
+    return {
+      confirmation:merged.confirmation ?? "",
+      ticketUrl:merged.ticketUrl ?? "",
+      documentUrl:merged.documentUrl ?? "",
+      parkingNotes:merged.parkingNotes ?? "",
+      phone:merged.phone ?? "",
+      website:merged.website ?? "",
+      notes:merged.notes ?? "",
+      status:merged.status ?? "Pending"
+    };
+  }
+
   const overrides=readReservationOverrides();
   const saved=overrides[reservationKey(date,index,item)]||{};
+
   return {
     confirmation:saved.confirmation ?? "",
     ticketUrl:saved.ticketUrl ?? "",
@@ -1740,20 +1837,59 @@ function wireReservationManager(){
     form.addEventListener("submit",e=>{
       e.preventDefault();
       const data=new FormData(form);
-      const all=readReservationOverrides();
-      const key=form.dataset.reservationForm;
-      all[key]={
-        confirmation:String(data.get("confirmation")||"").trim(),
-        status:String(data.get("status")||"Pending"),
-        phone:String(data.get("phone")||"").trim(),
-        website:safeUrl(data.get("website")),
-        ticketUrl:safeUrl(data.get("ticketUrl")),
-        documentUrl:safeUrl(data.get("documentUrl")),
-        parkingNotes:String(data.get("parkingNotes")||"").trim(),
-        notes:String(data.get("notes")||"").trim(),
-        updatedAt:new Date().toISOString()
-      };
-      saveReservationOverrides(all);
+const key=form.dataset.reservationForm;
+const [date,,...nameParts]=
+  String(key||"").split("::");
+const name=nameParts.join("::");
+
+const reservation={
+  date,
+  name,
+  confirmation:String(
+    data.get("confirmation")||"",
+  ).trim(),
+  status:String(
+    data.get("status")||"Pending",
+  ),
+  phone:String(
+    data.get("phone")||"",
+  ).trim(),
+  website:safeUrl(
+    data.get("website"),
+  ),
+  ticketUrl:safeUrl(
+    data.get("ticketUrl"),
+  ),
+  documentUrl:safeUrl(
+    data.get("documentUrl"),
+  ),
+  parkingNotes:String(
+    data.get("parkingNotes")||"",
+  ).trim(),
+  notes:String(
+    data.get("notes")||"",
+  ).trim(),
+};
+
+if (RESERVATION_JOURNAL) {
+  RESERVATION_JOURNAL
+    .saveReservation(reservation);
+
+  ACTIVE_ADVENTURE =
+    ADVENTURE_STARTUP_RESULT
+      ?.activeAdventureService
+      ?.getActiveAdventure() ||
+    ACTIVE_ADVENTURE;
+} else {
+  const all=readReservationOverrides();
+
+  all[key]={
+    ...reservation,
+    updatedAt:new Date().toISOString(),
+  };
+
+  saveReservationOverrides(all);
+}
       const status=form.querySelector(".managerStatus");
       if(status)status.textContent="✓ Saved";
       setTimeout(()=>{if(status)status.textContent=""},1800);
@@ -2450,8 +2586,16 @@ globalThis.addEventListener(
       cloudAdventure;
 
     if (CURRENT_VIEW === "memories") {
-      view("memories");
-    }
+  view("memories");
+}
+
+if (CURRENT_VIEW === "reservations") {
+  view("reservations");
+}
+
+if (CURRENT_VIEW === "reservation-manager") {
+  renderReservationManager();
+}
   },
 );
 function waitForWelcomeDependency(
