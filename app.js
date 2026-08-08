@@ -2948,15 +2948,17 @@ function familyQuestionFor(date){
 }
 
 if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));
-}
-
-
-if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     wireBuildTools();
+
     try{
-      const reg=await navigator.serviceWorker.register("service-worker.js");
+      const reg=
+        await navigator.serviceWorker.register(
+          "service-worker.js",
+          {
+            updateViaCache:"none"
+          }
+        );
 
       if(reg.waiting){
         showUpdateToast();
@@ -2964,21 +2966,35 @@ if("serviceWorker" in navigator){
 
       reg.addEventListener("updatefound",()=>{
         const worker=reg.installing;
+
         if(!worker)return;
+
         worker.addEventListener("statechange",()=>{
-          if(worker.state==="installed" && navigator.serviceWorker.controller){
+          if(
+            worker.state==="installed" &&
+            navigator.serviceWorker.controller
+          ){
             showUpdateToast();
           }
         });
       });
 
-      navigator.serviceWorker.addEventListener("controllerchange",()=>{
-        window.location.reload();
-      });
+      navigator.serviceWorker.addEventListener(
+        "controllerchange",
+        ()=>{
+          window.location.reload();
+        }
+      );
 
-      // Check for a newer deployment whenever the app opens.
-      reg.update().catch(()=>{});
-    }catch(e){}
+      // Always check production for the newest
+      // service worker and imported build metadata.
+      await reg.update();
+    }catch(e){
+      console.warn(
+        "Service worker update check failed safely.",
+        e
+      );
+    }
   });
 }else{
   window.addEventListener("load",wireBuildTools);
