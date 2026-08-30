@@ -85,6 +85,46 @@ test("seeds the Smokies Adventure when no stored data exists", () => {
     ),
     true,
   );
+  assert.equal(
+    startup.adventureStorage.hasAdventureRecord(
+      "pacific-coast-2026",
+    ),
+    true,
+  );
+  assert.equal(
+    startup.activeAdventureService
+      .getActiveAdventureId(),
+    "smokies-2026",
+  );
+});
+
+test("adds the Pacific Coast shell without replacing stored data", () => {
+  const { startup } = createTestStartup();
+  const storedPacific = {
+    ...AdventureData.createPacificCoastAdventureRecord(),
+    subtitle: "Saved locally",
+  };
+
+  startup.adventureStorage.saveAdventureRecord(
+    storedPacific,
+  );
+  startup.activeAdventureService.saveActiveAdventure(
+    AdventureData.createSmokiesAdventureRecord(),
+  );
+
+  startup.initializeAdventure();
+
+  assert.equal(
+    startup.adventureStorage.loadAdventureRecord(
+      "pacific-coast-2026",
+    ).subtitle,
+    "Saved locally",
+  );
+  assert.equal(
+    startup.activeAdventureService
+      .getActiveAdventureId(),
+    "smokies-2026",
+  );
 });
 
 test("migrates legacy adventure data when seeding the first adventure", () => {

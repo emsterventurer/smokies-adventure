@@ -108,6 +108,28 @@ h2 {
   margin: 5px 0;
   font-weight: 500;
 }
+.adventureSwitcherField {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
+  color: var(--mut);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.adventureSwitcherField select {
+  max-width: min(100%, 240px);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #edf2ec;
+  color: var(--fd);
+  font: 600 0.78rem Georgia, serif;
+  letter-spacing: normal;
+  padding: 7px 10px;
+  text-transform: none;
+}
 .badge {
   background: var(--f);
   color: white;
@@ -4659,4 +4681,23 @@ button[disabled] {
   .memoryDeleteButton {
     align-self: flex-start;
   }
+}
+.nonSmokiesAdventure main > :not(.top):not(#adventureUnavailable) {
+  display: none !important;
+}
+
+.nonSmokiesAdventure .top > :not(:first-child) {
+  display: none !important;
+}
+
+.nonSmokiesAdventure nav {
+  display: none !important;
+}
+
+.nonSmokiesAdventure .sideParty {
+  display: none !important;
+}
+
+.adventureUnavailable {
+  text-align: center;
 }

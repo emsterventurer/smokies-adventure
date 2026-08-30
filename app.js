@@ -175,6 +175,31 @@ let ACTIVE_ADVENTURE = null;
 let ADVENTURE_STARTUP_RESULT = null;
 let CURRENT_VIEW = "home";
 
+function listAvailableAdventures() {
+  return (
+    ADVENTURE_STARTUP_RESULT
+      ?.adventureStorage
+      ?.listAdventureRecords?.() ||
+    []
+  );
+}
+
+function selectActiveAdventure(adventureId) {
+  const activeAdventureService =
+    ADVENTURE_STARTUP_RESULT
+      ?.activeAdventureService;
+
+  activeAdventureService
+    ?.setActiveAdventureId?.(adventureId);
+
+  ACTIVE_ADVENTURE =
+    activeAdventureService
+      ?.getActiveAdventure?.() ||
+    null;
+
+  return ACTIVE_ADVENTURE;
+}
+
 function initializeDurableAdventureData() {
   try {
     if (
@@ -194,6 +219,8 @@ function initializeDurableAdventureData() {
       ...result,
       activeAdventureService:
         startup.activeAdventureService,
+      adventureStorage:
+        startup.adventureStorage,
     };
     ACTIVE_ADVENTURE = result.adventure;
 
@@ -217,6 +244,19 @@ function initializeDurableAdventureData() {
 }
 
 initializeDurableAdventureData();
+globalThis.AdventureSwitcher
+  ?.initializeAdventureSwitcher?.({
+    document,
+    adventures: listAvailableAdventures(),
+    activeAdventureService:
+      ADVENTURE_STARTUP_RESULT
+        ?.activeAdventureService,
+    selectActiveAdventure,
+    smokiesAdventureId:
+      globalThis.AdventureData
+        ?.SMOKIES_ADVENTURE_ID,
+    reload: () => window.location.reload(),
+  });
 if (
   ADVENTURE_STARTUP_RESULT
     ?.activeAdventureService
@@ -356,7 +396,15 @@ function initializeReservationJournal() {
         });
 
     RESERVATION_JOURNAL
-      .migrateLegacyOverrides();
+      .migrateLegacyOverrides({
+        activeAdventureId:
+          ADVENTURE_STARTUP_RESULT
+            .activeAdventureService
+            .getActiveAdventureId(),
+        legacyAdventureId:
+          globalThis.AdventureData
+            .SMOKIES_ADVENTURE_ID,
+      });
 
     ACTIVE_ADVENTURE =
       ADVENTURE_STARTUP_RESULT

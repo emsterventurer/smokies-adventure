@@ -3,6 +3,8 @@
 
 const ADVENTURE_RECORD_SCHEMA_VERSION = 1;
 const SMOKIES_ADVENTURE_ID = "smokies-2026";
+const PACIFIC_COAST_ADVENTURE_ID =
+  "pacific-coast-2026";
 
 const SMOKIES_PARTICIPANTS = Object.freeze([
   Object.freeze({
@@ -121,11 +123,75 @@ function createSmokiesAdventureRecord() {
   };
 }
 
+function createPacificCoastAdventureRecord() {
+  return {
+    schemaVersion: ADVENTURE_RECORD_SCHEMA_VERSION,
+    id: PACIFIC_COAST_ADVENTURE_ID,
+    slug: PACIFIC_COAST_ADVENTURE_ID,
+    title: "Pacific Coast 2026",
+    subtitle: "",
+    dates: {
+      start: "2026-09-24",
+      end: "2026-09-28",
+      timezone: "America/Los_Angeles",
+    },
+    destination: {
+      name: "Pacific Coast",
+      city: null,
+      state: null,
+      country: "United States",
+      latitude: null,
+      longitude: null,
+    },
+    participants: [],
+    itinerary: {
+      days: [],
+    },
+    reservations: {
+      items: [],
+    },
+    packing: {
+      travelers: {},
+      sharedItems: [],
+      updatedAt: null,
+    },
+    readiness: {
+      travelers: {},
+      family: {
+        state: "unknown",
+      },
+      updatedAt: null,
+    },
+    completion: {
+      completedDayIds: [],
+      completedActivityIds: [],
+    },
+    preferences: {
+      breakfastWindow: null,
+      notes: [],
+    },
+    memories: {
+      entries: [],
+    },
+    media: {
+      referencedMediaIds: [],
+    },
+    metadata: {
+      createdAt: null,
+      updatedAt: null,
+      migratedAt: null,
+      migrationSource: null,
+    },
+  };
+}
+
 const AdventureData = Object.freeze({
   SCHEMA_VERSION: ADVENTURE_RECORD_SCHEMA_VERSION,
   SMOKIES_ADVENTURE_ID,
+  PACIFIC_COAST_ADVENTURE_ID,
   SMOKIES_PARTICIPANTS,
   createSmokiesAdventureRecord,
+  createPacificCoastAdventureRecord,
 });
 
 if (typeof module !== "undefined" && module.exports) {

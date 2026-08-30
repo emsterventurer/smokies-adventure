@@ -51,6 +51,34 @@ function createAdventureStartup(options = {}) {
           : options.seedFactory,
     });
 
+  const bundledAdventureFactories =
+    options.seedFactory === null
+      ? []
+      : options.bundledAdventureFactories ?? [
+          AdventureData
+            .createPacificCoastAdventureRecord,
+        ];
+
+  function ensureBundledAdventures() {
+    bundledAdventureFactories.forEach(
+      (createAdventureRecord) => {
+        if (typeof createAdventureRecord !== "function") {
+          return;
+        }
+
+        const record = createAdventureRecord();
+
+        if (
+          !adventureStorage.hasAdventureRecord(
+            record.id,
+          )
+        ) {
+          adventureStorage.saveAdventureRecord(record);
+        }
+      },
+    );
+  }
+
   function hasLegacyAdventureData() {
     if (
       !storageProvider ||
@@ -74,6 +102,7 @@ function createAdventureStartup(options = {}) {
       existing.status !== "seeded" ||
       !hasLegacyAdventureData()
     ) {
+      ensureBundledAdventures();
       return existing;
     }
 
@@ -91,6 +120,8 @@ function createAdventureStartup(options = {}) {
       activeAdventureService.saveActiveAdventure(
         migrated,
       );
+
+    ensureBundledAdventures();
 
     return {
       status: "migrated",

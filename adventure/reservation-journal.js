@@ -189,7 +189,19 @@ function createReservationJournal(options = {}) {
     }
   }
 
-  function migrateLegacyOverrides() {
+  function migrateLegacyOverrides({
+    activeAdventureId,
+    legacyAdventureId,
+  } = {}) {
+    if (
+      activeAdventureId !== undefined &&
+      activeAdventureId !== legacyAdventureId
+    ) {
+      return {
+        migrated: 0,
+      };
+    }
+
     const overrides =
       readLegacyOverrides();
 
