@@ -229,3 +229,70 @@ test("legacy migration is idempotent", () => {
     1,
   );
 });
+
+test("scopes legacy reservation migration to the Smokies Adventure", () => {
+  const legacyKey =
+    "adventureCompanionReservationOverridesV1";
+  let legacyValue = JSON.stringify({
+    "2026-08-07::1::Local Goat": {
+      confirmation: "LOCAL123",
+    },
+  });
+
+  const legacyStorage = {
+    getItem(key) {
+      return key === legacyKey
+        ? legacyValue
+        : null;
+    },
+    removeItem(key) {
+      if (key === legacyKey) {
+        legacyValue = null;
+      }
+    },
+  };
+  const {
+    journal,
+    activeAdventureService,
+  } = createTestJournal({ legacyStorage });
+
+  activeAdventureService.saveActiveAdventure(
+    AdventureData.createPacificCoastAdventureRecord(),
+  );
+
+  const pacificResult =
+    journal.migrateLegacyOverrides({
+      activeAdventureId:
+        AdventureData.PACIFIC_COAST_ADVENTURE_ID,
+      legacyAdventureId:
+        AdventureData.SMOKIES_ADVENTURE_ID,
+    });
+
+  assert.deepEqual(pacificResult, { migrated: 0 });
+  assert.notEqual(legacyValue, null);
+  assert.deepEqual(
+    activeAdventureService.getActiveAdventure()
+      .reservations.items,
+    [],
+  );
+
+  activeAdventureService.setActiveAdventureId(
+    AdventureData.SMOKIES_ADVENTURE_ID,
+  );
+
+  const smokiesResult =
+    journal.migrateLegacyOverrides({
+      activeAdventureId:
+        AdventureData.SMOKIES_ADVENTURE_ID,
+      legacyAdventureId:
+        AdventureData.SMOKIES_ADVENTURE_ID,
+    });
+
+  assert.equal(smokiesResult.migrated, 1);
+  assert.equal(legacyValue, null);
+  assert.equal(
+    activeAdventureService.getActiveAdventure()
+      .reservations.items.length,
+    1,
+  );
+});

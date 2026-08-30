@@ -225,7 +225,14 @@
 </header>
 <main>
 <section class="top card">
- <div><span class="eyebrow">CURRENT ADVENTURE</span><h2>Smoky Mountains 2026</h2></div>
+  <div>
+    <span class="eyebrow">CURRENT ADVENTURE</span>
+    <h2 id="activeAdventureTitle">Smoky Mountains 2026</h2>
+    <label class="adventureSwitcherField">
+     <span>Adventure</span>
+     <select id="adventureSwitcher" aria-label="Choose active Adventure"></select>
+    </label>
+</div>
  <span id="phaseBadge" class="badge">Planning</span>
  <div class="phases">
   <div data-p="dreaming"><b>🌱</b><small>Dreaming</small></div><i></i>
@@ -234,6 +241,11 @@
   <div data-p="remembering"><b>🌳</b><small>Remembering</small></div>
  </div>
  <div class="preview"><label>Preview date<input id="previewDate" type="date"></label><button id="today">Today</button></div>
+</section>
+
+<section id="adventureUnavailable" class="card adventureUnavailable" hidden>
+  <h3>Adventure itinerary is not available yet</h3>
+  <p>This Adventure is available to the app, but its itinerary has not been added.</p>
 </section>
 
 <section class="familyWelcome">
@@ -314,6 +326,7 @@
 <script type="module" src="adventure/firebase/firebase-media-provider.mjs"></script>
 <script type="module" src="adventure/firebase/adventure-sync-startup.mjs"></script>
 <script src="adventure/active-adventure.js"></script>
+<script src="adventure/adventure-switcher.js"></script>
 <script src="adventure/media-store.js"></script>
 <script src="adventure/memory-journal.js"></script>
 <script src="adventure/adventure-startup.js"></script>

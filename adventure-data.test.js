@@ -64,6 +64,33 @@ test("assigns the five Smokies participants by stable adventurer ID", () => {
   );
 });
 
+test("creates the Pacific Coast Adventure shell", () => {
+  const adventure =
+    AdventureData.createPacificCoastAdventureRecord();
+
+  assert.equal(adventure.schemaVersion, 1);
+  assert.equal(adventure.id, "pacific-coast-2026");
+  assert.equal(adventure.slug, "pacific-coast-2026");
+  assert.equal(adventure.title, "Pacific Coast 2026");
+  assert.equal(adventure.subtitle, "");
+  assert.deepEqual(adventure.dates, {
+    start: "2026-09-24",
+    end: "2026-09-28",
+    timezone: "America/Los_Angeles",
+  });
+  assert.deepEqual(adventure.destination, {
+    name: "Pacific Coast",
+    city: null,
+    state: null,
+    country: "United States",
+    latitude: null,
+    longitude: null,
+  });
+  assert.deepEqual(adventure.participants, []);
+  assert.deepEqual(adventure.itinerary.days, []);
+  assert.deepEqual(adventure.reservations.items, []);
+});
+
 test("creates all required Adventure Record collections", () => {
   const adventure = AdventureData.createSmokiesAdventureRecord();
 
@@ -124,5 +151,9 @@ test("creates independent Adventure Record instances", () => {
 test("exports stable schema constants", () => {
   assert.equal(AdventureData.SCHEMA_VERSION, 1);
   assert.equal(AdventureData.SMOKIES_ADVENTURE_ID, "smokies-2026");
+  assert.equal(
+    AdventureData.PACIFIC_COAST_ADVENTURE_ID,
+    "pacific-coast-2026",
+  );
   assert.equal(AdventurerDirectory.SCHEMA_VERSION, 1);
 });
