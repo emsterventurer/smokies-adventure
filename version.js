@@ -19,15 +19,15 @@
     "use strict";
 
     const build=Object.freeze({
-    version:"M3-11",
-    milestone:"Milestone 3",
-    feature:"Shared Reservation Center",
-    build:"Build 2",
-    updated:"August 8, 2026",
-    cache:"adventure-companion-m3-11-build-2",
-    eyebrow:"M3-11 · SHARED RESERVATION CENTER",
+    version:"M4-01",
+    milestone:"Milestone 4",
+    feature:"Adventure Switcher",
+    build:"Build 1",
+    updated:"August 30, 2026",
+    cache:"adventure-companion-m4-01-build-1",
+    eyebrow:"M4-01 · ADVENTURE SWITCHER",
       description:
-        "Adventure Companion is preparing for its first family pilot with secure hosting, adventurer identity, shared access, cloud photos, and visible synchronization status."
+        "Adventure Companion now supports switching between durable Adventures while preserving the complete Smokies experience and safely preparing Pacific Coast 2026 for future planning."
     });
 
     function applyToDocument(doc){
