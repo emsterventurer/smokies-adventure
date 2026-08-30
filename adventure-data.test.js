@@ -183,6 +183,32 @@ test("enriches an empty Pacific Coast shell with the Arrival Day", () => {
     ],
   );
   assert.equal(shell.itinerary.days.length, 0);
+
+  const hotelStop =
+    result.adventure.itinerary.days[0].stops[1];
+  const dinnerStop =
+    result.adventure.itinerary.days[0].stops[2];
+  const hotelReservation =
+    result.adventure.reservations.items.find(
+      (reservation) =>
+        reservation.id ===
+        hotelStop.reservationId,
+    );
+
+  assert.equal(hotelStop.duration, undefined);
+  assert.equal(hotelStop.notes, undefined);
+  assert.equal(dinnerStop.notes, undefined);
+  assert.equal(
+    Object.hasOwn(
+      hotelReservation,
+      "confirmation",
+    ),
+    false,
+  );
+  assert.match(
+    hotelReservation.notes,
+    /Healdsburg King.*1 night.*check-in after 4 PM.*call before 2 PM.*checkout 11 AM/,
+  );
 });
 
 test("Pacific Coast enrichment is idempotent and preserves unrelated data", () => {

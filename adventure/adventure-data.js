@@ -22,7 +22,7 @@ function createPacificCoastArrivalDay() {
     date: "2026-09-24",
     title: "Arrival in Healdsburg",
     summary:
-      "Arrive at SFO, make the drive to Healdsburg, settle in, and enjoy a confirmed dinner at The Matheson.",
+      "Arrive at SFO, make the drive to Healdsburg, settle in, and enjoy dinner at The Matheson.",
     routeLabel: "SFO → Healdsburg",
     pace: "Easy arrival evening",
     stops: [
@@ -41,15 +41,12 @@ function createPacificCoastArrivalDay() {
         id: "healdsburg-inn",
         name: "Healdsburg Inn on Plaza",
         kind: "lodging",
-        timeLabel: "Check-in after 4 PM",
-        duration: "1 night",
+        timeLabel: "Hotel arrival",
         address:
           "112 Matheson St, Healdsburg, CA",
         navigationQuery:
           "Healdsburg Inn on Plaza, 112 Matheson St, Healdsburg, CA",
         priority: "required",
-        notes:
-          "If arriving after 8 PM, call before 2 PM. Checkout is 11 AM.",
         reservationId:
           "2026-09-24::Healdsburg Inn on Plaza",
       },
@@ -57,13 +54,10 @@ function createPacificCoastArrivalDay() {
         id: "the-matheson",
         name: "The Matheson",
         kind: "dinner",
-        timeLabel:
-          "Confirmed · time not yet supplied",
+        timeLabel: "Dinner stop",
         navigationQuery:
           "The Matheson, Healdsburg, CA",
         priority: "required",
-        notes:
-          "Confirmed arrival-night dinner reservation.",
         reservationId:
           "2026-09-24::The Matheson",
       },
@@ -80,7 +74,6 @@ function createPacificCoastArrivalReservations() {
       name: "Healdsburg Inn on Plaza",
       kind: "lodging",
       status: "Confirmed",
-      confirmation: "HIP1017780",
       address:
         "112 Matheson St, Healdsburg, CA",
       notes:
@@ -93,7 +86,7 @@ function createPacificCoastArrivalReservations() {
       kind: "dinner",
       status: "Confirmed",
       notes:
-        "Confirmed reservation. Time not yet supplied.",
+        "Reservation time not yet supplied.",
     },
   ];
 }

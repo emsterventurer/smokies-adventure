@@ -64,8 +64,11 @@ test("builds a canonical Pacific view model with reservations and safe navigatio
   assert.equal(days[0].routeLabel, "SFO → Healdsburg");
   assert.equal(days[0].stops.length, 3);
   assert.equal(
-    days[0].stops[1].reservation.confirmation,
-    "HIP1017780",
+    Object.hasOwn(
+      days[0].stops[1].reservation,
+      "confirmation",
+    ),
+    false,
   );
   assert.equal(
     days[0].stops[2].reservation.status,
@@ -94,8 +97,12 @@ test("renders the canonical Pacific itinerary without Smokies tables", () => {
   assert.match(markup, /Thursday, September 24, 2026/);
   assert.match(markup, /SFO → Healdsburg/);
   assert.match(markup, /Healdsburg Inn on Plaza/);
-  assert.match(markup, /HIP1017780/);
+  assert.match(markup, /Healdsburg King/);
+  assert.match(markup, /check-in after 4 PM/);
+  assert.match(markup, /call before 2 PM/);
+  assert.match(markup, /checkout 11 AM/);
   assert.match(markup, /The Matheson/);
+  assert.match(markup, /Reservation time not yet supplied/);
   assert.doesNotMatch(markup, /Smokies|Club Wyndham|DAY_DASH|STOP_DATA/);
 });
 
