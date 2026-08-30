@@ -25,6 +25,11 @@ function createSharedAdventureSync(options = {}) {
     options.activeAdventureService;
   const cloudProvider =
     options.cloudProvider;
+  const prepareIncomingAdventure =
+    typeof options.prepareIncomingAdventure ===
+    "function"
+      ? options.prepareIncomingAdventure
+      : (adventure) => adventure;
 
   if (
     !isActiveAdventureService(
@@ -97,9 +102,13 @@ function createSharedAdventureSync(options = {}) {
         return null;
       }
 
+      const preparedAdventure =
+        prepareIncomingAdventure(
+          cloudAdventure,
+        );
       const saved =
         activeAdventureService.saveActiveAdventure(
-          cloudAdventure,
+          preparedAdventure,
           {
             pushToCloud: false,
           },
@@ -132,9 +141,13 @@ function createSharedAdventureSync(options = {}) {
             return;
           }
 
-                   const saved =
-            activeAdventureService.saveActiveAdventure(
+          const preparedAdventure =
+            prepareIncomingAdventure(
               cloudAdventure,
+            );
+          const saved =
+            activeAdventureService.saveActiveAdventure(
+              preparedAdventure,
               {
                 pushToCloud: false,
               },

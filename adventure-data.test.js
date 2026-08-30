@@ -157,3 +157,143 @@ test("exports stable schema constants", () => {
   );
   assert.equal(AdventurerDirectory.SCHEMA_VERSION, 1);
 });
+
+test("enriches an empty Pacific Coast shell with the Arrival Day", () => {
+  const shell =
+    AdventureData.createPacificCoastAdventureRecord();
+
+  const result =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      shell,
+    );
+
+  assert.equal(result.enriched, true);
+  assert.equal(
+    result.adventure.itinerary.days[0].id,
+    "2026-09-24",
+  );
+  assert.deepEqual(
+    result.adventure.itinerary.days[0].stops.map(
+      (stop) => stop.id,
+    ),
+    [
+      "sfo-arrival",
+      "healdsburg-inn",
+      "the-matheson",
+    ],
+  );
+  assert.equal(shell.itinerary.days.length, 0);
+
+  const hotelStop =
+    result.adventure.itinerary.days[0].stops[1];
+  const dinnerStop =
+    result.adventure.itinerary.days[0].stops[2];
+  const hotelReservation =
+    result.adventure.reservations.items.find(
+      (reservation) =>
+        reservation.id ===
+        hotelStop.reservationId,
+    );
+
+  assert.equal(hotelStop.duration, undefined);
+  assert.equal(hotelStop.notes, undefined);
+  assert.equal(dinnerStop.notes, undefined);
+  assert.equal(
+    Object.hasOwn(
+      hotelReservation,
+      "confirmation",
+    ),
+    false,
+  );
+  assert.match(
+    hotelReservation.notes,
+    /Healdsburg King.*1 night.*check-in after 4 PM.*call before 2 PM.*checkout 11 AM/,
+  );
+});
+
+test("Pacific Coast enrichment is idempotent and preserves unrelated data", () => {
+  const shell =
+    AdventureData.createPacificCoastAdventureRecord();
+
+  shell.participants = [];
+  shell.memories.entries.push({
+    id: "memory-1",
+    adventureId: shell.id,
+    adventurerIds: [],
+    locationIds: [],
+    activityIds: [],
+    mediaIds: [],
+    tags: [],
+  });
+  shell.preferences.notes.push(
+    "Preserve a leisurely pace.",
+  );
+  shell.reservations.items.push({
+    id: "2026-09-24::The Matheson",
+    date: "2026-09-24",
+    name: "The Matheson",
+    status: "Confirmed",
+    notes: "User-authored dinner note.",
+  });
+
+  const first =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      shell,
+    );
+  const second =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      first.adventure,
+    );
+
+  assert.equal(second.enriched, false);
+  assert.equal(
+    first.adventure.itinerary.days.length,
+    1,
+  );
+  assert.equal(
+    first.adventure.reservations.items.length,
+    2,
+  );
+  assert.equal(
+    first.adventure.reservations.items.find(
+      (reservation) =>
+        reservation.name === "The Matheson",
+    ).notes,
+    "User-authored dinner note.",
+  );
+  assert.deepEqual(
+    first.adventure.memories,
+    shell.memories,
+  );
+  assert.deepEqual(
+    first.adventure.preferences,
+    shell.preferences,
+  );
+  assert.deepEqual(first.adventure.participants, []);
+});
+
+test("does not overwrite a non-empty Pacific Coast itinerary", () => {
+  const adventure =
+    AdventureData.createPacificCoastAdventureRecord();
+  adventure.itinerary.days.push({
+    id: "user-day",
+    date: "2026-09-24",
+    title: "User-authored day",
+  });
+
+  const result =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      adventure,
+    );
+
+  assert.equal(result.enriched, false);
+  assert.equal(result.adventure, adventure);
+  assert.deepEqual(
+    result.adventure.itinerary.days,
+    adventure.itinerary.days,
+  );
+  assert.deepEqual(
+    result.adventure.reservations.items,
+    [],
+  );
+});

@@ -7,6 +7,9 @@ const path = require("node:path");
 const {
   initializeAdventureSwitcher,
 } = require("./adventure/adventure-switcher.js");
+const AdventureItinerary = require(
+  "./adventure/adventure-itinerary.js",
+);
 
 function createElement() {
   const listeners = {};
@@ -31,15 +34,28 @@ function createElement() {
   };
 }
 
-function createHarness(activeAdventureId = "smokies-2026") {
+function createHarness(
+  activeAdventureId = "smokies-2026",
+  activeItineraryDays = [],
+) {
   const adventures = [
     { id: "smokies-2026", title: "Smokies 2026" },
-    { id: "pacific-2027", title: "Pacific Coast 2027" },
+    {
+      id: "pacific-2027",
+      title: "Pacific Coast 2027",
+      itinerary: {
+        days:
+          activeAdventureId === "pacific-2027"
+            ? activeItineraryDays
+            : [],
+      },
+    },
   ];
   const elements = {
     "#adventureSwitcher": createElement(),
     "#activeAdventureTitle": createElement(),
     "#adventureUnavailable": createElement(),
+    "#canonicalAdventureItinerary": createElement(),
   };
   const classes = new Set();
   const selections = [];
@@ -93,6 +109,11 @@ function createHarness(activeAdventureId = "smokies-2026") {
           activeAdventureService
             .setActiveAdventureId(adventureId),
         smokiesAdventureId: "smokies-2026",
+        supportsCanonicalItinerary:
+          (adventure) =>
+            adventure?.itinerary?.days?.some(
+              AdventureItinerary.isSupportedDay,
+            ) === true,
         reload: () => {
           reloads += 1;
         },
@@ -186,6 +207,50 @@ test("preserves the existing Smokies itinerary UI for Smokies", () => {
   assert.equal(
     harness.elements["#adventureUnavailable"].hidden,
     true,
+  );
+});
+
+test("shows canonical itinerary UI for a non-Smokies Adventure with days", () => {
+  const harness = createHarness(
+    "pacific-2027",
+    [
+      {
+        id: "2027-09-24",
+        date: "2027-09-24",
+        title: "Arrival day",
+        summary: "Arrive and settle in.",
+        routeLabel: "Airport → Coast",
+        pace: "Easy",
+        stops: [
+          {
+            id: "arrival",
+            name: "Airport",
+            kind: "arrival",
+            timeLabel: "Time pending",
+            priority: "required",
+            navigationQuery: "Airport",
+          },
+        ],
+      },
+    ],
+  );
+  const result = harness.initialize();
+
+  assert.equal(result.isSmokiesAdventure, false);
+  assert.equal(result.hasCanonicalItinerary, true);
+  assert.equal(
+    harness.classes.has(
+      "canonicalItineraryAdventure",
+    ),
+    true,
+  );
+  assert.equal(
+    harness.elements["#adventureUnavailable"].hidden,
+    true,
+  );
+  assert.equal(
+    harness.elements["#canonicalAdventureItinerary"].hidden,
+    false,
   );
 });
 

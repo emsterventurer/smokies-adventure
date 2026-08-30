@@ -12,6 +12,15 @@ function initializeAdventureSwitcher(options = {}) {
     options.selectActiveAdventure;
   const smokiesAdventureId =
     options.smokiesAdventureId;
+  const supportsCanonicalItinerary =
+    typeof options.supportsCanonicalItinerary ===
+    "function"
+      ? options.supportsCanonicalItinerary
+      : (adventure) =>
+          Array.isArray(
+            adventure?.itinerary?.days,
+          ) &&
+          adventure.itinerary.days.length > 0;
   const reload =
     typeof options.reload === "function"
       ? options.reload
@@ -56,17 +65,38 @@ function initializeAdventureSwitcher(options = {}) {
 
   const isSmokiesAdventure =
     activeAdventureId === smokiesAdventureId;
+  const hasCanonicalItinerary =
+    !isSmokiesAdventure &&
+    supportsCanonicalItinerary(
+      activeAdventure,
+    );
 
   document.body?.classList.toggle(
     "nonSmokiesAdventure",
     !isSmokiesAdventure,
+  );
+  document.body?.classList.toggle(
+    "canonicalItineraryAdventure",
+    hasCanonicalItinerary,
   );
 
   const unavailable =
     document.querySelector("#adventureUnavailable");
 
   if (unavailable) {
-    unavailable.hidden = isSmokiesAdventure;
+    unavailable.hidden =
+      isSmokiesAdventure ||
+      hasCanonicalItinerary;
+  }
+
+  const canonicalItinerary =
+    document.querySelector(
+      "#canonicalAdventureItinerary",
+    );
+
+  if (canonicalItinerary) {
+    canonicalItinerary.hidden =
+      !hasCanonicalItinerary;
   }
 
   switcher.addEventListener("change", () => {
@@ -78,6 +108,7 @@ function initializeAdventureSwitcher(options = {}) {
     adventures,
     activeAdventureId,
     isSmokiesAdventure,
+    hasCanonicalItinerary,
   };
 }
 

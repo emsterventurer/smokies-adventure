@@ -41,6 +41,9 @@ function initializeSharedAdventureSync(
         activeAdventureService,
         cloudProvider:
           CloudAdventureProvider,
+        prepareIncomingAdventure:
+          globalThis.AdventureData
+            ?.prepareBundledAdventureRecord,
       });
 
   const activeAdventure =

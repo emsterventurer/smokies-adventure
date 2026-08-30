@@ -4698,6 +4698,72 @@ button[disabled] {
   display: none !important;
 }
 
+.nonSmokiesAdventure.canonicalItineraryAdventure main > #canonicalAdventureItinerary {
+  display: block !important;
+}
+
+.canonicalAdventureItinerary {
+  padding: 0;
+  overflow: hidden;
+}
+
+.canonicalItineraryHead {
+  padding: 24px;
+  background: linear-gradient(145deg, #f3f8f4, #fffaf0);
+}
+
+.canonicalItineraryHead h3,
+.canonicalItineraryHead h4 {
+  margin: 4px 0;
+}
+
+.canonicalDayChips,
+.canonicalReservation,
+.canonicalStopList {
+  display: grid;
+  gap: 12px;
+}
+
+.canonicalDayChips {
+  grid-template-columns: repeat(auto-fit, minmax(180px, max-content));
+  margin-top: 16px;
+}
+
+.canonicalDayChips span,
+.canonicalPriority {
+  width: fit-content;
+  border-radius: 999px;
+  background: #e4efe6;
+  color: #28583b;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.canonicalStopList {
+  padding: 20px;
+}
+
+.canonicalStopCard {
+  margin: 0;
+}
+
+.canonicalStopBody h4 {
+  margin: 3px 0 8px;
+}
+
+.canonicalReservation {
+  margin: 12px 0;
+  padding: 12px;
+  border-left: 4px solid #b8863b;
+  background: #fff8e9;
+}
+
+.canonicalReservation small,
+.canonicalReservation span {
+  display: block;
+}
+
 .adventureUnavailable {
   text-align: center;
 }

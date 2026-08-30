@@ -127,6 +127,39 @@ test("adds the Pacific Coast shell without replacing stored data", () => {
   );
 });
 
+test("enriches an already stored empty Pacific Coast shell", () => {
+  const storageProvider =
+    AdventureStorage.createMemoryStorage();
+  const adventureStorage =
+    AdventureStorage.createAdventureStorage({
+      storageProvider,
+    });
+  const shell =
+    AdventureData.createPacificCoastAdventureRecord();
+
+  adventureStorage.saveAdventureRecord(shell);
+
+  const startup =
+    AdventureStartup.createAdventureStartup({
+      storageProvider,
+      adventureStorage,
+    });
+
+  startup.initializeAdventure();
+
+  const stored =
+    adventureStorage.loadAdventureRecord(
+      AdventureData.PACIFIC_COAST_ADVENTURE_ID,
+    );
+
+  assert.equal(stored.itinerary.days.length, 1);
+  assert.equal(
+    stored.itinerary.days[0].id,
+    AdventureData.PACIFIC_COAST_ARRIVAL_DAY_ID,
+  );
+  assert.equal(stored.reservations.items.length, 2);
+});
+
 test("migrates legacy adventure data when seeding the first adventure", () => {
   const { startup } = createTestStartup({
     initialEntries: {
