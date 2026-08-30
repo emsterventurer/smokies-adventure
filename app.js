@@ -255,8 +255,36 @@ globalThis.AdventureSwitcher
     smokiesAdventureId:
       globalThis.AdventureData
         ?.SMOKIES_ADVENTURE_ID,
+    supportsCanonicalItinerary:
+      (adventure) =>
+        Array.isArray(
+          adventure?.itinerary?.days,
+        ) &&
+        adventure.itinerary.days.some(
+          (day) =>
+            globalThis.AdventureItinerary
+              ?.isSupportedDay?.(day) === true,
+        ),
     reload: () => window.location.reload(),
   });
+
+const canonicalItineraryHost =
+  document.querySelector(
+    "#canonicalAdventureItinerary",
+  );
+
+if (
+  canonicalItineraryHost &&
+  globalThis.AdventureItinerary
+) {
+  canonicalItineraryHost.innerHTML =
+    globalThis.AdventureItinerary
+      .renderCanonicalItinerary(
+        ADVENTURE_STARTUP_RESULT
+          ?.activeAdventureService
+          ?.getActiveAdventure?.(),
+      );
+}
 if (
   ADVENTURE_STARTUP_RESULT
     ?.activeAdventureService
@@ -446,6 +474,9 @@ function initializeSharedAdventureSync() {
             .activeAdventureService,
         cloudProvider:
           globalThis.CloudAdventureProvider,
+        prepareIncomingAdventure:
+          globalThis.AdventureData
+            ?.prepareBundledAdventureRecord,
       });
 
   SHARED_ADVENTURE_SYNC.subscribe(

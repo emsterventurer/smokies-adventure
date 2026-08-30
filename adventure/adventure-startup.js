@@ -75,8 +75,38 @@ function createAdventureStartup(options = {}) {
         ) {
           adventureStorage.saveAdventureRecord(record);
         }
+
+        const storedRecord =
+          adventureStorage.loadAdventureRecord(
+            record.id,
+          );
+        const preparedRecord =
+          AdventureData.prepareBundledAdventureRecord?.(
+            storedRecord,
+          ) ?? storedRecord;
+
+        if (
+          storedRecord &&
+          preparedRecord !== storedRecord
+        ) {
+          adventureStorage.saveAdventureRecord(
+            preparedRecord,
+          );
+        }
       },
     );
+  }
+
+  function refreshResultAdventure(result) {
+    const activeAdventure =
+      activeAdventureService.getActiveAdventure();
+
+    return activeAdventure
+      ? {
+          ...result,
+          adventure: activeAdventure,
+        }
+      : result;
   }
 
   function hasLegacyAdventureData() {
@@ -103,7 +133,7 @@ function createAdventureStartup(options = {}) {
       !hasLegacyAdventureData()
     ) {
       ensureBundledAdventures();
-      return existing;
+      return refreshResultAdventure(existing);
     }
 
     const migrated =
@@ -123,10 +153,10 @@ function createAdventureStartup(options = {}) {
 
     ensureBundledAdventures();
 
-    return {
+    return refreshResultAdventure({
       status: "migrated",
       adventure: saved,
-    };
+    });
   }
 
   return Object.freeze({
