@@ -19,15 +19,15 @@
     "use strict";
 
     const build=Object.freeze({
-    version:"M4-01",
+    version:"M4-02.1",
     milestone:"Milestone 4",
-    feature:"Adventure Switcher",
+    feature:"Pacific Coast Arrival Day",
     build:"Build 1",
     updated:"August 30, 2026",
-    cache:"adventure-companion-m4-01-build-1",
-    eyebrow:"M4-01 · ADVENTURE SWITCHER",
+    cache:"adventure-companion-m4-02-1-build-1",
+    eyebrow:"M4-02.1 · PACIFIC COAST ARRIVAL DAY",
       description:
-        "Adventure Companion now supports switching between durable Adventures while preserving the complete Smokies experience and safely preparing Pacific Coast 2026 for future planning."
+        "Adventure Companion now adds the first canonical Pacific Coast itinerary day while preserving the complete Smokies experience."
     });
 
     function applyToDocument(doc){
