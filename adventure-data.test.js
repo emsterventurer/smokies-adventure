@@ -158,7 +158,7 @@ test("exports stable schema constants", () => {
   assert.equal(AdventurerDirectory.SCHEMA_VERSION, 1);
 });
 
-test("enriches an empty Pacific Coast shell with the Arrival Day", () => {
+test("enriches an empty Pacific Coast shell with all bundled land days", () => {
   const shell =
     AdventureData.createPacificCoastAdventureRecord();
 
@@ -168,9 +168,15 @@ test("enriches an empty Pacific Coast shell with the Arrival Day", () => {
     );
 
   assert.equal(result.enriched, true);
-  assert.equal(
-    result.adventure.itinerary.days[0].id,
-    "2026-09-24",
+  assert.deepEqual(
+    result.adventure.itinerary.days.map((day) => day.id),
+    [
+      "2026-09-24",
+      "2026-09-25",
+      "2026-09-26",
+      "2026-09-27",
+      "2026-09-28",
+    ],
   );
   assert.deepEqual(
     result.adventure.itinerary.days[0].stops.map(
@@ -248,11 +254,11 @@ test("Pacific Coast enrichment is idempotent and preserves unrelated data", () =
   assert.equal(second.enriched, false);
   assert.equal(
     first.adventure.itinerary.days.length,
-    1,
+    5,
   );
   assert.equal(
     first.adventure.reservations.items.length,
-    2,
+    9,
   );
   assert.equal(
     first.adventure.reservations.items.find(
@@ -272,28 +278,379 @@ test("Pacific Coast enrichment is idempotent and preserves unrelated data", () =
   assert.deepEqual(first.adventure.participants, []);
 });
 
-test("does not overwrite a non-empty Pacific Coast itinerary", () => {
+test("adds missing bundled days without replacing an existing Arrival Day", () => {
   const adventure =
     AdventureData.createPacificCoastAdventureRecord();
-  adventure.itinerary.days.push({
-    id: "user-day",
+  const existingArrival = {
+    id: "2026-09-24",
     date: "2026-09-24",
     title: "User-authored day",
-  });
+    custom: {
+      preserved: true,
+    },
+  };
+  adventure.itinerary.days.push(existingArrival);
 
   const result =
     AdventureData.enrichPacificCoastAdventureRecord(
       adventure,
     );
 
-  assert.equal(result.enriched, false);
-  assert.equal(result.adventure, adventure);
+  assert.equal(result.enriched, true);
   assert.deepEqual(
-    result.adventure.itinerary.days,
-    adventure.itinerary.days,
+    result.adventure.itinerary.days[0],
+    existingArrival,
   );
   assert.deepEqual(
-    result.adventure.reservations.items,
-    [],
+    result.adventure.itinerary.days.map((day) => day.id),
+    [
+      "2026-09-24",
+      "2026-09-25",
+      "2026-09-26",
+      "2026-09-27",
+      "2026-09-28",
+    ],
+  );
+});
+
+test("preserves every existing same-ID Pacific land day", () => {
+  const adventure =
+    AdventureData.createPacificCoastAdventureRecord();
+  const storedDays = [
+    "2026-09-25",
+    "2026-09-26",
+    "2026-09-27",
+    "2026-09-28",
+  ].map((id) => ({
+    id,
+    date: id,
+    title: `Stored ${id}`,
+    marker: { source: "traveler" },
+  }));
+
+  adventure.itinerary.days.push(...storedDays);
+
+  const result =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      adventure,
+    );
+
+  for (const storedDay of storedDays) {
+    assert.deepEqual(
+      result.adventure.itinerary.days.find(
+        (day) => day.id === storedDay.id,
+      ),
+      storedDay,
+    );
+  }
+  assert.deepEqual(
+    result.adventure.itinerary.days.map((day) => day.id),
+    [
+      "2026-09-24",
+      "2026-09-25",
+      "2026-09-26",
+      "2026-09-27",
+      "2026-09-28",
+    ],
+  );
+});
+
+test("adds missing reservations without overwriting stable identities", () => {
+  const adventure =
+    AdventureData.createPacificCoastAdventureRecord();
+  const storedReservation = {
+    id: "2026-09-25::Sea Grill",
+    date: "2026-09-25",
+    name: "Sea Grill",
+    status: "Traveler changed this",
+    notes: "Preserve exactly.",
+  };
+  const legacyIdentityReservation = {
+    date: "2026-09-27",
+    name: "Hallmark Resort Newport",
+    status: "Stored without an explicit ID",
+  };
+  adventure.reservations.items.push(
+    storedReservation,
+    legacyIdentityReservation,
+  );
+
+  const prepared =
+    AdventureData.prepareBundledAdventureRecord(
+      adventure,
+    );
+
+  assert.deepEqual(
+    prepared.reservations.items.find(
+      (item) => item.id === storedReservation.id,
+    ),
+    storedReservation,
+  );
+  assert.deepEqual(
+    prepared.reservations.items.find(
+      (item) =>
+        item.date === legacyIdentityReservation.date &&
+        item.name === legacyIdentityReservation.name,
+    ),
+    legacyIdentityReservation,
+  );
+  assert.equal(
+    prepared.reservations.items.filter(
+      (item) =>
+        item.name === "Hallmark Resort Newport",
+    ).length,
+    1,
+  );
+  assert.ok(
+    prepared.reservations.items.some(
+      (item) =>
+        item.name ===
+        "Holiday Inn Express & Suites Eureka",
+    ),
+  );
+});
+
+test("leaves Smokies and unrelated Adventures unchanged", () => {
+  const smokies =
+    AdventureData.createSmokiesAdventureRecord();
+  const unrelated = {
+    ...AdventureData.createPacificCoastAdventureRecord(),
+    id: "blue-ridge-2027",
+  };
+
+  const smokiesResult =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      smokies,
+    );
+  const unrelatedResult =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      unrelated,
+    );
+
+  assert.equal(smokiesResult.enriched, false);
+  assert.equal(smokiesResult.adventure, smokies);
+  assert.equal(unrelatedResult.enriched, false);
+  assert.equal(unrelatedResult.adventure, unrelated);
+});
+
+test("preserves Pacific route alternatives and planning semantics", () => {
+  const days =
+    AdventureData.createPacificCoastLandDays();
+  const saturday = days.find(
+    (day) => day.id === "2026-09-26",
+  );
+  const monday = days.find(
+    (day) => day.id === "2026-09-28",
+  );
+  const friday = days.find(
+    (day) => day.id === "2026-09-25",
+  );
+  const sunday = days.find(
+    (day) => day.id === "2026-09-27",
+  );
+
+  assert.deepEqual(
+    saturday.routeAlternatives.map(
+      ({ id, preferred }) => ({ id, preferred }),
+    ),
+    [
+      { id: "coast-focused", preferred: true },
+      { id: "big-tree-and-coast", preferred: false },
+    ],
+  );
+  assert.ok(
+    saturday.routeAlternatives[1].stopIds.includes(
+      "big-tree-wayside",
+    ),
+  );
+  assert.equal(
+    saturday.routeAlternatives[0].stopIds.includes(
+      "big-tree-wayside",
+    ),
+    false,
+  );
+
+  assert.match(
+    monday.travelNotes[0],
+    /stop wherever makes the most sense/i,
+  );
+  assert.match(
+    monday.travelNotes.join(" "),
+    /Longview.*Lake Sacajawea.*Nutty Narrows.*Castle Rock/i,
+  );
+  assert.match(
+    monday.travelNotes.join(" "),
+    /somewhere else or skip the break entirely/i,
+  );
+  assert.equal(
+    monday.stops.some((stop) =>
+      /Longview|Castle Rock|Lake Sacajawea|Nutty Narrows/i.test(
+        `${stop.name} ${stop.navigationQuery ?? ""}`,
+      ),
+    ),
+    false,
+  );
+  assert.equal(
+    monday.stops.find(
+      (stop) => stop.id === "chihuly-bridge-of-glass",
+    ).priority,
+    "required",
+  );
+
+  const referencedReservations = [
+    friday.stops.find((stop) => stop.id === "sea-grill")
+      .reservationId,
+    saturday.stops.find(
+      (stop) => stop.id === "spinners-dinner",
+    ).reservationId,
+    sunday.stops.find((stop) => stop.id === "georgies")
+      .reservationId,
+  ];
+  const reservationMap = new Map(
+    AdventureData.createPacificCoastLandReservations().map(
+      (reservation) => [reservation.id, reservation],
+    ),
+  );
+
+  for (const reservationId of referencedReservations) {
+    assert.notEqual(
+      reservationMap.get(reservationId).status,
+      "Confirmed",
+    );
+  }
+});
+
+test("preserves the reviewed Pacific drive durations and intentional gaps", () => {
+  const days = new Map(
+    AdventureData.createPacificCoastLandDays().map(
+      (day) => [day.id, day],
+    ),
+  );
+  const stops = (dayId) =>
+    new Map(
+      days.get(dayId).stops.map((stop) => [stop.id, stop]),
+    );
+
+  assert.deepEqual(
+    [...stops("2026-09-25").values()]
+      .slice(1)
+      .map((stop) => stop.driveFromPrevious),
+    [
+      "55 min",
+      "1 hr 25 min",
+      "30 min",
+      "10 min",
+      "50 min",
+      "27–30 min",
+      "5–10 min",
+    ],
+  );
+
+  const saturday = days.get("2026-09-26");
+  assert.deepEqual(
+    saturday.routeAlternatives[1]
+      .driveFromPreviousByStopId,
+    {
+      "newton-b-drury-scenic-parkway": "1 hr 10 min",
+      "crescent-city": "50 min",
+      "brookings-harris-beach": "30 min",
+      "samuel-h-boardman-viewpoint": "15 min",
+      "pacific-reef-hotel": "45 min",
+    },
+  );
+  assert.equal(
+    saturday.alternativeRouteStops.find(
+      (stop) => stop.id === "big-tree-wayside",
+    ).driveFromPrevious,
+    undefined,
+  );
+
+  const sunday = stops("2026-09-27");
+  assert.equal(
+    sunday.get("face-rock-viewpoint").driveFromPrevious,
+    "1 hr 10–15 min",
+  );
+  assert.equal(
+    sunday.get("face-rock-creamery").driveFromPrevious,
+    undefined,
+  );
+  assert.equal(
+    sunday.get("georgies").driveFromPrevious,
+    undefined,
+  );
+
+  const monday = stops("2026-09-28");
+  assert.equal(
+    monday.get("chihuly-bridge-of-glass").driveFromPrevious,
+    "3 hr 31–57 min DIRECT",
+  );
+  assert.equal(
+    [...monday.values()].some((stop) =>
+      /Longview|Castle Rock|Lake Sacajawea|Nutty Narrows/i.test(
+        `${stop.name} ${stop.navigationQuery ?? ""}`,
+      ),
+    ),
+    false,
+  );
+});
+
+test("additively prepares missing drive metadata on stored Pacific days", () => {
+  const adventure =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      AdventureData.createPacificCoastAdventureRecord(),
+    ).adventure;
+  const saturday = adventure.itinerary.days.find(
+    (day) => day.id === "2026-09-26",
+  );
+  const storedSummary = saturday.summary;
+
+  saturday.stops.forEach((stop) => {
+    delete stop.driveFromPrevious;
+  });
+  saturday.routeAlternatives.forEach((route) => {
+    delete route.driveFromPreviousByStopId;
+  });
+
+  const first =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      adventure,
+    );
+  const preparedSaturday = first.adventure.itinerary.days.find(
+    (day) => day.id === "2026-09-26",
+  );
+  const second =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      first.adventure,
+    );
+
+  assert.equal(first.enriched, true);
+  assert.equal(preparedSaturday.summary, storedSummary);
+  assert.equal(
+    preparedSaturday.stops.find(
+      (stop) => stop.id === "crescent-city",
+    ).driveFromPrevious,
+    "1 hr 40 min",
+  );
+  assert.equal(
+    preparedSaturday.routeAlternatives.find(
+      (route) => route.id === "big-tree-and-coast",
+    ).driveFromPreviousByStopId["crescent-city"],
+    "50 min",
+  );
+  assert.equal(second.enriched, false);
+  assert.equal(second.adventure, first.adventure);
+});
+
+test("bundled Pacific reservations contain no confirmation fields", () => {
+  const reservations = [
+    ...AdventureData.createPacificCoastArrivalReservations(),
+    ...AdventureData.createPacificCoastLandReservations(),
+  ];
+
+  assert.equal(
+    reservations.some((reservation) =>
+      Object.hasOwn(reservation, "confirmation"),
+    ),
+    false,
   );
 });

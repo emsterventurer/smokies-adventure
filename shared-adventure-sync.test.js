@@ -200,7 +200,7 @@ test("prepares an inbound cloud Adventure before saving it locally", async () =>
   );
 });
 
-test("an empty Pacific cloud subscription cannot replace the bundled Arrival Day", async () => {
+test("an empty Pacific cloud subscription receives all bundled land days", async () => {
   const provider = createCloudProvider();
   const activeAdventureService =
     createActiveAdventureService();
@@ -224,9 +224,55 @@ test("an empty Pacific cloud subscription cannot replace the bundled Arrival Day
   const saved =
     activeAdventureService.getActiveAdventure();
 
-  assert.equal(
-    saved.itinerary.days[0].id,
-    AdventureData.PACIFIC_COAST_ARRIVAL_DAY_ID,
+  assert.deepEqual(
+    saved.itinerary.days.map((day) => day.id),
+    [
+      AdventureData.PACIFIC_COAST_ARRIVAL_DAY_ID,
+      ...AdventureData.PACIFIC_COAST_LAND_DAY_IDS,
+    ],
   );
-  assert.equal(saved.reservations.items.length, 2);
+  assert.equal(saved.reservations.items.length, 9);
+});
+
+test("an inbound Pacific Arrival Day is preserved while missing land days are prepared", async () => {
+  const provider = createCloudProvider();
+  const activeAdventureService =
+    createActiveAdventureService();
+  const cloudAdventure =
+    AdventureData.createPacificCoastAdventureRecord();
+  const storedArrival = {
+    ...AdventureData.createPacificCoastArrivalDay(),
+    title: "Cloud-authored Arrival Day",
+    custom: { preserved: true },
+  };
+  cloudAdventure.itinerary.days.push(storedArrival);
+
+  await provider.saveAdventureRecord(cloudAdventure);
+
+  const sync =
+    SharedAdventureSync.createSharedAdventureSync({
+      activeAdventureService,
+      cloudProvider: provider,
+      prepareIncomingAdventure:
+        AdventureData.prepareBundledAdventureRecord,
+    });
+
+  await sync.pullAdventure(
+    AdventureData.PACIFIC_COAST_ADVENTURE_ID,
+  );
+
+  const saved =
+    activeAdventureService.getActiveAdventure();
+
+  assert.deepEqual(
+    saved.itinerary.days[0],
+    storedArrival,
+  );
+  assert.deepEqual(
+    saved.itinerary.days.map((day) => day.id),
+    [
+      AdventureData.PACIFIC_COAST_ARRIVAL_DAY_ID,
+      ...AdventureData.PACIFIC_COAST_LAND_DAY_IDS,
+    ],
+  );
 });
