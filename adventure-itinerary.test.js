@@ -59,31 +59,36 @@ test("builds a canonical Pacific view model with reservations and safe navigatio
     AdventureItinerary.createItineraryViewModel(
       createArrivalAdventure(),
     );
+  const arrivalDay = days.find(
+    (day) =>
+      day.id ===
+      AdventureData.PACIFIC_COAST_ARRIVAL_DAY_ID,
+  );
 
-  assert.equal(days.length, 1);
-  assert.equal(days[0].routeLabel, "SFO → Healdsburg");
-  assert.equal(days[0].stops.length, 3);
+  assert.ok(arrivalDay);
+  assert.equal(arrivalDay.routeLabel, "SFO → Healdsburg");
+  assert.equal(arrivalDay.stops.length, 3);
   assert.equal(
     Object.hasOwn(
-      days[0].stops[1].reservation,
+      arrivalDay.stops[1].reservation,
       "confirmation",
     ),
     false,
   );
   assert.equal(
-    days[0].stops[2].reservation.status,
+    arrivalDay.stops[2].reservation.status,
     "Confirmed",
   );
   assert.equal(
-    days[0].stops[0].navigation.googleMaps,
+    arrivalDay.stops[0].navigation.googleMaps,
     "https://www.google.com/maps/search/?api=1&query=San%20Francisco%20International%20Airport%2C%20San%20Francisco%2C%20CA",
   );
   assert.equal(
-    days[0].stops[0].navigation.waze,
+    arrivalDay.stops[0].navigation.waze,
     "https://www.waze.com/ul?q=San%20Francisco%20International%20Airport%2C%20San%20Francisco%2C%20CA&navigate=yes",
   );
   assert.match(
-    days[0].stops[0].navigation.nextStop,
+    arrivalDay.stops[0].navigation.nextStop,
     /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1&origin=/,
   );
 });

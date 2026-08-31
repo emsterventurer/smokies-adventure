@@ -127,7 +127,7 @@ test("adds the Pacific Coast shell without replacing stored data", () => {
   );
 });
 
-test("enriches an already stored empty Pacific Coast shell", () => {
+test("enriches an already stored empty Pacific Coast shell with all bundled days", () => {
   const storageProvider =
     AdventureStorage.createMemoryStorage();
   const adventureStorage =
@@ -152,12 +152,56 @@ test("enriches an already stored empty Pacific Coast shell", () => {
       AdventureData.PACIFIC_COAST_ADVENTURE_ID,
     );
 
-  assert.equal(stored.itinerary.days.length, 1);
-  assert.equal(
-    stored.itinerary.days[0].id,
-    AdventureData.PACIFIC_COAST_ARRIVAL_DAY_ID,
+  assert.deepEqual(
+    stored.itinerary.days.map((day) => day.id),
+    [
+      AdventureData.PACIFIC_COAST_ARRIVAL_DAY_ID,
+      ...AdventureData.PACIFIC_COAST_LAND_DAY_IDS,
+    ],
   );
-  assert.equal(stored.reservations.items.length, 2);
+  assert.equal(stored.reservations.items.length, 9);
+});
+
+test("startup adds missing land days to a production-style Pacific record", () => {
+  const storageProvider =
+    AdventureStorage.createMemoryStorage();
+  const adventureStorage =
+    AdventureStorage.createAdventureStorage({
+      storageProvider,
+    });
+  const shell =
+    AdventureData.createPacificCoastAdventureRecord();
+  const arrivalDay =
+    AdventureData.createPacificCoastArrivalDay();
+  arrivalDay.title = "Stored production Arrival Day";
+  shell.itinerary.days.push(arrivalDay);
+
+  adventureStorage.saveAdventureRecord(shell);
+
+  const startup =
+    AdventureStartup.createAdventureStartup({
+      storageProvider,
+      adventureStorage,
+    });
+
+  startup.initializeAdventure();
+
+  const stored =
+    adventureStorage.loadAdventureRecord(
+      AdventureData.PACIFIC_COAST_ADVENTURE_ID,
+    );
+
+  assert.deepEqual(
+    stored.itinerary.days.map((day) => day.id),
+    [
+      AdventureData.PACIFIC_COAST_ARRIVAL_DAY_ID,
+      ...AdventureData.PACIFIC_COAST_LAND_DAY_IDS,
+    ],
+  );
+  assert.equal(
+    stored.itinerary.days[0].title,
+    "Stored production Arrival Day",
+  );
 });
 
 test("migrates legacy adventure data when seeding the first adventure", () => {
