@@ -2895,7 +2895,7 @@ async function setupWelcome() {
         "Choose your name to continue";
     } else {
       enterButton.textContent =
-        "Enter our adventure";
+        "Enter Adventure Companion";
     }
   }
 
