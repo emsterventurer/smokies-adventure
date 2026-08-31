@@ -126,6 +126,7 @@ function createPacificCoastLandDays() {
           navigationQuery:
             "Nelson Family Vineyards, Ukiah, CA",
           priority: "planned",
+          driveFromPrevious: "55 min",
         },
         {
           id: "avenue-cafe-miranda",
@@ -136,6 +137,7 @@ function createPacificCoastLandDays() {
           navigationQuery:
             "Avenue Cafe, Miranda, CA",
           priority: "planned",
+          driveFromPrevious: "1 hr 25 min",
         },
         {
           id: "humboldt-redwoods-visitor-center",
@@ -146,6 +148,7 @@ function createPacificCoastLandDays() {
           navigationQuery:
             "Humboldt Redwoods State Park Visitor Center, Weott, CA",
           priority: "planned",
+          driveFromPrevious: "30 min",
           notes:
             "Easy-access redwood context; no hiking is assumed.",
         },
@@ -158,6 +161,7 @@ function createPacificCoastLandDays() {
           navigationQuery:
             "Founders Grove, Dyerville Loop Road, Weott, CA",
           priority: "planned",
+          driveFromPrevious: "10 min",
           notes:
             "Keep this a short, easy redwood experience; no strenuous walking.",
         },
@@ -170,6 +174,7 @@ function createPacificCoastLandDays() {
           navigationQuery:
             "Main Street, Ferndale, CA",
           priority: "planned",
+          driveFromPrevious: "50 min",
           notes:
             "Browse Victorian Main Street, shops, and galleries; leave around 5:30 PM.",
         },
@@ -183,6 +188,7 @@ function createPacificCoastLandDays() {
           navigationQuery:
             "Holiday Inn Express & Suites Eureka, 815 W Wabash Ave, Eureka, CA",
           priority: "required",
+          driveFromPrevious: "27–30 min",
           reservationId:
             "2026-09-25::Holiday Inn Express & Suites Eureka",
         },
@@ -193,6 +199,7 @@ function createPacificCoastLandDays() {
           timeLabel: "Target about 7:00 PM",
           navigationQuery: "Sea Grill, Eureka, CA",
           priority: "target",
+          driveFromPrevious: "5–10 min",
           reservationId: "2026-09-25::Sea Grill",
         },
       ],
@@ -222,6 +229,13 @@ function createPacificCoastLandDays() {
           id: "big-tree-and-coast",
           label: "Option B — Big Tree + Coast",
           preferred: false,
+          driveFromPreviousByStopId: {
+            "newton-b-drury-scenic-parkway": "1 hr 10 min",
+            "crescent-city": "50 min",
+            "brookings-harris-beach": "30 min",
+            "samuel-h-boardman-viewpoint": "15 min",
+            "pacific-reef-hotel": "45 min",
+          },
           stopIds: [
             "holiday-inn-express-eureka-departure",
             "newton-b-drury-scenic-parkway",
@@ -275,6 +289,7 @@ function createPacificCoastLandDays() {
           duration: "Allow 1–1.5 hours",
           navigationQuery: "Crescent City Harbor, Crescent City, CA",
           priority: "planned",
+          driveFromPrevious: "1 hr 40 min",
           notes:
             "Lunch, waterfront or harbor time, and a natural bathroom/stretch break.",
         },
@@ -286,6 +301,7 @@ function createPacificCoastLandDays() {
           navigationQuery:
             "Harris Beach State Park, Brookings, OR",
           priority: "planned",
+          driveFromPrevious: "30 min",
           notes:
             "Keep this short and easy-access; no hiking is assumed.",
         },
@@ -297,6 +313,7 @@ function createPacificCoastLandDays() {
           navigationQuery:
             "Samuel H Boardman State Scenic Corridor, Brookings, OR",
           priority: "planned",
+          driveFromPrevious: "15 min",
           notes:
             "Choose one or two easy-access roadside viewpoints only; no hiking.",
         },
@@ -309,6 +326,7 @@ function createPacificCoastLandDays() {
           navigationQuery:
             "Pacific Reef Hotel, 29362 Ellensburg Hwy 101, Gold Beach, OR",
           priority: "required",
+          driveFromPrevious: "45–60 min",
           reservationId:
             "2026-09-26::Pacific Reef Hotel & Light Show",
         },
@@ -353,6 +371,7 @@ function createPacificCoastLandDays() {
           navigationQuery:
             "Face Rock State Scenic Viewpoint, Bandon, OR",
           priority: "planned",
+          driveFromPrevious: "1 hr 10–15 min",
           notes: "Short, easy scenic viewpoint; no hike.",
         },
         {
@@ -363,6 +382,7 @@ function createPacificCoastLandDays() {
           duration: "Plan to leave Bandon around 1:50 PM",
           navigationQuery: "Old Town Bandon, Bandon, OR",
           priority: "flexible",
+          driveFromPrevious: "10 min",
           notes:
             "Choose lunch during the day. Tony's Crab Shack and Bandon Fish Market are casual possibilities, not reservations.",
         },
@@ -382,6 +402,7 @@ function createPacificCoastLandDays() {
           duration: "Allow about 55 minutes; target departure around 4:15 PM",
           navigationQuery: "Historic Old Town Florence, Florence, OR",
           priority: "planned",
+          driveFromPrevious: "1 hr 30 min",
           notes:
             "Shops, galleries, riverfront, and optional coffee. The departure target protects a relaxed Newport arrival.",
         },
@@ -395,6 +416,7 @@ function createPacificCoastLandDays() {
           navigationQuery:
             "Hallmark Resort Newport, 744 SW Elizabeth St, Newport, OR",
           priority: "required",
+          driveFromPrevious: "1 hr 15–30 min",
           reservationId:
             "2026-09-27::Hallmark Resort Newport",
         },
@@ -441,6 +463,7 @@ function createPacificCoastLandDays() {
           duration: "Experience about 1 hour 30–35 minutes; lunch about 45 minutes",
           navigationQuery: "Tillamook Creamery, Tillamook, OR",
           priority: "planned",
+          driveFromPrevious: "1 hr 32–37 min",
           notes: "Target departure around 1:00 PM.",
         },
         {
@@ -451,6 +474,7 @@ function createPacificCoastLandDays() {
           duration: "Allow 45–60 minutes",
           navigationQuery: "Chihuly Bridge of Glass, Tacoma, WA",
           priority: "required",
+          driveFromPrevious: "3 hr 31–57 min DIRECT",
           notes:
             "Must protect this experience when adjusting the day. Museum admission is not required for the outdoor bridge.",
         },
@@ -462,6 +486,7 @@ function createPacificCoastLandDays() {
           navigationQuery:
             "Embassy Suites by Hilton Seattle Tacoma International Airport, Tukwila, WA",
           priority: "required",
+          driveFromPrevious: "30–45 min",
           reservationId:
             "2026-09-28::Embassy Suites Seattle Airport",
           notes:
@@ -547,6 +572,102 @@ function reservationIdFor(reservation) {
   );
 }
 
+function addMissingPacificDriveMetadata(
+  existingDay,
+  bundledDay,
+) {
+  let enriched = false;
+  const addStopDurations = (existingStops, bundledStops) => {
+    if (!Array.isArray(existingStops)) {
+      return existingStops;
+    }
+
+    const bundledStopMap = new Map(
+      (Array.isArray(bundledStops) ? bundledStops : [])
+        .map((stop) => [stop?.id, stop]),
+    );
+
+    return existingStops.map((stop) => {
+      const bundledStop = bundledStopMap.get(stop?.id);
+
+      if (
+        Object.hasOwn(stop || {}, "driveFromPrevious") ||
+        typeof bundledStop?.driveFromPrevious !== "string"
+      ) {
+        return stop;
+      }
+
+      enriched = true;
+      return {
+        ...stop,
+        driveFromPrevious: bundledStop.driveFromPrevious,
+      };
+    });
+  };
+  const bundledRouteMap = new Map(
+    (Array.isArray(bundledDay?.routeAlternatives)
+      ? bundledDay.routeAlternatives
+      : []).map((route) => [route?.id, route]),
+  );
+  const routeAlternatives = Array.isArray(
+    existingDay?.routeAlternatives,
+  )
+    ? existingDay.routeAlternatives.map((route) => {
+        const bundledOverrides = bundledRouteMap.get(route?.id)
+          ?.driveFromPreviousByStopId;
+
+        if (
+          !bundledOverrides ||
+          typeof bundledOverrides !== "object"
+        ) {
+          return route;
+        }
+
+        const existingOverrides =
+          route.driveFromPreviousByStopId &&
+          typeof route.driveFromPreviousByStopId === "object"
+            ? route.driveFromPreviousByStopId
+            : {};
+        const missingOverrides = Object.fromEntries(
+          Object.entries(bundledOverrides).filter(
+            ([stopId]) =>
+              !Object.hasOwn(existingOverrides, stopId),
+          ),
+        );
+
+        if (!Object.keys(missingOverrides).length) {
+          return route;
+        }
+
+        enriched = true;
+        return {
+          ...route,
+          driveFromPreviousByStopId: {
+            ...existingOverrides,
+            ...missingOverrides,
+          },
+        };
+      })
+    : existingDay?.routeAlternatives;
+  const day = {
+    ...existingDay,
+    stops: addStopDurations(
+      existingDay?.stops,
+      bundledDay?.stops,
+    ),
+    alternativeRouteStops: addStopDurations(
+      existingDay?.alternativeRouteStops,
+      bundledDay?.alternativeRouteStops,
+    ),
+    routeAlternatives,
+  };
+
+  return {
+    day: enriched ? day : existingDay,
+    enriched,
+  };
+}
+
 function enrichPacificCoastAdventureRecord(record) {
   if (
     !record ||
@@ -575,12 +696,29 @@ function enrichPacificCoastAdventureRecord(record) {
   const existingDayMap = new Map(
     existingDays.map((day) => [String(day?.id ?? ""), day]),
   );
+  let driveMetadataEnriched = false;
+  const preparedExistingDayMap = new Map(
+    canonicalBundledDays.map((bundledDay) => {
+      const existingDay = existingDayMap.get(bundledDay.id);
+
+      if (!existingDay) {
+        return [bundledDay.id, null];
+      }
+
+      const prepared = addMissingPacificDriveMetadata(
+        existingDay,
+        bundledDay,
+      );
+      driveMetadataEnriched ||= prepared.enriched;
+      return [bundledDay.id, prepared.day];
+    }),
+  );
   const bundledDays = canonicalBundledDays.filter(
     (day) => !existingDayIds.has(day.id),
   );
   const mergedDays = [
     ...canonicalBundledDays.map(
-      (day) => existingDayMap.get(day.id) || day,
+      (day) => preparedExistingDayMap.get(day.id) || day,
     ),
     ...existingDays.filter(
       (day) => !bundledDayIds.has(String(day?.id ?? "")),
@@ -605,7 +743,11 @@ function enrichPacificCoastAdventureRecord(record) {
         ),
     );
 
-  if (!bundledDays.length && !bundledReservations.length) {
+  if (
+    !bundledDays.length &&
+    !bundledReservations.length &&
+    !driveMetadataEnriched
+  ) {
     return {
       adventure: record,
       enriched: false,

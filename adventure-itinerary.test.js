@@ -2,6 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
 
 const AdventureData = require(
   "./adventure/adventure-data.js",
@@ -23,6 +24,24 @@ function createArrivalAdventure() {
   return AdventureData
     .enrichPacificCoastAdventureRecord(shell)
     .adventure;
+}
+
+function createStoredAdventureWithoutDriveMetadata() {
+  const adventure = createArrivalAdventure();
+
+  adventure.itinerary.days.forEach((day) => {
+    day.stops?.forEach((stop) => {
+      delete stop.driveFromPrevious;
+    });
+    day.alternativeRouteStops?.forEach((stop) => {
+      delete stop.driveFromPrevious;
+    });
+    day.routeAlternatives?.forEach((route) => {
+      delete route.driveFromPreviousByStopId;
+    });
+  });
+
+  return adventure;
 }
 
 test("September 24 survives Adventure normalization and storage", () => {
@@ -90,6 +109,775 @@ test("builds a canonical Pacific view model with reservations and safe navigatio
   assert.match(
     arrivalDay.stops[0].navigation.nextStop,
     /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1&origin=/,
+  );
+});
+
+test("keeps all Pacific land days supported and resolves compact Saturday route alternatives", () => {
+  const adventure = createArrivalAdventure();
+  const days =
+    AdventureItinerary.createItineraryViewModel(
+      adventure,
+    );
+  const saturday = days.find(
+    (day) => day.id === "2026-09-26",
+  );
+
+  assert.deepEqual(
+    days.map((day) => day.id),
+    [
+      "2026-09-24",
+      "2026-09-25",
+      "2026-09-26",
+      "2026-09-27",
+      "2026-09-28",
+    ],
+  );
+  assert.equal(
+    adventure.itinerary.days.every(
+      AdventureItinerary.isSupportedDay,
+    ),
+    true,
+  );
+  assert.equal(saturday.routeAlternatives.length, 2);
+  assert.equal(saturday.selectedRouteId, "coast-focused");
+  assert.deepEqual(
+    saturday.routeAlternatives.map(
+      ({ id, preferred }) => ({ id, preferred }),
+    ),
+    [
+      { id: "coast-focused", preferred: true },
+      { id: "big-tree-and-coast", preferred: false },
+    ],
+  );
+  assert.deepEqual(
+    saturday.routeAlternatives[0].stops.map(
+      (stop) => stop.id,
+    ),
+    [
+      "holiday-inn-express-eureka-departure",
+      "crescent-city",
+      "brookings-harris-beach",
+      "samuel-h-boardman-viewpoint",
+      "pacific-reef-hotel",
+    ],
+  );
+  assert.deepEqual(
+    saturday.routeAlternatives[1].stops.map(
+      (stop) => stop.id,
+    ),
+    [
+      "holiday-inn-express-eureka-departure",
+      "newton-b-drury-scenic-parkway",
+      "big-tree-wayside",
+      "crescent-city",
+      "brookings-harris-beach",
+      "samuel-h-boardman-viewpoint",
+      "pacific-reef-hotel",
+    ],
+  );
+  assert.equal(
+    saturday.stops.some((stop) =>
+      [
+        "newton-b-drury-scenic-parkway",
+        "big-tree-wayside",
+      ].includes(stop.id),
+    ),
+    false,
+  );
+});
+
+test("route alternatives omit malformed descriptors and unknown stops without breaking the day", () => {
+  const saturday =
+    AdventureData.createPacificCoastLandDays().find(
+      (day) => day.id === "2026-09-26",
+    );
+  saturday.routeAlternatives = [
+    null,
+    { id: "missing-label", stopIds: [] },
+    {
+      id: "partially-known",
+      label: "Partially known",
+      preferred: true,
+      stopIds: [
+        "crescent-city",
+        "unknown-stop",
+        "big-tree-wayside",
+      ],
+    },
+    {
+      id: "all-unknown",
+      label: "All unknown",
+      stopIds: ["unknown-stop"],
+    },
+  ];
+
+  assert.equal(
+    AdventureItinerary.isSupportedDay(saturday),
+    true,
+  );
+  assert.deepEqual(
+    AdventureItinerary.createRouteAlternatives(
+      saturday,
+    ).map((route) => ({
+      id: route.id,
+      stops: route.stops.map((stop) => stop.id),
+    })),
+    [
+      {
+        id: "partially-known",
+        stops: ["crescent-city", "big-tree-wayside"],
+      },
+    ],
+  );
+});
+
+test("renders and operates the five-day Pacific Adventure Trail without mutating canonical data", () => {
+  const adventure = createArrivalAdventure();
+  const original = structuredClone(adventure);
+  const listeners = {};
+  const host = {
+    innerHTML:
+      AdventureItinerary.renderCanonicalItinerary(adventure),
+    addEventListener(name, listener) {
+      listeners[name] = listener;
+    },
+    contains() {
+      return true;
+    },
+  };
+
+  assert.match(host.innerHTML, /THE JOURNEY AHEAD/);
+  assert.match(host.innerHTML, /Our Adventure Trail/);
+  assert.equal(
+    (host.innerHTML.match(/data-canonical-day-id=/g) || []).length,
+    5,
+  );
+  assert.match(
+    host.innerHTML,
+    /Day 1[\s\S]*Thu[\s\S]*Sep 24[\s\S]*Day 2[\s\S]*Fri[\s\S]*Sep 25[\s\S]*Day 3[\s\S]*Sat[\s\S]*Sep 26[\s\S]*Day 4[\s\S]*Sun[\s\S]*Sep 27[\s\S]*Day 5[\s\S]*Mon[\s\S]*Sep 28/,
+  );
+  assert.match(
+    host.innerHTML,
+    /class="trailStop stone-1 active"[\s\S]*data-canonical-day-id="2026-09-24"[\s\S]*aria-pressed="true"/,
+  );
+  assert.match(host.innerHTML, /Arrival in Healdsburg/);
+
+  const state =
+    AdventureItinerary.initializeCanonicalItineraryInteractions(
+      host,
+      adventure,
+    );
+  const saturdayButton = {
+    dataset: { canonicalDayId: "2026-09-26" },
+    closest(selector) {
+      return selector === "[data-canonical-day-id]"
+        ? this
+        : null;
+    },
+  };
+  listeners.click({ target: saturdayButton });
+
+  assert.equal(state.selectedDayId, "2026-09-26");
+  assert.match(host.innerHTML, /Saturday, September 26, 2026/);
+  assert.match(host.innerHTML, /Option A — Coast-focused/);
+  assert.match(host.innerHTML, /Option B — Big Tree \+ Coast/);
+  assert.doesNotMatch(
+    host.innerHTML.match(
+      /<section class="canonicalItineraryDay">[\s\S]*$/,
+    )?.[0] || "",
+    /Arrival in Healdsburg/,
+  );
+  assert.deepEqual(adventure, original);
+});
+
+test("app Pacific Daily Adventure integration renders prepared stored Saturday drive labels", () => {
+  const activeAdventure =
+    AdventureData.prepareBundledAdventureRecord(
+      createStoredAdventureWithoutDriveMetadata(),
+    );
+  const markup =
+    AdventureItinerary.renderPacificDailyAdventure(
+      activeAdventure,
+      { selectedDayId: "2026-09-26" },
+    );
+  const appSource = fs.readFileSync(
+    require.resolve("./app.js"),
+    "utf8",
+  );
+
+  assert.match(
+    appSource,
+    /renderPacificDailyAdventure\(\s*ACTIVE_ADVENTURE/,
+  );
+  assert.match(
+    markup,
+    /Holiday Inn Express &amp; Suites Eureka[\s\S]*Next drive · ~1 hr 40 min →/,
+  );
+  assert.match(
+    markup,
+    /Crescent City[\s\S]*Next drive · ~30 min →/,
+  );
+});
+
+test("renders Saturday alternatives as an interactive single-route selector", () => {
+  const markup =
+    AdventureItinerary.renderCanonicalItinerary(
+      createArrivalAdventure(),
+      { selectedDayId: "2026-09-26" },
+    );
+  const alternatives = markup.match(
+    /<section class="canonicalRouteAlternatives"[\s\S]*?<\/section>/,
+  )?.[0];
+
+  assert.ok(alternatives);
+  assert.match(alternatives, /Choose one route for this day/);
+  assert.match(
+    alternatives,
+    /alternate versions, not one combined route/i,
+  );
+  assert.match(alternatives, /Option A — Coast-focused/);
+  assert.match(alternatives, /Preferred/);
+  assert.match(alternatives, /Option B — Big Tree \+ Coast/);
+  assert.match(alternatives, /data-route-option="coast-focused"/);
+  assert.match(alternatives, /data-route-option="big-tree-and-coast"/);
+  assert.match(
+    alternatives,
+    /data-route-option="coast-focused"[\s\S]*?aria-pressed="true"/,
+  );
+  assert.match(
+    alternatives,
+    /data-route-option="big-tree-and-coast"[\s\S]*?aria-pressed="false"/,
+  );
+  assert.doesNotMatch(alternatives, /<ol>|canonicalStopCard/);
+});
+
+test("switches Saturday stop cards without mutating canonical data", () => {
+  const adventure = createArrivalAdventure();
+  const original = structuredClone(adventure);
+  const listeners = {};
+  const host = {
+    innerHTML:
+      AdventureItinerary.renderCanonicalItinerary(
+        adventure,
+      ),
+    addEventListener(name, listener) {
+      listeners[name] = listener;
+    },
+    contains() {
+      return true;
+    },
+  };
+  const state =
+    AdventureItinerary.initializeCanonicalItineraryInteractions(
+      host,
+      adventure,
+    );
+  const choose = (routeOption) => {
+    const button = {
+      dataset: {
+        dayId: "2026-09-26",
+        routeOption,
+      },
+      closest(selector) {
+        return selector === "[data-route-option]"
+          ? this
+          : null;
+      },
+    };
+    listeners.click({ target: button });
+  };
+  const chooseDay = (canonicalDayId) => {
+    const button = {
+      dataset: { canonicalDayId },
+      closest(selector) {
+        return selector === "[data-canonical-day-id]"
+          ? this
+          : null;
+      },
+    };
+    listeners.click({ target: button });
+  };
+
+  assert.deepEqual(state.routeSelections, {});
+  chooseDay("2026-09-26");
+  assert.equal(state.selectedDayId, "2026-09-26");
+  choose("big-tree-and-coast");
+  assert.equal(
+    state.routeSelections["2026-09-26"],
+    "big-tree-and-coast",
+  );
+  assert.match(
+    host.innerHTML,
+    /Newton B\. Drury Scenic Parkway[\s\S]*Big Tree Wayside[\s\S]*Crescent City/,
+  );
+  assert.match(host.innerHTML, /Next drive: ~1 hr 10 min/);
+  assert.match(host.innerHTML, /Next drive: ~50 min/);
+  assert.match(
+    host.innerHTML,
+    /class="nextRoute"[^>]*>Next drive · ~1 hr 10 min →<\/a>/,
+  );
+  assert.match(
+    host.innerHTML,
+    /class="nextRoute"[^>]*>Next drive · ~50 min →<\/a>/,
+  );
+  assert.doesNotMatch(host.innerHTML, /Next drive: ~1 hr 40 min/);
+
+  choose("coast-focused");
+  assert.equal(
+    state.routeSelections["2026-09-26"],
+    "coast-focused",
+  );
+  const selectedSaturday =
+    AdventureItinerary.createItineraryViewModel(
+      adventure,
+      { routeSelections: state.routeSelections },
+    ).find((day) => day.id === "2026-09-26");
+  assert.equal(
+    selectedSaturday.stops.some((stop) =>
+      /Newton B\. Drury|Big Tree Wayside/.test(stop.name),
+    ),
+    false,
+  );
+  assert.match(host.innerHTML, /Next drive: ~1 hr 40 min/);
+  assert.match(host.innerHTML, /Next drive: ~45–60 min/);
+  assert.match(
+    host.innerHTML,
+    /class="nextRoute"[^>]*>Next drive · ~1 hr 40 min →<\/a>/,
+  );
+  assert.match(
+    host.innerHTML,
+    /class="nextRoute"[^>]*>Next drive · ~45–60 min →<\/a>/,
+  );
+  assert.doesNotMatch(host.innerHTML, /Next drive: ~1 hr 10 min/);
+  assert.deepEqual(adventure, original);
+});
+
+test("renders Monday travel notes as non-navigation day guidance", () => {
+  const adventure = createArrivalAdventure();
+  const monday = adventure.itinerary.days.find(
+    (day) => day.id === "2026-09-28",
+  );
+  const markup =
+    AdventureItinerary.renderCanonicalItinerary(
+      adventure,
+      { selectedDayId: "2026-09-28" },
+    );
+  const guidance = markup.match(
+    /<aside class="canonicalTravelGuidance"[\s\S]*?<\/aside>/,
+  )?.[0];
+
+  assert.ok(guidance);
+  assert.match(guidance, /Flexible travel guidance/);
+  assert.match(
+    guidance,
+    /stop wherever makes the most sense/i,
+  );
+  assert.match(
+    guidance,
+    /Longview.*Lake Sacajawea.*Nutty Narrows.*Castle Rock/i,
+  );
+  assert.match(
+    guidance,
+    /somewhere else or skip the break entirely/i,
+  );
+  assert.doesNotMatch(
+    guidance,
+    /href=|maps|waze|nextRoute|Next stop/i,
+  );
+  assert.equal(
+    monday.stops.some((stop) =>
+      /Longview|Castle Rock|Lake Sacajawea|Nutty Narrows/i.test(
+        `${stop.name} ${stop.navigationQuery ?? ""}`,
+      ),
+    ),
+    false,
+  );
+});
+
+test("renders Pacific reservations from canonical records without public confirmations", () => {
+  const adventure = createArrivalAdventure();
+  const markup =
+    AdventureItinerary.renderCanonicalReservations(
+      adventure,
+    );
+
+  assert.match(markup, /Healdsburg Inn on Plaza/);
+  assert.match(markup, /Holiday Inn Express &amp; Suites Eureka/);
+  assert.match(markup, /Pacific Reef Hotel &amp; Light Show/);
+  assert.match(markup, /Hallmark Resort Newport/);
+  assert.match(markup, /Embassy Suites Seattle Airport/);
+  assert.match(markup, /The Matheson/);
+  assert.match(markup, /Sea Grill/);
+  assert.match(markup, /Spinner&#039;s Seafood/);
+  assert.match(markup, /Georgie&#039;s Beachside Grill/);
+  assert.match(markup, /Confirmed/);
+  assert.match(markup, /Preferred target/);
+  assert.doesNotMatch(markup, /Confirmation/i);
+  assert.doesNotMatch(
+    markup,
+    /Club Wyndham|Local Goat|Dollywood|Greenbrier/,
+  );
+});
+
+function routePointIds(segments) {
+  return segments.flatMap((segment, index) =>
+    segment.points
+      .slice(index === 0 ? 0 : 1)
+      .map((point) => point.id),
+  );
+}
+
+test("creates complete ordered Day Maps with a safe segmented fallback", () => {
+  const adventure = createArrivalAdventure();
+  const days =
+    AdventureItinerary.createItineraryViewModel(
+      adventure,
+    );
+  const sourceDays = new Map(
+    adventure.itinerary.days.map((day) => [day.id, day]),
+  );
+
+  for (const day of days) {
+    assert.ok(day.dayMapSegments.length > 0);
+    assert.equal(
+      day.dayMapSegments.every(
+        (segment) => segment.points.length <= 5,
+      ),
+      true,
+    );
+
+    const expectedIds = day.routeAlternatives.length
+      ? day.routeAlternatives.find(
+          (route) => route.preferred,
+        ).stops.map((stop) => stop.id)
+      : sourceDays.get(day.id).stops.map((stop) => stop.id);
+
+    assert.deepEqual(
+      routePointIds(day.dayMapSegments),
+      expectedIds,
+    );
+  }
+
+  const mapActionCount = days.reduce(
+    (count, day) =>
+      count +
+      (AdventureItinerary.renderCanonicalItinerary(
+        adventure,
+        { selectedDayId: day.id },
+      ).match(/Open Day Map/g) || []).length,
+    0,
+  );
+  assert.equal(
+    mapActionCount,
+    7,
+  );
+});
+
+test("Saturday Day Map follows the selected route and Monday excludes break suggestions", () => {
+  const adventure = createArrivalAdventure();
+  const days =
+    AdventureItinerary.createItineraryViewModel(
+      adventure,
+      {
+        routeSelections: {
+          "2026-09-26": "big-tree-and-coast",
+        },
+      },
+    );
+  const saturday = days.find(
+    (day) => day.id === "2026-09-26",
+  );
+  const monday = days.find(
+    (day) => day.id === "2026-09-28",
+  );
+
+  assert.deepEqual(
+    routePointIds(saturday.dayMapSegments),
+    [
+      "holiday-inn-express-eureka-departure",
+      "newton-b-drury-scenic-parkway",
+      "big-tree-wayside",
+      "crescent-city",
+      "brookings-harris-beach",
+      "samuel-h-boardman-viewpoint",
+      "pacific-reef-hotel",
+    ],
+  );
+  assert.doesNotMatch(
+    monday.dayMapSegments
+      .map((segment) => segment.url)
+      .join(" "),
+    /Longview|Castle Rock|Lake Sacajawea|Nutty Narrows/i,
+  );
+});
+
+test("maps canonical destination drive durations onto the preceding stop", () => {
+  const days =
+    AdventureItinerary.createItineraryViewModel(
+      createArrivalAdventure(),
+    );
+  const friday = days.find((day) => day.id === "2026-09-25");
+  const sunday = days.find((day) => day.id === "2026-09-27");
+  const monday = days.find((day) => day.id === "2026-09-28");
+
+  assert.deepEqual(
+    friday.stops.map((stop) => stop.nextDrive),
+    [
+      "55 min",
+      "1 hr 25 min",
+      "30 min",
+      "10 min",
+      "50 min",
+      "27–30 min",
+      "5–10 min",
+      null,
+    ],
+  );
+  assert.equal(
+    sunday.stops.find((stop) => stop.id === "old-town-bandon")
+      .nextDrive,
+    null,
+  );
+  assert.equal(
+    sunday.stops.find((stop) => stop.id === "hallmark-resort-newport")
+      .nextDrive,
+    null,
+  );
+  assert.equal(
+    monday.stops.find((stop) => stop.id === "tillamook-creamery")
+      .nextDrive,
+    "3 hr 31–57 min DIRECT",
+  );
+  assert.equal(monday.stops.at(-1).nextDrive, null);
+
+  const markup = ["2026-09-25", "2026-09-27", "2026-09-28"]
+    .map((selectedDayId) =>
+      AdventureItinerary.renderCanonicalItinerary(
+        createArrivalAdventure(),
+        { selectedDayId },
+      ),
+    )
+    .join("");
+  assert.match(markup, /Next drive: ~27–30 min/);
+  assert.match(markup, /Next drive: ~3 hr 31–57 min DIRECT/);
+  assert.match(
+    markup,
+    /class="nextRoute"[^>]*>Next drive · ~27–30 min →<\/a>/,
+  );
+  assert.match(
+    markup,
+    /class="nextRoute"[^>]*>Next stop →<\/a>/,
+  );
+});
+
+test("Saturday selected routes update stops and reviewed drive durations without mutation", () => {
+  const adventure = createArrivalAdventure();
+  const original = JSON.stringify(adventure);
+  const optionA =
+    AdventureItinerary.createItineraryViewModel(adventure)
+      .find((day) => day.id === "2026-09-26");
+  const optionB =
+    AdventureItinerary.createItineraryViewModel(adventure, {
+      routeSelections: {
+        "2026-09-26": "big-tree-and-coast",
+      },
+    }).find((day) => day.id === "2026-09-26");
+
+  assert.deepEqual(
+    optionA.stops.slice(0, 5).map((stop) => stop.nextDrive),
+    ["1 hr 40 min", "30 min", "15 min", "45–60 min", null],
+  );
+  assert.deepEqual(
+    optionB.stops.slice(0, 7).map((stop) => stop.nextDrive),
+    ["1 hr 10 min", null, "50 min", "30 min", "15 min", "45 min", null],
+  );
+  assert.equal(
+    optionA.stops.some((stop) => stop.id === "big-tree-wayside"),
+    false,
+  );
+  assert.equal(
+    optionB.stops.some((stop) => stop.id === "big-tree-wayside"),
+    true,
+  );
+  assert.equal(JSON.stringify(adventure), original);
+});
+
+test("builds a Pacific trip snapshot from canonical major stops and safe navigation", () => {
+  const adventure = createArrivalAdventure();
+  const snapshot =
+    AdventureItinerary.createTripSnapshotViewModel(
+      adventure,
+    );
+  const markup =
+    AdventureItinerary.renderTripSnapshot(
+      adventure,
+    );
+
+  assert.deepEqual(
+    snapshot.majorStops.map((stop) => stop.id),
+    [
+      "sfo-arrival",
+      "healdsburg-inn",
+      "holiday-inn-express-eureka",
+      "pacific-reef-hotel",
+      "hallmark-resort-newport",
+      "chihuly-bridge-of-glass",
+      "embassy-suites-seattle-airport",
+    ],
+  );
+  assert.match(markup, /September 24, 2026/);
+  assert.match(markup, /September 28, 2026/);
+  assert.match(
+    markup,
+    /San Francisco International Airport.*Healdsburg Inn.*Holiday Inn Express.*Pacific Reef.*Hallmark Resort.*Chihuly Bridge of Glass.*Embassy Suites/s,
+  );
+  assert.match(
+    markup,
+    /Chihuly Bridge of Glass[\s\S]*Required priority/,
+  );
+  assert.deepEqual(
+    routePointIds(snapshot.overallMapSegments),
+    snapshot.majorStops.map((stop) => stop.id),
+  );
+  assert.equal(snapshot.overallMapSegments.length, 2);
+  assert.equal(
+    (markup.match(/Open Overall Trip Map/g) || []).length,
+    2,
+  );
+  assert.match(
+    markup,
+    /https:\/\/www\.google\.com\/maps\/search\/\?api=1&query=/,
+  );
+  assert.match(markup, /https:\/\/www\.waze\.com\/ul\?q=/);
+  assert.match(markup, /waypoints=/);
+  assert.doesNotMatch(markup, /Longview|Castle Rock/);
+  assert.doesNotMatch(markup, /Smokies|Club Wyndham/);
+});
+
+function createNavigationButton(view) {
+  return {
+    dataset: { view },
+    hidden: false,
+    innerHTML: `${view} original`,
+  };
+}
+
+function createNavigationHarness() {
+  const desktop = [
+    "home",
+    "week",
+    "reservations",
+    "memories",
+    "packing",
+    "trip",
+  ].map(createNavigationButton);
+  const mobile = [
+    "home",
+    "week",
+    "packing",
+    "memories",
+    "companion",
+  ].map(createNavigationButton);
+
+  return {
+    desktop,
+    mobile,
+    document: {
+      querySelectorAll(selector) {
+        return selector.startsWith(".desktopSideNav")
+          ? desktop
+          : mobile;
+      },
+    },
+  };
+}
+
+test("configures only the four useful Pacific review destinations", () => {
+  const harness = createNavigationHarness();
+
+  AdventureItinerary.configurePacificReviewNavigation(
+    harness.document,
+    true,
+  );
+
+  assert.deepEqual(
+    harness.desktop
+      .filter((button) => !button.hidden)
+      .map((button) => button.dataset.view),
+    ["home", "week", "reservations", "trip"],
+  );
+  assert.match(harness.desktop[1].innerHTML, /🛣️/);
+  assert.deepEqual(
+    harness.mobile
+      .filter((button) => !button.hidden)
+      .map((button) => button.dataset.view),
+    ["home", "week", "reservations", "trip"],
+  );
+  assert.match(harness.mobile[1].innerHTML, /🛣️/);
+  assert.equal(harness.mobile[4].hidden, true);
+});
+
+test("leaves Smokies navigation unchanged", () => {
+  const harness = createNavigationHarness();
+  const before = JSON.parse(
+    JSON.stringify({
+      desktop: harness.desktop,
+      mobile: harness.mobile,
+    }),
+  );
+
+  AdventureItinerary.configurePacificReviewNavigation(
+    harness.document,
+    false,
+  );
+
+  assert.deepEqual(
+    {
+      desktop: harness.desktop,
+      mobile: harness.mobile,
+    },
+    before,
+  );
+});
+
+test("escapes route-alternative labels, stop notes, and travel guidance", () => {
+  const adventure = createArrivalAdventure();
+  const saturday = adventure.itinerary.days.find(
+    (day) => day.id === "2026-09-26",
+  );
+  const monday = adventure.itinerary.days.find(
+    (day) => day.id === "2026-09-28",
+  );
+
+  saturday.routeAlternatives[0].label =
+    '<script data-route="unsafe">Route</script>';
+  saturday.stops[0].notes =
+    '<img src=x onerror="unsafe">';
+  monday.travelNotes = [
+    '<script data-guidance="unsafe">Break</script>',
+  ];
+
+  const markup = ["2026-09-26", "2026-09-28"]
+    .map((selectedDayId) =>
+      AdventureItinerary.renderCanonicalItinerary(
+        adventure,
+        { selectedDayId },
+      ),
+    )
+    .join("");
+
+  assert.doesNotMatch(markup, /<script data-|<img src=x/);
+  assert.match(
+    markup,
+    /&lt;script data-route=&quot;unsafe&quot;&gt;Route&lt;\/script&gt;/,
+  );
+  assert.match(
+    markup,
+    /&lt;img src=x onerror=&quot;unsafe&quot;&gt;/,
+  );
+  assert.match(
+    markup,
+    /&lt;script data-guidance=&quot;unsafe&quot;&gt;Break&lt;\/script&gt;/,
   );
 });
 

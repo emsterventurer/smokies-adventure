@@ -520,6 +520,127 @@ test("preserves Pacific route alternatives and planning semantics", () => {
   }
 });
 
+test("preserves the reviewed Pacific drive durations and intentional gaps", () => {
+  const days = new Map(
+    AdventureData.createPacificCoastLandDays().map(
+      (day) => [day.id, day],
+    ),
+  );
+  const stops = (dayId) =>
+    new Map(
+      days.get(dayId).stops.map((stop) => [stop.id, stop]),
+    );
+
+  assert.deepEqual(
+    [...stops("2026-09-25").values()]
+      .slice(1)
+      .map((stop) => stop.driveFromPrevious),
+    [
+      "55 min",
+      "1 hr 25 min",
+      "30 min",
+      "10 min",
+      "50 min",
+      "27–30 min",
+      "5–10 min",
+    ],
+  );
+
+  const saturday = days.get("2026-09-26");
+  assert.deepEqual(
+    saturday.routeAlternatives[1]
+      .driveFromPreviousByStopId,
+    {
+      "newton-b-drury-scenic-parkway": "1 hr 10 min",
+      "crescent-city": "50 min",
+      "brookings-harris-beach": "30 min",
+      "samuel-h-boardman-viewpoint": "15 min",
+      "pacific-reef-hotel": "45 min",
+    },
+  );
+  assert.equal(
+    saturday.alternativeRouteStops.find(
+      (stop) => stop.id === "big-tree-wayside",
+    ).driveFromPrevious,
+    undefined,
+  );
+
+  const sunday = stops("2026-09-27");
+  assert.equal(
+    sunday.get("face-rock-viewpoint").driveFromPrevious,
+    "1 hr 10–15 min",
+  );
+  assert.equal(
+    sunday.get("face-rock-creamery").driveFromPrevious,
+    undefined,
+  );
+  assert.equal(
+    sunday.get("georgies").driveFromPrevious,
+    undefined,
+  );
+
+  const monday = stops("2026-09-28");
+  assert.equal(
+    monday.get("chihuly-bridge-of-glass").driveFromPrevious,
+    "3 hr 31–57 min DIRECT",
+  );
+  assert.equal(
+    [...monday.values()].some((stop) =>
+      /Longview|Castle Rock|Lake Sacajawea|Nutty Narrows/i.test(
+        `${stop.name} ${stop.navigationQuery ?? ""}`,
+      ),
+    ),
+    false,
+  );
+});
+
+test("additively prepares missing drive metadata on stored Pacific days", () => {
+  const adventure =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      AdventureData.createPacificCoastAdventureRecord(),
+    ).adventure;
+  const saturday = adventure.itinerary.days.find(
+    (day) => day.id === "2026-09-26",
+  );
+  const storedSummary = saturday.summary;
+
+  saturday.stops.forEach((stop) => {
+    delete stop.driveFromPrevious;
+  });
+  saturday.routeAlternatives.forEach((route) => {
+    delete route.driveFromPreviousByStopId;
+  });
+
+  const first =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      adventure,
+    );
+  const preparedSaturday = first.adventure.itinerary.days.find(
+    (day) => day.id === "2026-09-26",
+  );
+  const second =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      first.adventure,
+    );
+
+  assert.equal(first.enriched, true);
+  assert.equal(preparedSaturday.summary, storedSummary);
+  assert.equal(
+    preparedSaturday.stops.find(
+      (stop) => stop.id === "crescent-city",
+    ).driveFromPrevious,
+    "1 hr 40 min",
+  );
+  assert.equal(
+    preparedSaturday.routeAlternatives.find(
+      (route) => route.id === "big-tree-and-coast",
+    ).driveFromPreviousByStopId["crescent-city"],
+    "50 min",
+  );
+  assert.equal(second.enriched, false);
+  assert.equal(second.adventure, first.adventure);
+});
+
 test("bundled Pacific reservations contain no confirmation fields", () => {
   const reservations = [
     ...AdventureData.createPacificCoastArrivalReservations(),

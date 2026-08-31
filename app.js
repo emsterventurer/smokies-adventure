@@ -284,6 +284,26 @@ if (
           ?.activeAdventureService
           ?.getActiveAdventure?.(),
       );
+  globalThis.AdventureItinerary
+    .initializeCanonicalItineraryInteractions?.(
+      canonicalItineraryHost,
+      ADVENTURE_STARTUP_RESULT
+        ?.activeAdventureService
+        ?.getActiveAdventure?.(),
+    );
+}
+
+const IS_PACIFIC_COAST_ADVENTURE =
+  ACTIVE_ADVENTURE?.id ===
+  globalThis.AdventureData
+    ?.PACIFIC_COAST_ADVENTURE_ID;
+
+if (IS_PACIFIC_COAST_ADVENTURE) {
+  globalThis.AdventureItinerary
+    ?.configurePacificReviewNavigation?.(
+      document,
+      true,
+    );
 }
 if (
   ADVENTURE_STARTUP_RESULT
@@ -2233,6 +2253,52 @@ function bindCompletion(){
     showDay(date);
   });
 }
+
+function renderPacificReviewView(viewName, screen) {
+  if (
+    !IS_PACIFIC_COAST_ADVENTURE ||
+    !globalThis.AdventureItinerary
+  ) {
+    return false;
+  }
+
+  if (viewName === "week") {
+    screen.innerHTML =
+      globalThis.AdventureItinerary
+        .renderPacificDailyAdventure(
+          ACTIVE_ADVENTURE,
+        );
+    globalThis.AdventureItinerary
+      .initializeCanonicalItineraryInteractions?.(
+        screen.querySelector(
+          "[data-canonical-itinerary-host]",
+        ),
+        ACTIVE_ADVENTURE,
+      );
+    return true;
+  }
+
+  if (viewName === "reservations") {
+    screen.innerHTML =
+      globalThis.AdventureItinerary
+        .renderCanonicalReservations(
+          ACTIVE_ADVENTURE,
+        );
+    return true;
+  }
+
+  if (viewName === "trip") {
+    screen.innerHTML =
+      globalThis.AdventureItinerary
+        .renderTripSnapshot(
+          ACTIVE_ADVENTURE,
+        );
+    return true;
+  }
+
+  return false;
+}
+
 function view(v) {
   CURRENT_VIEW = v;
   $$("nav button,.desktopSideNav [data-view]")
@@ -2244,6 +2310,11 @@ function view(v) {
     );
 
   const screen = $("#screen");
+
+  document.body.classList.toggle(
+    "pacificReviewSubView",
+    IS_PACIFIC_COAST_ADVENTURE && v !== "home",
+  );
 
   if (v === "home") {
     screen.classList.remove("screenEntering");
@@ -2262,6 +2333,14 @@ function view(v) {
   screen.classList.remove("screenEntering");
   void screen.offsetWidth;
   screen.classList.add("screenEntering");
+
+  if (renderPacificReviewView(v, screen)) {
+    screen.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+    return;
+  }
 
   if (v === "week") {
     screen.innerHTML = `

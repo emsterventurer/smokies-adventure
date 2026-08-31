@@ -254,6 +254,37 @@ test("shows canonical itinerary UI for a non-Smokies Adventure with days", () =>
   );
 });
 
+test("routes Pacific review views through the active canonical Adventure", () => {
+  const appSource = fs.readFileSync(
+    path.join(__dirname, "app.js"),
+    "utf8",
+  );
+  const start = appSource.indexOf(
+    "function renderPacificReviewView",
+  );
+  const end = appSource.indexOf(
+    "function view(v)",
+    start,
+  );
+  const reviewSource = appSource.slice(start, end);
+
+  assert.notEqual(start, -1);
+  assert.notEqual(end, -1);
+  assert.match(
+    reviewSource,
+    /renderPacificDailyAdventure\([\s\S]*ACTIVE_ADVENTURE/,
+  );
+  assert.match(
+    reviewSource,
+    /renderCanonicalReservations\([\s\S]*ACTIVE_ADVENTURE/,
+  );
+  assert.match(
+    reviewSource,
+    /renderTripSnapshot\([\s\S]*ACTIVE_ADVENTURE/,
+  );
+  assert.doesNotMatch(reviewSource, /RESERVATION_DATA|DATA\.days/);
+});
+
 test("app uses startup Adventure Storage and the existing service APIs", () => {
   const appSource = fs.readFileSync(
     path.join(__dirname, "app.js"),
