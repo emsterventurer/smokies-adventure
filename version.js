@@ -19,15 +19,15 @@
     "use strict";
 
     const build=Object.freeze({
-    version:"M4-02.1",
+    version:"M4-02.2",
     milestone:"Milestone 4",
-    feature:"Pacific Coast Arrival Day",
+    feature:"Pacific Coast Land Trip",
     build:"Build 1",
     updated:"August 30, 2026",
-    cache:"adventure-companion-m4-02-1-build-1",
-    eyebrow:"M4-02.1 · PACIFIC COAST ARRIVAL DAY",
+    cache:"adventure-companion-m4-02-2-build-1",
+    eyebrow:"M4-02.2 · PACIFIC COAST LAND TRIP",
       description:
-        "Adventure Companion now adds the first canonical Pacific Coast itinerary day while preserving the complete Smokies experience."
+        "Adventure Companion now adds the complete Pacific Coast land-trip review experience while preserving the complete Smokies experience."
     });
 
     function applyToDocument(doc){
