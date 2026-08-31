@@ -19,15 +19,15 @@
     "use strict";
 
     const build=Object.freeze({
-    version:"M4-02.2",
+    version:"M4-02.3",
     milestone:"Milestone 4",
-    feature:"Pacific Coast Land Trip",
+    feature:"Multi-Adventure Welcome & Mobile Entry Fix",
     build:"Build 1",
-    updated:"August 30, 2026",
-    cache:"adventure-companion-m4-02-2-build-1",
-    eyebrow:"M4-02.2 · PACIFIC COAST LAND TRIP",
+    updated:"August 31, 2026",
+    cache:"adventure-companion-m4-02-3-build-1",
+    eyebrow:"M4-02.3 · MULTI-ADVENTURE WELCOME & MOBILE ENTRY FIX",
       description:
-        "Adventure Companion now adds the complete Pacific Coast land-trip review experience while preserving the complete Smokies experience."
+        "Adventure Companion now welcomes the family into every Adventure with a mobile-friendly entry experience while preserving existing Adventure behavior."
     });
 
     function applyToDocument(doc){
