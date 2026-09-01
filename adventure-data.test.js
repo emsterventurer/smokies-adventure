@@ -753,7 +753,6 @@ test("does not bundle Carolyn email identity information", () => {
     pacific: AdventureData.createPacificCoastAdventureRecord(),
   });
 
-  assert.doesNotMatch(bundled, /cosbycm@yahoo\.com/i);
   assert.doesNotMatch(bundled, /@/);
 });
 
