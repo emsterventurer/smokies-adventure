@@ -19,15 +19,15 @@
     "use strict";
 
     const build=Object.freeze({
-    version:"M4-02.3",
+    version:"M4-02.4",
     milestone:"Milestone 4",
-    feature:"Multi-Adventure Welcome & Mobile Entry Fix",
+    feature:"Pacific Coast Castle Rock & Carolyn Traveler",
     build:"Build 1",
-    updated:"August 31, 2026",
-    cache:"adventure-companion-m4-02-3-build-1",
-    eyebrow:"M4-02.3 · MULTI-ADVENTURE WELCOME & MOBILE ENTRY FIX",
+    updated:"September 1, 2026",
+    cache:"adventure-companion-m4-02-4-build-1",
+    eyebrow:"M4-02.4 · PACIFIC COAST CASTLE ROCK & CAROLYN TRAVELER",
       description:
-        "Adventure Companion now welcomes the family into every Adventure with a mobile-friendly entry experience while preserving existing Adventure behavior."
+        "Adventure Companion now includes Castle Rock and Carolyn in the Pacific Coast experience, with reviewed drive estimates and preservation-first upgrades while preserving Smokies."
     });
 
     function applyToDocument(doc){

@@ -29,7 +29,7 @@ const worker = fs.readFileSync(
 
 assert.equal(
   build.version,
-  "M4-02.3",
+  "M4-02.4",
 );
 
 assert.equal(
@@ -39,7 +39,7 @@ assert.equal(
 
 assert.equal(
   build.cache,
-  "adventure-companion-m4-02-3-build-1",
+  "adventure-companion-m4-02-4-build-1",
 );
 
 assert(
