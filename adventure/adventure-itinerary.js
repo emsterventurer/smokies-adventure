@@ -90,8 +90,9 @@ function isSupportedStop(stop) {
       stop.name.trim() &&
       typeof stop.kind === "string" &&
       stop.kind.trim() &&
-      typeof stop.timeLabel === "string" &&
-      stop.timeLabel.trim() &&
+      (stop.timeLabel === undefined ||
+        (typeof stop.timeLabel === "string" &&
+          stop.timeLabel.trim())) &&
       typeof stop.priority === "string" &&
       stop.priority.trim() &&
       typeof (
@@ -450,7 +451,7 @@ function renderCanonicalItinerary(adventure, options = {}) {
                   <article class="stopCard evolvedStop canonicalStopCard">
                     <div class="stopOrder canonicalStopOrder"><span>${index + 1}</span><i></i></div>
                     <div class="stopBody canonicalStopBody">
-                      <small>${escapeHtml(stop.timeLabel)} · ${escapeHtml(stop.kind)}</small>
+                      <small>${stop.timeLabel ? `${escapeHtml(stop.timeLabel)} · ` : ""}${escapeHtml(stop.kind)}</small>
                       <h4>${escapeHtml(stop.name)}</h4>
                       <span class="canonicalPriority ${escapeHtml(stop.priority)}">${escapeHtml(stop.priority)}</span>
                       ${stop.duration ? `<p><strong>${escapeHtml(stop.duration)}</strong></p>` : ""}

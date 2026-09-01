@@ -276,3 +276,50 @@ test("an inbound Pacific Arrival Day is preserved while missing land days are pr
     ],
   );
 });
+
+test("inbound Pacific preparation upgrades Monday and adds Carolyn consistently", async () => {
+  const provider = createCloudProvider();
+  const activeAdventureService = createActiveAdventureService();
+  const cloudAdventure = AdventureData.createPacificCoastAdventureRecord();
+  cloudAdventure.participants = [{ adventurerId: "bubbe", custom: true }];
+  const monday = AdventureData.createPacificCoastLandDays().find(
+    (day) => day.id === "2026-09-28",
+  );
+  monday.stops = monday.stops.filter((stop) => stop.id !== "castle-rock");
+  monday.stops.find(
+    (stop) => stop.id === "chihuly-bridge-of-glass",
+  ).driveFromPrevious = "3 hr 31–57 min DIRECT";
+  cloudAdventure.itinerary.days = [monday];
+  await provider.saveAdventureRecord(cloudAdventure);
+
+  const sync = SharedAdventureSync.createSharedAdventureSync({
+    activeAdventureService,
+    cloudProvider: provider,
+    prepareIncomingAdventure: AdventureData.prepareBundledAdventureRecord,
+  });
+  await sync.pullAdventure(AdventureData.PACIFIC_COAST_ADVENTURE_ID);
+
+  const saved = activeAdventureService.getActiveAdventure();
+  const savedMonday = saved.itinerary.days.find(
+    (day) => day.id === "2026-09-28",
+  );
+  assert.deepEqual(
+    saved.participants.map((participant) => participant.adventurerId),
+    ["bubbe", "carolyn"],
+  );
+  assert.equal(
+    savedMonday.stops.filter((stop) => stop.id === "castle-rock").length,
+    1,
+  );
+  assert.equal(
+    savedMonday.stops.find(
+      (stop) => stop.id === "chihuly-bridge-of-glass",
+    ).driveFromPrevious,
+    "1 hr 30 min",
+  );
+  assert.equal(
+    savedMonday.stops.find((stop) => stop.id === "castle-rock")
+      .driveFromPrevious,
+    "2 hr 15 min",
+  );
+});

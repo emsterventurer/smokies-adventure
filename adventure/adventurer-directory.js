@@ -39,6 +39,13 @@ const INITIAL_ADVENTURERS = Object.freeze([
     avatar: null,
     active: true,
   }),
+  Object.freeze({
+    id: "carolyn",
+    displayName: "Carolyn",
+    relationshipLabel: null,
+    avatar: null,
+    active: true,
+  }),
 ]);
 
 function cloneAdventurer(adventurer) {

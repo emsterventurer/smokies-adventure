@@ -10,11 +10,11 @@ test("creates the initial Adventurer Directory", () => {
   const directory = AdventurerDirectory.createInitialAdventurerDirectory();
 
   assert.equal(directory.schemaVersion, 1);
-  assert.equal(directory.adventurers.length, 5);
+  assert.equal(directory.adventurers.length, 6);
 
   assert.deepEqual(
     directory.adventurers.map((adventurer) => adventurer.id),
-    ["emily", "jake", "kaseryn", "bubbe", "papa"],
+    ["emily", "jake", "kaseryn", "bubbe", "papa", "carolyn"],
   );
 });
 
@@ -64,6 +64,36 @@ test("assigns the five Smokies participants by stable adventurer ID", () => {
   );
 });
 
+test("adds Carolyn to the directory and Pacific Coast only", () => {
+  const carolyn = AdventurerDirectory.INITIAL_ADVENTURERS.find(
+    (adventurer) => adventurer.id === "carolyn",
+  );
+  const pacific = AdventureData.createPacificCoastAdventureRecord();
+  const smokies = AdventureData.createSmokiesAdventureRecord();
+
+  assert.deepEqual(carolyn, {
+    id: "carolyn",
+    displayName: "Carolyn",
+    relationshipLabel: null,
+    avatar: null,
+    active: true,
+  });
+  assert.deepEqual(pacific.participants, [
+    {
+      adventurerId: "carolyn",
+      role: "traveler",
+      includedInReadiness: true,
+      adventurePreferences: {},
+    },
+  ]);
+  assert.equal(
+    smokies.participants.some(
+      (participant) => participant.adventurerId === "carolyn",
+    ),
+    false,
+  );
+});
+
 test("creates the Pacific Coast Adventure shell", () => {
   const adventure =
     AdventureData.createPacificCoastAdventureRecord();
@@ -86,7 +116,14 @@ test("creates the Pacific Coast Adventure shell", () => {
     latitude: null,
     longitude: null,
   });
-  assert.deepEqual(adventure.participants, []);
+  assert.deepEqual(adventure.participants, [
+    {
+      adventurerId: "carolyn",
+      role: "traveler",
+      includedInReadiness: true,
+      adventurePreferences: {},
+    },
+  ]);
   assert.deepEqual(adventure.itinerary.days, []);
   assert.deepEqual(adventure.reservations.items, []);
 });
@@ -275,7 +312,12 @@ test("Pacific Coast enrichment is idempotent and preserves unrelated data", () =
     first.adventure.preferences,
     shell.preferences,
   );
-  assert.deepEqual(first.adventure.participants, []);
+  assert.deepEqual(
+    first.adventure.participants.map(
+      (participant) => participant.adventurerId,
+    ),
+    ["carolyn"],
+  );
 });
 
 test("adds missing bundled days without replacing an existing Arrival Day", () => {
@@ -476,18 +518,32 @@ test("preserves Pacific route alternatives and planning semantics", () => {
   );
   assert.match(
     monday.travelNotes.join(" "),
-    /Longview.*Lake Sacajawea.*Nutty Narrows.*Castle Rock/i,
+    /Longview.*Lake Sacajawea.*Nutty Narrows/i,
   );
   assert.match(
     monday.travelNotes.join(" "),
-    /somewhere else or skip the break entirely/i,
+    /somewhere else or skip the additional break entirely/i,
   );
   assert.equal(
     monday.stops.some((stop) =>
-      /Longview|Castle Rock|Lake Sacajawea|Nutty Narrows/i.test(
+      /Longview|Lake Sacajawea|Nutty Narrows/i.test(
         `${stop.name} ${stop.navigationQuery ?? ""}`,
       ),
     ),
+    false,
+  );
+  assert.deepEqual(
+    monday.stops.map((stop) => stop.id),
+    [
+      "hallmark-newport-departure",
+      "tillamook-creamery",
+      "castle-rock",
+      "chihuly-bridge-of-glass",
+      "embassy-suites-seattle-airport",
+    ],
+  );
+  assert.equal(
+    monday.travelNotes.join(" ").includes("Castle Rock"),
     false,
   );
   assert.equal(
@@ -521,6 +577,7 @@ test("preserves Pacific route alternatives and planning semantics", () => {
 });
 
 test("preserves the reviewed Pacific drive durations and intentional gaps", () => {
+  const arrival = AdventureData.createPacificCoastArrivalDay();
   const days = new Map(
     AdventureData.createPacificCoastLandDays().map(
       (day) => [day.id, day],
@@ -530,6 +587,11 @@ test("preserves the reviewed Pacific drive durations and intentional gaps", () =
     new Map(
       days.get(dayId).stops.map((stop) => [stop.id, stop]),
     );
+
+  assert.deepEqual(
+    arrival.stops.slice(1).map((stop) => stop.driveFromPrevious),
+    ["1 hr 30 min–2 hr", "2–5 min"],
+  );
 
   assert.deepEqual(
     [...stops("2026-09-25").values()]
@@ -548,6 +610,17 @@ test("preserves the reviewed Pacific drive durations and intentional gaps", () =
 
   const saturday = days.get("2026-09-26");
   assert.deepEqual(
+    saturday.stops.slice(1, 5).map(
+      (stop) => stop.driveFromPrevious,
+    ),
+    ["1 hr 40 min", "30 min", "15 min", "45–60 min"],
+  );
+  assert.equal(
+    saturday.stops.find((stop) => stop.id === "spinners-dinner")
+      .driveFromPrevious,
+    undefined,
+  );
+  assert.deepEqual(
     saturday.routeAlternatives[1]
       .driveFromPreviousByStopId,
     {
@@ -562,36 +635,125 @@ test("preserves the reviewed Pacific drive durations and intentional gaps", () =
     saturday.alternativeRouteStops.find(
       (stop) => stop.id === "big-tree-wayside",
     ).driveFromPrevious,
-    undefined,
+    "10–15 min",
   );
 
   const sunday = stops("2026-09-27");
-  assert.equal(
-    sunday.get("face-rock-viewpoint").driveFromPrevious,
-    "1 hr 10–15 min",
-  );
-  assert.equal(
-    sunday.get("face-rock-creamery").driveFromPrevious,
-    undefined,
-  );
-  assert.equal(
-    sunday.get("georgies").driveFromPrevious,
-    undefined,
+  assert.deepEqual(
+    [...sunday.values()].slice(1).map(
+      (stop) => stop.driveFromPrevious,
+    ),
+    [
+      "1 hr 10–15 min",
+      "10 min",
+      "5 min",
+      "1 hr 30 min",
+      "1 hr 15–30 min",
+      undefined,
+    ],
   );
 
   const monday = stops("2026-09-28");
-  assert.equal(
-    monday.get("chihuly-bridge-of-glass").driveFromPrevious,
-    "3 hr 31–57 min DIRECT",
+  assert.deepEqual(
+    [...monday.values()].slice(1).map(
+      (stop) => stop.driveFromPrevious,
+    ),
+    [
+      "1 hr 32–37 min",
+      "2 hr 15 min",
+      "1 hr 30 min",
+      "30–45 min",
+    ],
   );
   assert.equal(
     [...monday.values()].some((stop) =>
-      /Longview|Castle Rock|Lake Sacajawea|Nutty Narrows/i.test(
+      /Longview|Lake Sacajawea|Nutty Narrows/i.test(
         `${stop.name} ${stop.navigationQuery ?? ""}`,
       ),
     ),
     false,
   );
+});
+
+test("upgrades the known stored Monday shape and Pacific participants once", () => {
+  const adventure = AdventureData.createPacificCoastAdventureRecord();
+  adventure.participants = [
+    {
+      adventurerId: "emily",
+      role: "organizer",
+      custom: "preserved",
+    },
+  ];
+  const monday = AdventureData.createPacificCoastLandDays().find(
+    (day) => day.id === "2026-09-28",
+  );
+  monday.stops = monday.stops.filter(
+    (stop) => stop.id !== "castle-rock",
+  );
+  monday.stops.find(
+    (stop) => stop.id === "chihuly-bridge-of-glass",
+  ).driveFromPrevious = "3 hr 31–57 min DIRECT";
+  monday.travelNotes[1] =
+    "Potential suggestions only: Longview — Lake Sacajawea / Nutty Narrows area, or Castle Rock. Travelers may stop somewhere else or skip the break entirely.";
+  monday.custom = { preserved: true };
+  monday.stops.push({
+    id: "traveler-authored-stop",
+    name: "Traveler-authored stop",
+    custom: true,
+  });
+  adventure.itinerary.days = [monday];
+
+  const first = AdventureData.enrichPacificCoastAdventureRecord(adventure);
+  const second = AdventureData.enrichPacificCoastAdventureRecord(
+    first.adventure,
+  );
+  const preparedMonday = first.adventure.itinerary.days.find(
+    (day) => day.id === "2026-09-28",
+  );
+
+  assert.equal(first.enriched, true);
+  assert.equal(second.enriched, false);
+  assert.equal(preparedMonday.custom.preserved, true);
+  assert.equal(
+    preparedMonday.stops.filter((stop) => stop.id === "castle-rock")
+      .length,
+    1,
+  );
+  assert.equal(
+    preparedMonday.stops.find(
+      (stop) => stop.id === "chihuly-bridge-of-glass",
+    ).driveFromPrevious,
+    "1 hr 30 min",
+  );
+  assert.equal(
+    preparedMonday.stops.find(
+      (stop) => stop.id === "castle-rock",
+    ).driveFromPrevious,
+    "2 hr 15 min",
+  );
+  assert.ok(
+    preparedMonday.stops.some(
+      (stop) => stop.id === "traveler-authored-stop" && stop.custom,
+    ),
+  );
+  assert.match(preparedMonday.travelNotes.join(" "), /Longview/);
+  assert.doesNotMatch(preparedMonday.travelNotes.join(" "), /Castle Rock/);
+  assert.deepEqual(
+    first.adventure.participants.map(
+      (participant) => participant.adventurerId,
+    ),
+    ["emily", "carolyn"],
+  );
+  assert.equal(first.adventure.participants[0].custom, "preserved");
+});
+
+test("does not bundle Carolyn email identity information", () => {
+  const bundled = JSON.stringify({
+    directory: AdventurerDirectory.createInitialAdventurerDirectory(),
+    pacific: AdventureData.createPacificCoastAdventureRecord(),
+  });
+
+  assert.doesNotMatch(bundled, /@/);
 });
 
 test("additively prepares missing drive metadata on stored Pacific days", () => {

@@ -204,6 +204,55 @@ test("startup adds missing land days to a production-style Pacific record", () =
   );
 });
 
+test("startup upgrades the stored Pacific Monday route and participants", () => {
+  const storageProvider = AdventureStorage.createMemoryStorage();
+  const adventureStorage = AdventureStorage.createAdventureStorage({
+    storageProvider,
+  });
+  const adventure = AdventureData.createPacificCoastAdventureRecord();
+  adventure.participants = [{ adventurerId: "emily", custom: true }];
+  const monday = AdventureData.createPacificCoastLandDays().find(
+    (day) => day.id === "2026-09-28",
+  );
+  monday.stops = monday.stops.filter((stop) => stop.id !== "castle-rock");
+  monday.stops.find(
+    (stop) => stop.id === "chihuly-bridge-of-glass",
+  ).driveFromPrevious = "3 hr 31–57 min DIRECT";
+  adventure.itinerary.days = [monday];
+  adventureStorage.saveAdventureRecord(adventure);
+
+  AdventureStartup.createAdventureStartup({
+    storageProvider,
+    adventureStorage,
+  }).initializeAdventure();
+
+  const stored = adventureStorage.loadAdventureRecord(
+    AdventureData.PACIFIC_COAST_ADVENTURE_ID,
+  );
+  const storedMonday = stored.itinerary.days.find(
+    (day) => day.id === "2026-09-28",
+  );
+  assert.equal(
+    storedMonday.stops.filter((stop) => stop.id === "castle-rock").length,
+    1,
+  );
+  assert.equal(
+    storedMonday.stops.find(
+      (stop) => stop.id === "chihuly-bridge-of-glass",
+    ).driveFromPrevious,
+    "1 hr 30 min",
+  );
+  assert.equal(
+    storedMonday.stops.find((stop) => stop.id === "castle-rock")
+      .driveFromPrevious,
+    "2 hr 15 min",
+  );
+  assert.deepEqual(
+    stored.participants.map((participant) => participant.adventurerId),
+    ["emily", "carolyn"],
+  );
+});
+
 test("migrates legacy adventure data when seeding the first adventure", () => {
   const { startup } = createTestStartup({
     initialEntries: {
