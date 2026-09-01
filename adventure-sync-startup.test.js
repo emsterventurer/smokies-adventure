@@ -55,6 +55,46 @@ assert(
 );
 
 assert(
+  !app.includes(
+    "createSharedAdventureSync",
+  ) &&
+    !app.includes(
+      "SHARED_ADVENTURE_SYNC.subscribe",
+    ),
+  "app.js should not create a competing Shared Adventure Sync controller",
+);
+
+assert(
+  syncStartup.includes(
+    "adventureAwareAccessEnabled",
+  ) &&
+    syncStartup.includes(
+      "canSynchronizeAdventure",
+    ),
+  "Adventure-aware sync should remain locked until authorized access resolves",
+);
+
+assert(
+  syncStartup.includes(
+    '"adventure:access-ready"',
+  ) &&
+    syncStartup.includes(
+      "sharedAdventureSync?.stop?.()",
+    ),
+  "Empty or unavailable access should stop synchronization",
+);
+
+assert.equal(
+  (
+    syncStartup.match(
+      /createSharedAdventureSync/g,
+    ) ?? []
+  ).length,
+  2,
+  "The sole sync startup module should contain one capability check and one construction call",
+);
+
+assert(
   syncStartup.includes(
     "CloudAdventureProvider",
   ),

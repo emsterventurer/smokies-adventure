@@ -174,6 +174,17 @@ let DATA;
 let ACTIVE_ADVENTURE = null;
 let ADVENTURE_STARTUP_RESULT = null;
 let CURRENT_VIEW = "home";
+const ADVENTURE_AWARE_ACCESS_ENABLED =
+  APP_CONFIG.features?.adventureAwareAccess === true;
+let ADVENTURE_ACCESS_STATE = Object.freeze({
+  status: ADVENTURE_AWARE_ACCESS_ENABLED
+    ? "unresolved"
+    : "legacy",
+  access: Object.freeze([]),
+  adventures: Object.freeze([]),
+  activeAdventureId: null,
+  activeAdventurerId: null,
+});
 
 function listAvailableAdventures() {
   return (
@@ -244,29 +255,81 @@ function initializeDurableAdventureData() {
 }
 
 initializeDurableAdventureData();
-globalThis.AdventureSwitcher
-  ?.initializeAdventureSwitcher?.({
-    document,
-    adventures: listAvailableAdventures(),
-    activeAdventureService:
-      ADVENTURE_STARTUP_RESULT
-        ?.activeAdventureService,
-    selectActiveAdventure,
-    smokiesAdventureId:
-      globalThis.AdventureData
-        ?.SMOKIES_ADVENTURE_ID,
-    supportsCanonicalItinerary:
-      (adventure) =>
-        Array.isArray(
-          adventure?.itinerary?.days,
-        ) &&
-        adventure.itinerary.days.some(
-          (day) =>
-            globalThis.AdventureItinerary
-              ?.isSupportedDay?.(day) === true,
-        ),
-    reload: () => window.location.reload(),
-  });
+
+function initializeAvailableAdventureSwitcher(
+  accessState = ADVENTURE_ACCESS_STATE,
+) {
+  const adventureAware =
+    ADVENTURE_AWARE_ACCESS_ENABLED;
+  const adventures = adventureAware
+    ? accessState?.status === "authorized"
+      ? accessState.adventures
+      : []
+    : listAvailableAdventures();
+
+  return globalThis.AdventureSwitcher
+    ?.initializeAdventureSwitcher?.({
+      document,
+      adventures,
+      activeAdventureService:
+        ADVENTURE_STARTUP_RESULT
+          ?.activeAdventureService,
+      selectActiveAdventure,
+      smokiesAdventureId:
+        globalThis.AdventureData
+          ?.SMOKIES_ADVENTURE_ID,
+      supportsCanonicalItinerary:
+        (adventure) =>
+          Array.isArray(
+            adventure?.itinerary?.days,
+          ) &&
+          adventure.itinerary.days.some(
+            (day) =>
+              globalThis.AdventureItinerary
+                ?.isSupportedDay?.(day) === true,
+          ),
+      isAdventureAuthorized: (adventureId) =>
+        !adventureAware ||
+        accessState?.access?.some(
+          (entry) =>
+            entry.adventureId === adventureId,
+        ) === true,
+      beforeSelectAdventure: (adventureId) => {
+        if (!adventureAware) {
+          return true;
+        }
+
+        const selection =
+          globalThis.AdventureAccess
+            ?.resolveAuthorizedSelection?.(
+              accessState,
+              adventureId,
+              (adventurerId) =>
+                globalThis.AdventurerIdentity
+                  ?.findAdventurer?.(adventurerId),
+            );
+
+        if (!selection) {
+          return false;
+        }
+
+        globalThis.AdventureSharedSync?.stop?.();
+
+        const selectedIdentity =
+          globalThis.AdventurerIdentity
+            ?.selectIdentity?.(
+              selection.adventurerId,
+            );
+
+        return Boolean(selectedIdentity);
+      },
+      reload: () => window.location.reload(),
+    });
+}
+
+if (!ADVENTURE_AWARE_ACCESS_ENABLED) {
+  initializeAvailableAdventureSwitcher();
+}
 
 const canonicalItineraryHost =
   document.querySelector(
@@ -472,49 +535,6 @@ function initializeReservationJournal() {
 }
 
 initializeReservationJournal();
-
-let SHARED_ADVENTURE_SYNC = null;
-
-function initializeSharedAdventureSync() {
-  if (
-    SHARED_ADVENTURE_SYNC ||
-    !globalThis.SharedAdventureSync ||
-    !globalThis.CloudAdventureProvider ||
-    !ADVENTURE_STARTUP_RESULT?.activeAdventureService ||
-    !ACTIVE_ADVENTURE?.id
-  ) {
-    return SHARED_ADVENTURE_SYNC;
-  }
-
-  SHARED_ADVENTURE_SYNC =
-    globalThis.SharedAdventureSync
-      .createSharedAdventureSync({
-        activeAdventureService:
-          ADVENTURE_STARTUP_RESULT
-            .activeAdventureService,
-        cloudProvider:
-          globalThis.CloudAdventureProvider,
-        prepareIncomingAdventure:
-          globalThis.AdventureData
-            ?.prepareBundledAdventureRecord,
-      });
-
-  SHARED_ADVENTURE_SYNC.subscribe(
-    ACTIVE_ADVENTURE.id,
-  );
-
-  globalThis.AdventureSharedSync =
-    SHARED_ADVENTURE_SYNC;
-
-  return SHARED_ADVENTURE_SYNC;
-}
-
-globalThis.addEventListener(
-  "adventure:cloud-provider-ready",
-  initializeSharedAdventureSync,
-);
-
-initializeSharedAdventureSync();
 
 function escapeMemoryText(value) {
   return String(value ?? "").replace(
@@ -2756,6 +2776,133 @@ if (CURRENT_VIEW === "reservation-manager") {
 }
   },
 );
+
+function publishAdventureAccessState(state) {
+  ADVENTURE_ACCESS_STATE = Object.freeze({
+    status: state.status,
+    access: Object.freeze([...(state.access ?? [])]),
+    adventures: Object.freeze([
+      ...(state.adventures ?? []),
+    ]),
+    activeAdventureId:
+      state.activeAdventureId ?? null,
+    activeAdventurerId:
+      state.activeAdventurerId ?? null,
+    reason: state.reason ?? null,
+  });
+
+  globalThis.AdventureAccessState =
+    ADVENTURE_ACCESS_STATE;
+
+  globalThis.dispatchEvent(
+    new CustomEvent(
+      "adventure:access-ready",
+      {
+        detail: ADVENTURE_ACCESS_STATE,
+      },
+    ),
+  );
+
+  initializeAvailableAdventureSwitcher(
+    ADVENTURE_ACCESS_STATE,
+  );
+
+  return ADVENTURE_ACCESS_STATE;
+}
+
+async function resolveAdventureAwareAccess() {
+  const provider =
+    globalThis.AdventureAccessProvider;
+  const identityService =
+    globalThis.AdventurerIdentity;
+  const activeAdventureService =
+    ADVENTURE_STARTUP_RESULT
+      ?.activeAdventureService;
+
+  if (
+    !provider ||
+    typeof provider.resolveCurrentAdventureAccess !==
+      "function" ||
+    !globalThis.AdventureAccess ||
+    !identityService ||
+    !activeAdventureService
+  ) {
+    return publishAdventureAccessState({
+      status: "unavailable",
+      reason: "access-provider-unavailable",
+    });
+  }
+
+  try {
+    const accessResult =
+      await provider.resolveCurrentAdventureAccess();
+    const previousAdventureId =
+      activeAdventureService.getActiveAdventureId();
+    const state =
+      globalThis.AdventureAccess
+        .resolveAdventureAccess({
+          accessResult,
+          localAdventures:
+            listAvailableAdventures(),
+          persistedActiveAdventureId:
+            previousAdventureId,
+          findAdventurer: (adventurerId) =>
+            identityService.findAdventurer(
+              adventurerId,
+            ),
+        });
+
+    if (state.status !== "authorized") {
+      activeAdventureService.clearActiveAdventure();
+      ACTIVE_ADVENTURE = null;
+      return publishAdventureAccessState(state);
+    }
+
+    const selectedIdentity =
+      globalThis.AdventureAccess
+        .bindTrustedIdentity(
+          state,
+          identityService,
+        );
+
+    if (!selectedIdentity) {
+      activeAdventureService.clearActiveAdventure();
+      ACTIVE_ADVENTURE = null;
+      return publishAdventureAccessState({
+        ...state,
+        status: "unavailable",
+        activeAdventureId: null,
+        activeAdventurerId: null,
+        reason: "identity-unavailable",
+      });
+    }
+
+    activeAdventureService.setActiveAdventureId(
+      state.activeAdventureId,
+    );
+    ACTIVE_ADVENTURE =
+      activeAdventureService.getActiveAdventure();
+
+    if (previousAdventureId !== state.activeAdventureId) {
+      ADVENTURE_ACCESS_STATE = state;
+      return Object.freeze({
+        ...state,
+        requiresReload: true,
+      });
+    }
+
+    return publishAdventureAccessState(state);
+  } catch (error) {
+    activeAdventureService.clearActiveAdventure();
+    ACTIVE_ADVENTURE = null;
+
+    return publishAdventureAccessState({
+      status: "unavailable",
+      reason: "access-verification-failed",
+    });
+  }
+}
+
 function waitForWelcomeDependency(
   globalName,
   readyEventName,
@@ -2781,19 +2928,224 @@ function waitForWelcomeDependency(
   });
 }
 
-void Promise.all([
+const welcomeDependencies = [
   waitForWelcomeDependency(
     "AdventureFirebase",
     "adventure:firebase-auth-ready",
   ),
-  waitForWelcomeDependency(
-    "AdventureMembershipService",
-    "adventure:membership-service-ready",
-  ),
-]).then(() => setupWelcome());
+  ADVENTURE_AWARE_ACCESS_ENABLED
+    ? waitForWelcomeDependency(
+        "AdventureAccessProvider",
+        "adventure:access-provider-ready",
+      )
+    : waitForWelcomeDependency(
+        "AdventureMembershipService",
+        "adventure:membership-service-ready",
+      ),
+];
+
+void Promise.all(welcomeDependencies)
+  .then(() => setupWelcome());
 renderJourney(new Date());
 
+async function setupAdventureAwareWelcome() {
+  const modal = $("#welcomeModal");
+  const choicesHost = $("#welcomeIdentityChoices");
+  const accessMessage = $("#welcomeAccessMessage");
+  const googleSignInButton = $("#googleSignIn");
+  const enterButton = $("#enterAdventure");
+  const skipButton = $("#skipWelcome");
+  const identityService =
+    globalThis.AdventurerIdentity;
+
+  if (
+    !modal ||
+    !choicesHost ||
+    !accessMessage ||
+    !googleSignInButton ||
+    !enterButton ||
+    !identityService
+  ) {
+    return;
+  }
+
+  function renderIdentityChoices(
+    trustedAdventurerId = null,
+  ) {
+    const adventurers = trustedAdventurerId
+      ? [
+          identityService.findAdventurer(
+            trustedAdventurerId,
+          ),
+        ].filter(Boolean)
+      : identityService.getAdventurers();
+
+    choicesHost.replaceChildren();
+
+    adventurers.forEach((adventurer) => {
+      const button = document.createElement("button");
+      const name = document.createElement("strong");
+
+      button.type = "button";
+      button.className = "welcomeIdentityChoice";
+      button.dataset.adventurerIdentity = adventurer.id;
+      button.disabled = true;
+      button.setAttribute(
+        "aria-pressed",
+        String(adventurer.id === trustedAdventurerId),
+      );
+      button.classList.toggle(
+        "selected",
+        adventurer.id === trustedAdventurerId,
+      );
+      name.textContent = adventurer.displayName;
+      button.appendChild(name);
+
+      if (adventurer.relationshipLabel) {
+        const relationship =
+          document.createElement("small");
+        relationship.textContent =
+          adventurer.relationshipLabel;
+        button.appendChild(relationship);
+      }
+
+      choicesHost.appendChild(button);
+    });
+  }
+
+  function showAccessMessage(message = "") {
+    accessMessage.textContent = message;
+    accessMessage.hidden = !message;
+  }
+
+  function showSignedOutState() {
+    renderIdentityChoices();
+    showAccessMessage();
+    googleSignInButton.disabled = false;
+    googleSignInButton.textContent =
+      "🔐 Sign in with Google";
+    enterButton.disabled = true;
+    enterButton.textContent =
+      "Sign in with Google to continue";
+    modal.hidden = false;
+  }
+
+  async function authorizeUser(
+    user,
+    { restored = false } = {},
+  ) {
+    googleSignInButton.disabled = true;
+    googleSignInButton.textContent = user.email
+      ? `Signed in as ${user.email}`
+      : "Signed in with Google";
+    enterButton.disabled = true;
+    enterButton.textContent =
+      "Verifying Adventure access…";
+    showAccessMessage();
+
+    const state =
+      await resolveAdventureAwareAccess();
+
+    if (state.requiresReload) {
+      window.location.reload();
+      return;
+    }
+
+    if (state.status === "empty") {
+      renderIdentityChoices();
+      showAccessMessage(
+        "No Adventures available yet.",
+      );
+      enterButton.textContent =
+        "No Adventures available yet";
+      return;
+    }
+
+    if (state.status !== "authorized") {
+      renderIdentityChoices();
+      showAccessMessage(
+        "Adventure access couldn't be verified. Please try again.",
+      );
+      enterButton.textContent =
+        "Adventure access unavailable";
+      googleSignInButton.disabled = false;
+      return;
+    }
+
+    renderIdentityChoices(
+      state.activeAdventurerId,
+    );
+    enterButton.disabled = false;
+    enterButton.textContent =
+      "Enter Adventure Companion";
+
+    if (restored) {
+      modal.hidden = true;
+    }
+  }
+
+  googleSignInButton.onclick = async () => {
+    const firebase = globalThis.AdventureFirebase;
+
+    if (
+      !firebase ||
+      typeof firebase.signInWithGoogle !== "function"
+    ) {
+      showAccessMessage(
+        "Adventure access couldn't be verified. Please try again.",
+      );
+      return;
+    }
+
+    googleSignInButton.disabled = true;
+    googleSignInButton.textContent =
+      "Signing in with Google…";
+
+    try {
+      const user = await firebase.signInWithGoogle();
+      await authorizeUser(user);
+    } catch (error) {
+      showSignedOutState();
+      showAccessMessage(
+        "Adventure access couldn't be verified. Please try again.",
+      );
+    }
+  };
+
+  enterButton.onclick = () => {
+    if (ADVENTURE_ACCESS_STATE.status === "authorized") {
+      modal.hidden = true;
+    }
+  };
+
+  if (skipButton) {
+    skipButton.hidden = true;
+  }
+
+  const restoredGoogleUser =
+    globalThis.AdventureFirebase
+      ?.auth?.currentUser;
+
+  if (
+    restoredGoogleUser &&
+    restoredGoogleUser.isAnonymous === false
+  ) {
+    modal.hidden = false;
+    await authorizeUser(
+      restoredGoogleUser,
+      { restored: true },
+    );
+    return;
+  }
+
+  showSignedOutState();
+}
+
 async function setupWelcome() {
+  if (ADVENTURE_AWARE_ACCESS_ENABLED) {
+    return setupAdventureAwareWelcome();
+  }
+
   const modal =
     $("#welcomeModal");
 
