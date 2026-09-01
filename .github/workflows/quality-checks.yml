@@ -25,6 +25,12 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Set up Java for Firebase emulators
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - name: Show tool versions
         run: |
           node --version
@@ -58,6 +64,25 @@ jobs:
           node reliability.test.js
           node experience-polish.test.js
           node experience-completion.test.js
+
+      - name: Install and test trusted invitation functions
+        run: |
+          npm ci --prefix functions --ignore-scripts
+          npm test --prefix functions
+
+      - name: Run invitation emulator security checks
+        env:
+          ADVENTURE_INVITATION_HMAC_KEY: synthetic-ci-secret-with-at-least-32-bytes
+        shell: bash
+        run: |
+          secret_file="functions/.secret.local"
+          cleanup() {
+            rm -f "$secret_file"
+          }
+          trap cleanup EXIT
+          umask 077
+          printf 'ADVENTURE_INVITATION_HMAC_KEY=%s\n' "$ADVENTURE_INVITATION_HMAC_KEY" > "$secret_file"
+          npx --yes firebase-tools@15.25.1 emulators:exec --project demo-adventure-companion --only auth,firestore,functions "npm --prefix functions run test:emulator"
 
       - name: Verify required application files
         shell: bash
