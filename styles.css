@@ -617,6 +617,10 @@ nav .active {
 }
 
 .welcomeIdentityChoice {
+  display: flex;
+  min-height: 72px;
+  flex-direction: column;
+  justify-content: center;
   width: 100%;
   border: 2px solid rgba(255, 255, 255, 0.18);
   border-radius: 16px;

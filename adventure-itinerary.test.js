@@ -474,11 +474,11 @@ test("renders Monday travel notes as non-navigation day guidance", () => {
   );
   assert.match(
     guidance,
-    /Longview.*Lake Sacajawea.*Nutty Narrows.*Castle Rock/i,
+    /Longview.*Lake Sacajawea.*Nutty Narrows/i,
   );
   assert.match(
     guidance,
-    /somewhere else or skip the break entirely/i,
+    /somewhere else or skip the additional break entirely/i,
   );
   assert.doesNotMatch(
     guidance,
@@ -486,7 +486,7 @@ test("renders Monday travel notes as non-navigation day guidance", () => {
   );
   assert.equal(
     monday.stops.some((stop) =>
-      /Longview|Castle Rock|Lake Sacajawea|Nutty Narrows/i.test(
+      /Longview|Lake Sacajawea|Nutty Narrows/i.test(
         `${stop.name} ${stop.navigationQuery ?? ""}`,
       ),
     ),
@@ -607,7 +607,17 @@ test("Saturday Day Map follows the selected route and Monday excludes break sugg
     monday.dayMapSegments
       .map((segment) => segment.url)
       .join(" "),
-    /Longview|Castle Rock|Lake Sacajawea|Nutty Narrows/i,
+    /Longview|Lake Sacajawea|Nutty Narrows/i,
+  );
+  assert.deepEqual(
+    routePointIds(monday.dayMapSegments),
+    [
+      "hallmark-newport-departure",
+      "tillamook-creamery",
+      "castle-rock",
+      "chihuly-bridge-of-glass",
+      "embassy-suites-seattle-airport",
+    ],
   );
 });
 
@@ -636,7 +646,7 @@ test("maps canonical destination drive durations onto the preceding stop", () =>
   assert.equal(
     sunday.stops.find((stop) => stop.id === "old-town-bandon")
       .nextDrive,
-    null,
+    "5 min",
   );
   assert.equal(
     sunday.stops.find((stop) => stop.id === "hallmark-resort-newport")
@@ -646,7 +656,12 @@ test("maps canonical destination drive durations onto the preceding stop", () =>
   assert.equal(
     monday.stops.find((stop) => stop.id === "tillamook-creamery")
       .nextDrive,
-    "3 hr 31–57 min DIRECT",
+    "2 hr 15 min",
+  );
+  assert.equal(
+    monday.stops.find((stop) => stop.id === "castle-rock")
+      .nextDrive,
+    "1 hr 30 min",
   );
   assert.equal(monday.stops.at(-1).nextDrive, null);
 
@@ -659,7 +674,14 @@ test("maps canonical destination drive durations onto the preceding stop", () =>
     )
     .join("");
   assert.match(markup, /Next drive: ~27–30 min/);
-  assert.match(markup, /Next drive: ~3 hr 31–57 min DIRECT/);
+  assert.doesNotMatch(markup, /3 hr 31–57 min DIRECT/);
+  assert.match(
+    AdventureItinerary.renderCanonicalItinerary(
+      createArrivalAdventure(),
+      { selectedDayId: "2026-09-28" },
+    ),
+    /Tillamook Creamery[\s\S]*?Next drive · ~2 hr 15 min →[\s\S]*?Castle Rock[\s\S]*?Next drive · ~1 hr 30 min →[\s\S]*?Chihuly Bridge of Glass/,
+  );
   assert.match(
     markup,
     /class="nextRoute"[^>]*>Next drive · ~27–30 min →<\/a>/,
@@ -689,7 +711,15 @@ test("Saturday selected routes update stops and reviewed drive durations without
   );
   assert.deepEqual(
     optionB.stops.slice(0, 7).map((stop) => stop.nextDrive),
-    ["1 hr 10 min", null, "50 min", "30 min", "15 min", "45 min", null],
+    [
+      "1 hr 10 min",
+      "10–15 min",
+      "50 min",
+      "30 min",
+      "15 min",
+      "45 min",
+      null,
+    ],
   );
   assert.equal(
     optionA.stops.some((stop) => stop.id === "big-tree-wayside"),
@@ -750,7 +780,7 @@ test("builds a Pacific trip snapshot from canonical major stops and safe navigat
   );
   assert.match(markup, /https:\/\/www\.waze\.com\/ul\?q=/);
   assert.match(markup, /waypoints=/);
-  assert.doesNotMatch(markup, /Longview|Castle Rock/);
+  assert.doesNotMatch(markup, /Longview/);
   assert.doesNotMatch(markup, /Smokies|Club Wyndham/);
 });
 

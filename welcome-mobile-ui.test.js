@@ -53,6 +53,17 @@ test("Welcome remains scrollable and safe-area aware on small viewports", () => 
   assert.doesNotMatch(welcomeRules, /(?:height|min-height):\s*100vh/);
 });
 
+test("Welcome identity cards align without inventing relationship labels", () => {
+  assert.match(
+    styles,
+    /\.welcomeIdentityChoice\s*\{[^}]*display:\s*flex;[^}]*min-height:\s*72px;[^}]*flex-direction:\s*column;[^}]*justify-content:\s*center;/s,
+  );
+  assert.match(
+    app,
+    /adventurer\.relationshipLabel\s*\?[\s\S]*?<small>[\s\S]*?adventurer\.relationshipLabel[\s\S]*?:\s*""/,
+  );
+});
+
 test("mobile System diagnostics remain scrollable and dismissible", () => {
   assert.match(
     styles,

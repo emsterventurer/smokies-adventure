@@ -53,6 +53,7 @@ function createPacificCoastArrivalDay() {
         navigationQuery:
           "Healdsburg Inn on Plaza, 112 Matheson St, Healdsburg, CA",
         priority: "required",
+        driveFromPrevious: "1 hr 30 min–2 hr",
         reservationId:
           "2026-09-24::Healdsburg Inn on Plaza",
       },
@@ -64,6 +65,7 @@ function createPacificCoastArrivalDay() {
         navigationQuery:
           "The Matheson, Healdsburg, CA",
         priority: "required",
+        driveFromPrevious: "2–5 min",
         reservationId:
           "2026-09-24::The Matheson",
       },
@@ -267,6 +269,7 @@ function createPacificCoastLandDays() {
           navigationQuery:
             "Big Tree Wayside, Prairie Creek Redwoods State Park, CA",
           priority: "alternative",
+          driveFromPrevious: "10–15 min",
           notes:
             "Minimal walking and no hiking; part of the mutually exclusive Option B route.",
         },
@@ -393,6 +396,7 @@ function createPacificCoastLandDays() {
           timeLabel: "Before leaving Bandon",
           navigationQuery: "Face Rock Creamery, Bandon, OR",
           priority: "planned",
+          driveFromPrevious: "5 min",
         },
         {
           id: "historic-old-town-florence",
@@ -443,7 +447,7 @@ function createPacificCoastLandDays() {
       pace: "Long travel day with a flexible, non-location-specific break",
       travelNotes: [
         "Optional travel break — stop wherever makes the most sense based on traffic, bathrooms, coffee, and energy.",
-        "Potential suggestions only: Longview — Lake Sacajawea / Nutty Narrows area, or Castle Rock. Travelers may stop somewhere else or skip the break entirely.",
+        "Potential additional-break suggestion only: Longview — Lake Sacajawea / Nutty Narrows area. Travelers may stop somewhere else or skip the additional break entirely.",
       ],
       stops: [
         {
@@ -467,6 +471,14 @@ function createPacificCoastLandDays() {
           notes: "Target departure around 1:00 PM.",
         },
         {
+          id: "castle-rock",
+          name: "Castle Rock",
+          kind: "travel break",
+          navigationQuery: "Castle Rock, WA",
+          priority: "planned",
+          driveFromPrevious: "2 hr 15 min",
+        },
+        {
           id: "chihuly-bridge-of-glass",
           name: "Chihuly Bridge of Glass",
           kind: "required experience",
@@ -474,7 +486,7 @@ function createPacificCoastLandDays() {
           duration: "Allow 45–60 minutes",
           navigationQuery: "Chihuly Bridge of Glass, Tacoma, WA",
           priority: "required",
-          driveFromPrevious: "3 hr 31–57 min DIRECT",
+          driveFromPrevious: "1 hr 30 min",
           notes:
             "Must protect this experience when adjusting the day. Museum admission is not required for the outdoor bridge.",
         },
@@ -668,6 +680,81 @@ function addMissingPacificDriveMetadata(
   };
 }
 
+const LEGACY_PACIFIC_MONDAY_BREAK_NOTE =
+  "Potential suggestions only: Longview — Lake Sacajawea / Nutty Narrows area, or Castle Rock. Travelers may stop somewhere else or skip the break entirely.";
+const LEGACY_TILLAMOOK_TO_CHIHULY_DURATION =
+  "3 hr 31–57 min DIRECT";
+
+function preparePacificMondayDay(existingDay, bundledDay) {
+  if (
+    existingDay?.id !== "2026-09-28" ||
+    !Array.isArray(existingDay.stops)
+  ) {
+    return { day: existingDay, enriched: false };
+  }
+
+  let enriched = false;
+  let stops = existingDay.stops;
+  const tillamookIndex = stops.findIndex(
+    (stop) => stop?.id === "tillamook-creamery",
+  );
+  const chihulyIndex = stops.findIndex(
+    (stop) => stop?.id === "chihuly-bridge-of-glass",
+  );
+  const hasCastleRock = stops.some(
+    (stop) => stop?.id === "castle-rock",
+  );
+
+  if (
+    !hasCastleRock &&
+    tillamookIndex >= 0 &&
+    chihulyIndex > tillamookIndex
+  ) {
+    const castleRock = bundledDay.stops.find(
+      (stop) => stop.id === "castle-rock",
+    );
+    stops = [
+      ...stops.slice(0, tillamookIndex + 1),
+      cloneValue(castleRock),
+      ...stops.slice(tillamookIndex + 1),
+    ];
+    enriched = true;
+  }
+
+  stops = stops.map((stop) => {
+    if (
+      stop?.id !== "chihuly-bridge-of-glass" ||
+      stop.driveFromPrevious !==
+        LEGACY_TILLAMOOK_TO_CHIHULY_DURATION
+    ) {
+      return stop;
+    }
+
+    const preparedStop = { ...stop };
+    delete preparedStop.driveFromPrevious;
+    enriched = true;
+    return preparedStop;
+  });
+
+  const bundledLongviewNote = bundledDay.travelNotes?.[1];
+  const travelNotes = Array.isArray(existingDay.travelNotes)
+    ? existingDay.travelNotes.map((note) => {
+        if (note !== LEGACY_PACIFIC_MONDAY_BREAK_NOTE) {
+          return note;
+        }
+        enriched = true;
+        return bundledLongviewNote;
+      })
+    : existingDay.travelNotes;
+
+  return {
+    day: enriched
+      ? { ...existingDay, travelNotes, stops }
+      : existingDay,
+    enriched,
+  };
+}
+
 function enrichPacificCoastAdventureRecord(record) {
   if (
     !record ||
@@ -696,7 +783,7 @@ function enrichPacificCoastAdventureRecord(record) {
   const existingDayMap = new Map(
     existingDays.map((day) => [String(day?.id ?? ""), day]),
   );
-  let driveMetadataEnriched = false;
+  let existingDataEnriched = false;
   const preparedExistingDayMap = new Map(
     canonicalBundledDays.map((bundledDay) => {
       const existingDay = existingDayMap.get(bundledDay.id);
@@ -705,11 +792,16 @@ function enrichPacificCoastAdventureRecord(record) {
         return [bundledDay.id, null];
       }
 
-      const prepared = addMissingPacificDriveMetadata(
+      const mondayPrepared = preparePacificMondayDay(
         existingDay,
         bundledDay,
       );
-      driveMetadataEnriched ||= prepared.enriched;
+      const prepared = addMissingPacificDriveMetadata(
+        mondayPrepared.day,
+        bundledDay,
+      );
+      existingDataEnriched ||=
+        mondayPrepared.enriched || prepared.enriched;
       return [bundledDay.id, prepared.day];
     }),
   );
@@ -743,10 +835,28 @@ function enrichPacificCoastAdventureRecord(record) {
         ),
     );
 
+  const existingParticipants = Array.isArray(record.participants)
+    ? cloneValue(record.participants)
+    : [];
+  const hasCarolyn = existingParticipants.some(
+    (participant) => participant?.adventurerId === "carolyn",
+  );
+  const bundledParticipants = hasCarolyn
+    ? []
+    : [
+        {
+          adventurerId: "carolyn",
+          role: "traveler",
+          includedInReadiness: true,
+          adventurePreferences: {},
+        },
+      ];
+
   if (
     !bundledDays.length &&
     !bundledReservations.length &&
-    !driveMetadataEnriched
+    !existingDataEnriched &&
+    !bundledParticipants.length
   ) {
     return {
       adventure: record,
@@ -768,6 +878,10 @@ function enrichPacificCoastAdventureRecord(record) {
           ...bundledReservations,
         ],
       },
+      participants: [
+        ...existingParticipants,
+        ...bundledParticipants,
+      ],
     },
     enriched: true,
   };
@@ -915,7 +1029,14 @@ function createPacificCoastAdventureRecord() {
       latitude: null,
       longitude: null,
     },
-    participants: [],
+    participants: [
+      {
+        adventurerId: "carolyn",
+        role: "traveler",
+        includedInReadiness: true,
+        adventurePreferences: {},
+      },
+    ],
     itinerary: {
       days: [],
     },
