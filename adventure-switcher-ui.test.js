@@ -100,7 +100,7 @@ function createHarness(
     get reloads() {
       return reloads;
     },
-    initialize() {
+    initialize(overrides = {}) {
       return initializeAdventureSwitcher({
         document,
         adventures,
@@ -117,6 +117,7 @@ function createHarness(
         reload: () => {
           reloads += 1;
         },
+        ...overrides,
       });
     },
   };
@@ -161,6 +162,51 @@ test("persists a changed selection through the Active Adventure service and relo
 
   assert.deepEqual(harness.selections, ["pacific-2027"]);
   assert.equal(harness.reloads, 1);
+});
+
+test("rejects an unauthorized selection without persistence or reload", () => {
+  const harness = createHarness();
+  const rejected = [];
+  harness.initialize({
+    isAdventureAuthorized: (adventureId) =>
+      adventureId === "smokies-2026",
+    onUnauthorizedSelection: (adventureId) =>
+      rejected.push(adventureId),
+  });
+
+  const switcher = harness.elements["#adventureSwitcher"];
+  switcher.value = "pacific-2027";
+  switcher.dispatch("change");
+
+  assert.deepEqual(harness.selections, []);
+  assert.deepEqual(rejected, ["pacific-2027"]);
+  assert.equal(switcher.value, "smokies-2026");
+  assert.equal(harness.reloads, 0);
+});
+
+test("binds authorized target identity before persisting and reloading", () => {
+  const harness = createHarness();
+  const order = [];
+  harness.initialize({
+    isAdventureAuthorized: () => true,
+    beforeSelectAdventure: () => {
+      order.push("bind");
+      return true;
+    },
+    selectActiveAdventure: (adventureId) => {
+      order.push("persist");
+      harness.selections.push(adventureId);
+    },
+    reload: () => {
+      order.push("reload");
+    },
+  });
+
+  const switcher = harness.elements["#adventureSwitcher"];
+  switcher.value = "pacific-2027";
+  switcher.dispatch("change");
+
+  assert.deepEqual(order, ["bind", "persist", "reload"]);
 });
 
 test("hides Smokies-only UI for a non-Smokies Adventure", () => {

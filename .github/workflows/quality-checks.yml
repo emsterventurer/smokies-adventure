@@ -52,6 +52,16 @@ jobs:
           node --check experience-polish.test.js
           node --check experience-completion.test.js
           node --check version-foundation.test.js
+          node --check adventure/adventure-access.js
+          node --check adventure/adventure-switcher.js
+          node --check adventure/firebase/adventure-access-provider.mjs
+          node --check adventure/firebase/adventure-sync-startup.mjs
+          node --check adventure-access.test.js
+          node --check adventure-access-provider.test.js
+          node --check adventure-aware-welcome.test.js
+          node --check adventure-switcher-ui.test.js
+          node --check adventure-sync-startup.test.js
+          node --check adventure-membership-service.test.js
 
       - name: Run complete regression suite
         run: |
@@ -64,6 +74,13 @@ jobs:
           node reliability.test.js
           node experience-polish.test.js
           node experience-completion.test.js
+
+      - name: Run focused M4-03.2 access checks
+        run: |
+          node --test adventure-access.test.js adventure-access-provider.test.js adventure-aware-welcome.test.js adventure-switcher-ui.test.js adventure-sync-startup.test.js google-sign-in.test.js adventure-membership-service.test.js firebase-membership-provider.test.js
+
+      - name: Run complete root regression suite
+        run: node --test *.test.js
 
       - name: Install and test trusted invitation functions
         run: |

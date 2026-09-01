@@ -10,6 +10,18 @@ function initializeAdventureSwitcher(options = {}) {
     options.activeAdventureService;
   const selectActiveAdventure =
     options.selectActiveAdventure;
+  const isAdventureAuthorized =
+    typeof options.isAdventureAuthorized === "function"
+      ? options.isAdventureAuthorized
+      : () => true;
+  const beforeSelectAdventure =
+    typeof options.beforeSelectAdventure === "function"
+      ? options.beforeSelectAdventure
+      : () => true;
+  const onUnauthorizedSelection =
+    typeof options.onUnauthorizedSelection === "function"
+      ? options.onUnauthorizedSelection
+      : () => {};
   const smokiesAdventureId =
     options.smokiesAdventureId;
   const supportsCanonicalItinerary =
@@ -100,7 +112,18 @@ function initializeAdventureSwitcher(options = {}) {
   }
 
   switcher.addEventListener("change", () => {
-    selectActiveAdventure(switcher.value);
+    const nextAdventureId = switcher.value;
+
+    if (
+      !isAdventureAuthorized(nextAdventureId) ||
+      beforeSelectAdventure(nextAdventureId) === false
+    ) {
+      switcher.value = activeAdventureId ?? "";
+      onUnauthorizedSelection(nextAdventureId);
+      return;
+    }
+
+    selectActiveAdventure(nextAdventureId);
     reload();
   });
 

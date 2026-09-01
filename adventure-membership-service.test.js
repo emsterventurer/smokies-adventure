@@ -160,9 +160,22 @@ assert(
 
 assert(
   app.includes(
-    "Promise.all([",
+    "Promise.all(welcomeDependencies)",
   ),
   "Welcome setup should initialize only after all dependencies are ready",
+);
+
+assert(
+  app.includes(
+    "ADVENTURE_AWARE_ACCESS_ENABLED",
+  ) &&
+    app.includes(
+      '"AdventureAccessProvider"',
+    ) &&
+    app.includes(
+      '"AdventureMembershipService"',
+    ),
+  "Welcome dependencies should select trusted access or legacy membership according to the disabled rollout flag",
 );
 console.log(
   "Adventure membership service tests passed.",

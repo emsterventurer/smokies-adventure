@@ -45,7 +45,8 @@
     features:{
       diagnostics:true,
       weather:true,
-      packingCelebrations:true
+      packingCelebrations:true,
+      adventureAwareAccess:false
     }
   };
 
