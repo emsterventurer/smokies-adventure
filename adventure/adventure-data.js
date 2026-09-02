@@ -185,7 +185,7 @@ function createPacificCoastLandDays() {
           name: "Holiday Inn Express & Suites Eureka",
           kind: "lodging",
           timeLabel: "About 6:00 PM",
-          duration: "Allow 45–60 minutes to check in, rest, and freshen up",
+          duration: "Quick check-in and drop bags before dinner",
           address: "815 W Wabash Ave, Eureka, CA",
           navigationQuery:
             "Holiday Inn Express & Suites Eureka, 815 W Wabash Ave, Eureka, CA",
@@ -198,9 +198,8 @@ function createPacificCoastLandDays() {
           id: "sea-grill",
           name: "Sea Grill",
           kind: "dinner",
-          timeLabel: "Target about 7:00 PM",
           navigationQuery: "Sea Grill, Eureka, CA",
-          priority: "target",
+          priority: "required",
           driveFromPrevious: "5–10 min",
           reservationId: "2026-09-25::Sea Grill",
         },
@@ -525,8 +524,8 @@ function createPacificCoastLandReservations() {
       date: "2026-09-25",
       name: "Sea Grill",
       kind: "dinner",
-      status: "Target",
-      notes: "Target about 7:00 PM; not confirmed.",
+      status: "Confirmed",
+      time: "6:45 PM",
     },
     {
       id: "2026-09-26::Pacific Reef Hotel & Light Show",
@@ -755,6 +754,99 @@ function preparePacificMondayDay(existingDay, bundledDay) {
   };
 }
 
+function preparePacificSeaGrillReservation(reservation) {
+  if (
+    reservationIdFor(reservation) !==
+      "2026-09-25::Sea Grill" ||
+    reservation?.date !== "2026-09-25" ||
+    reservation?.name !== "Sea Grill" ||
+    reservation?.kind !== "dinner" ||
+    reservation?.status !== "Target" ||
+    reservation?.notes !==
+      "Target about 7:00 PM; not confirmed." ||
+    reservation?.time !== undefined
+  ) {
+    return {
+      reservation,
+      enriched: false,
+    };
+  }
+
+  const prepared = cloneValue(reservation);
+
+  prepared.status = "Confirmed";
+  prepared.time = "6:45 PM";
+  delete prepared.notes;
+
+  return {
+    reservation: prepared,
+    enriched: true,
+  };
+}
+
+function preparePacificSeaGrillFriday(day) {
+  if (day?.id !== "2026-09-25" || !Array.isArray(day.stops)) {
+    return {
+      day,
+      enriched: false,
+    };
+  }
+
+  let enriched = false;
+
+  const stops = day.stops.map((stop) => {
+    if (
+      stop?.id === "sea-grill" &&
+      stop?.name === "Sea Grill" &&
+      stop?.kind === "dinner" &&
+      stop?.reservationId === "2026-09-25::Sea Grill" &&
+      stop?.priority === "target" &&
+      stop?.timeLabel === "Target about 7:00 PM"
+    ) {
+      const prepared = cloneValue(stop);
+
+      prepared.priority = "required";
+      delete prepared.timeLabel;
+      enriched = true;
+
+      return prepared;
+    }
+
+    if (
+      stop?.id === "holiday-inn-express-eureka" &&
+      stop?.name === "Holiday Inn Express & Suites Eureka" &&
+      stop?.kind === "lodging" &&
+      stop?.duration ===
+        "Allow 45–60 minutes to check in, rest, and freshen up"
+    ) {
+      const prepared = cloneValue(stop);
+
+      prepared.duration =
+        "Quick check-in and drop bags before dinner";
+      enriched = true;
+
+      return prepared;
+    }
+
+    return stop;
+  });
+
+  if (!enriched) {
+    return {
+      day,
+      enriched: false,
+    };
+  }
+
+  return {
+    day: {
+      ...cloneValue(day),
+      stops,
+    },
+    enriched: true,
+  };
+}
+
 function enrichPacificCoastAdventureRecord(record) {
   if (
     !record ||
@@ -796,12 +888,19 @@ function enrichPacificCoastAdventureRecord(record) {
         existingDay,
         bundledDay,
       );
-      const prepared = addMissingPacificDriveMetadata(
+      const fridayPrepared = preparePacificSeaGrillFriday(
         mondayPrepared.day,
+      );
+      const prepared = addMissingPacificDriveMetadata(
+        fridayPrepared.day,
         bundledDay,
       );
+
       existingDataEnriched ||=
-        mondayPrepared.enriched || prepared.enriched;
+        mondayPrepared.enriched ||
+        fridayPrepared.enriched ||
+        prepared.enriched;
+
       return [bundledDay.id, prepared.day];
     }),
   );
@@ -822,6 +921,17 @@ function enrichPacificCoastAdventureRecord(record) {
   )
     ? cloneValue(record.reservations.items)
     : [];
+
+  const preparedExistingReservations =
+    existingReservations.map((reservation) => {
+      const prepared =
+        preparePacificSeaGrillReservation(reservation);
+
+      existingDataEnriched ||= prepared.enriched;
+
+      return prepared.reservation;
+    });
+
   const existingReservationIds = new Set(
     existingReservations.map(reservationIdFor),
   );
@@ -873,10 +983,10 @@ function enrichPacificCoastAdventureRecord(record) {
       },
       reservations: {
         ...cloneValue(record.reservations),
-        items: [
-          ...existingReservations,
-          ...bundledReservations,
-        ],
+      items: [
+        ...preparedExistingReservations,
+        ...bundledReservations,
+    ],
       },
       participants: [
         ...existingParticipants,
