@@ -253,6 +253,81 @@ test("startup upgrades the stored Pacific Monday route and participants", () => 
   );
 });
 
+test("startup upgrades the known stored Sea Grill reservation and Friday stops", () => {
+  const storageProvider =
+    AdventureStorage.createMemoryStorage();
+  const adventureStorage =
+    AdventureStorage.createAdventureStorage({
+      storageProvider,
+    });
+  const adventure =
+    AdventureData.createPacificCoastAdventureRecord();
+
+  const legacyFriday =
+    AdventureData.createPacificCoastLandDays().find(
+      (day) => day.id === "2026-09-25",
+    );
+
+  const legacySeaGrillStop = legacyFriday.stops.find(
+    (stop) => stop.id === "sea-grill",
+  );
+  legacySeaGrillStop.priority = "target";
+  legacySeaGrillStop.timeLabel =
+    "Target about 7:00 PM";
+
+  const legacyHotel = legacyFriday.stops.find(
+    (stop) => stop.id === "holiday-inn-express-eureka",
+  );
+  legacyHotel.duration =
+    "Allow 45–60 minutes to check in, rest, and freshen up";
+
+  adventure.itinerary.days.push(legacyFriday);
+  adventure.reservations.items.push({
+    id: "2026-09-25::Sea Grill",
+    date: "2026-09-25",
+    name: "Sea Grill",
+    kind: "dinner",
+    status: "Target",
+    notes: "Target about 7:00 PM; not confirmed.",
+  });
+
+  adventureStorage.saveAdventureRecord(adventure);
+
+  AdventureStartup.createAdventureStartup({
+    storageProvider,
+    adventureStorage,
+  }).initializeAdventure();
+
+  const stored =
+    adventureStorage.loadAdventureRecord(
+      AdventureData.PACIFIC_COAST_ADVENTURE_ID,
+    );
+  const friday = stored.itinerary.days.find(
+    (day) => day.id === "2026-09-25",
+  );
+  const seaGrillStop = friday.stops.find(
+    (stop) => stop.id === "sea-grill",
+  );
+  const hotel = friday.stops.find(
+    (stop) => stop.id === "holiday-inn-express-eureka",
+  );
+  const seaGrill =
+    stored.reservations.items.find(
+      (reservation) =>
+        reservation.id === "2026-09-25::Sea Grill",
+    );
+
+  assert.equal(seaGrillStop.priority, "required");
+  assert.equal(seaGrillStop.timeLabel, undefined);
+  assert.equal(
+    hotel.duration,
+    "Quick check-in and drop bags before dinner",
+  );
+  assert.equal(seaGrill.status, "Confirmed");
+  assert.equal(seaGrill.time, "6:45 PM");
+  assert.equal(seaGrill.notes, undefined);
+});
+
 test("migrates legacy adventure data when seeding the first adventure", () => {
   const { startup } = createTestStartup({
     initialEntries: {

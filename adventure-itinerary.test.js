@@ -84,7 +84,20 @@ test("builds a canonical Pacific view model with reservations and safe navigatio
       AdventureData.PACIFIC_COAST_ARRIVAL_DAY_ID,
   );
 
+    const friday = days.find(
+    (day) => day.id === "2026-09-25",
+  );
+  const seaGrill = friday.stops.find(
+    (stop) => stop.id === "sea-grill",
+  );
+
   assert.ok(arrivalDay);
+  assert.ok(friday);
+  assert.ok(seaGrill);
+  assert.equal(seaGrill.timeLabel, "6:45 PM");
+  assert.equal(seaGrill.priority, "required");
+  assert.equal(seaGrill.reservation.status, "Confirmed");
+  assert.equal(seaGrill.reservation.time, "6:45 PM");
   assert.equal(arrivalDay.routeLabel, "SFO → Healdsburg");
   assert.equal(arrivalDay.stops.length, 3);
   assert.equal(
@@ -508,6 +521,10 @@ test("renders Pacific reservations from canonical records without public confirm
   assert.match(markup, /Embassy Suites Seattle Airport/);
   assert.match(markup, /The Matheson/);
   assert.match(markup, /Sea Grill/);
+    assert.match(
+    markup,
+    /Friday, September 25, 2026 · 6:45 PM · dinner/,
+  );
   assert.match(markup, /Spinner&#039;s Seafood/);
   assert.match(markup, /Georgie&#039;s Beachside Grill/);
   assert.match(markup, /Confirmed/);

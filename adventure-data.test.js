@@ -319,6 +319,72 @@ test("Pacific Coast enrichment is idempotent and preserves unrelated data", () =
     ["carolyn"],
   );
 });
+test("upgrades only the known legacy Sea Grill reservation and remains idempotent", () => {
+  const legacy =
+    AdventureData.createPacificCoastAdventureRecord();
+
+  legacy.reservations.items.push({
+    id: "2026-09-25::Sea Grill",
+    date: "2026-09-25",
+    name: "Sea Grill",
+    kind: "dinner",
+    status: "Target",
+    notes: "Target about 7:00 PM; not confirmed.",
+  });
+
+  const first =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      legacy,
+    );
+  const seaGrill =
+    first.adventure.reservations.items.find(
+      (reservation) =>
+        reservation.id === "2026-09-25::Sea Grill",
+    );
+
+  assert.equal(first.enriched, true);
+  assert.equal(seaGrill.status, "Confirmed");
+  assert.equal(seaGrill.time, "6:45 PM");
+  assert.equal(seaGrill.notes, undefined);
+
+  const second =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      first.adventure,
+    );
+
+  assert.equal(second.enriched, false);
+  assert.deepEqual(second.adventure, first.adventure);
+
+  const customized =
+    AdventureData.createPacificCoastAdventureRecord();
+
+  customized.reservations.items.push({
+    id: "2026-09-25::Sea Grill",
+    date: "2026-09-25",
+    name: "Sea Grill",
+    kind: "dinner",
+    status: "Confirmed",
+    time: "7:15 PM",
+    notes: "Traveler changed this reservation.",
+  });
+
+  const preparedCustom =
+    AdventureData.enrichPacificCoastAdventureRecord(
+      customized,
+    );
+  const customSeaGrill =
+    preparedCustom.adventure.reservations.items.find(
+      (reservation) =>
+        reservation.id === "2026-09-25::Sea Grill",
+    );
+
+  assert.equal(customSeaGrill.status, "Confirmed");
+  assert.equal(customSeaGrill.time, "7:15 PM");
+  assert.equal(
+    customSeaGrill.notes,
+    "Traveler changed this reservation.",
+  );
+});
 
 test("adds missing bundled days without replacing an existing Arrival Day", () => {
   const adventure =
@@ -553,27 +619,44 @@ test("preserves Pacific route alternatives and planning semantics", () => {
     "required",
   );
 
-  const referencedReservations = [
-    friday.stops.find((stop) => stop.id === "sea-grill")
-      .reservationId,
+  const seaGrillStop = friday.stops.find(
+    (stop) => stop.id === "sea-grill",
+  );
+  const unconfirmedReservationIds = [
     saturday.stops.find(
       (stop) => stop.id === "spinners-dinner",
     ).reservationId,
     sunday.stops.find((stop) => stop.id === "georgies")
       .reservationId,
   ];
+
   const reservationMap = new Map(
     AdventureData.createPacificCoastLandReservations().map(
       (reservation) => [reservation.id, reservation],
     ),
   );
 
-  for (const reservationId of referencedReservations) {
+  const seaGrillReservation = reservationMap.get(
+    seaGrillStop.reservationId,
+  );
+
+  assert.equal(
+    seaGrillStop.reservationId,
+    "2026-09-25::Sea Grill",
+  );
+  assert.equal(seaGrillStop.priority, "required");
+  assert.equal(seaGrillStop.timeLabel, undefined);
+  assert.equal(seaGrillReservation.status, "Confirmed");
+  assert.equal(seaGrillReservation.time, "6:45 PM");
+  assert.equal(seaGrillReservation.notes, undefined);
+
+  for (const reservationId of unconfirmedReservationIds) {
     assert.notEqual(
       reservationMap.get(reservationId).status,
       "Confirmed",
     );
   }
+
 });
 
 test("preserves the reviewed Pacific drive durations and intentional gaps", () => {

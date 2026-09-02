@@ -277,6 +277,83 @@ test("an inbound Pacific Arrival Day is preserved while missing land days are pr
   );
 });
 
+test("inbound Pacific preparation upgrades the known legacy Sea Grill reservation and Friday stops", async () => {
+  const provider = createCloudProvider();
+  const activeAdventureService =
+    createActiveAdventureService();
+  const cloudAdventure =
+    AdventureData.createPacificCoastAdventureRecord();
+
+  const legacyFriday =
+    AdventureData.createPacificCoastLandDays().find(
+      (day) => day.id === "2026-09-25",
+    );
+
+  const legacySeaGrillStop = legacyFriday.stops.find(
+    (stop) => stop.id === "sea-grill",
+  );
+  legacySeaGrillStop.priority = "target";
+  legacySeaGrillStop.timeLabel =
+    "Target about 7:00 PM";
+
+  const legacyHotel = legacyFriday.stops.find(
+    (stop) => stop.id === "holiday-inn-express-eureka",
+  );
+  legacyHotel.duration =
+    "Allow 45–60 minutes to check in, rest, and freshen up";
+
+  cloudAdventure.itinerary.days.push(legacyFriday);
+  cloudAdventure.reservations.items.push({
+    id: "2026-09-25::Sea Grill",
+    date: "2026-09-25",
+    name: "Sea Grill",
+    kind: "dinner",
+    status: "Target",
+    notes: "Target about 7:00 PM; not confirmed.",
+  });
+
+  await provider.saveAdventureRecord(cloudAdventure);
+
+  const sync =
+    SharedAdventureSync.createSharedAdventureSync({
+      activeAdventureService,
+      cloudProvider: provider,
+      prepareIncomingAdventure:
+        AdventureData.prepareBundledAdventureRecord,
+    });
+
+  await sync.pullAdventure(
+    AdventureData.PACIFIC_COAST_ADVENTURE_ID,
+  );
+
+  const saved =
+    activeAdventureService.getActiveAdventure();
+  const friday = saved.itinerary.days.find(
+    (day) => day.id === "2026-09-25",
+  );
+  const seaGrillStop = friday.stops.find(
+    (stop) => stop.id === "sea-grill",
+  );
+  const hotel = friday.stops.find(
+    (stop) => stop.id === "holiday-inn-express-eureka",
+  );
+  const seaGrill =
+    saved.reservations.items.find(
+      (reservation) =>
+        reservation.id === "2026-09-25::Sea Grill",
+    );
+
+  assert.equal(seaGrillStop.priority, "required");
+  assert.equal(seaGrillStop.timeLabel, undefined);
+  assert.equal(
+    hotel.duration,
+    "Quick check-in and drop bags before dinner",
+  );
+  assert.equal(seaGrill.status, "Confirmed");
+  assert.equal(seaGrill.time, "6:45 PM");
+  assert.equal(seaGrill.notes, undefined);
+});
+
 test("inbound Pacific preparation upgrades Monday and adds Carolyn consistently", async () => {
   const provider = createCloudProvider();
   const activeAdventureService = createActiveAdventureService();

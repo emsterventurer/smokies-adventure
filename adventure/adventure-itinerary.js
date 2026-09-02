@@ -259,12 +259,14 @@ function createItineraryViewModel(adventure, options = {}) {
         nextStop?.address ||
         null;
 
+      const reservation =
+        reservationMap.get(stop.reservationId) || null;
+
       return {
         ...stop,
-        reservation:
-          reservationMap.get(
-            stop.reservationId,
-          ) || null,
+        timeLabel:
+          reservation?.time || stop.timeLabel,
+        reservation,
         navigation: {
           googleMaps: mapsSearch(query),
           waze: wazeSearch(query),
@@ -584,7 +586,7 @@ function renderCanonicalReservations(adventure) {
           (reservation) => `
             <article class="canonicalReservationReviewCard">
               <div>
-                <small>${escapeHtml(formatDate(reservation.date))} · ${escapeHtml(reservation.kind)}</small>
+                <small>${escapeHtml(formatDate(reservation.date))}${reservation.time ? ` · ${escapeHtml(reservation.time)}` : ""} · ${escapeHtml(reservation.kind)}</small>
                 <h4>${escapeHtml(reservation.name)}</h4>
                 ${reservation.address ? `<p>${escapeHtml(reservation.address)}</p>` : ""}
                 ${reservation.notes ? `<p>${escapeHtml(reservation.notes)}</p>` : ""}
