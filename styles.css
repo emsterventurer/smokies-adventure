@@ -130,6 +130,75 @@ h2 {
   padding: 7px 10px;
   text-transform: none;
 }
+.adventureInvitationPanel {
+  max-width: 520px;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #f5f6ef;
+  padding: 10px 12px;
+}
+.adventureInvitationPanel summary {
+  color: var(--fd);
+  font-weight: 700;
+}
+.adventureInvitationPanel > p {
+  margin: 9px 0;
+  color: var(--mut);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+.adventureInvitationForm {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.8fr) minmax(180px, 1.2fr);
+  gap: 10px;
+}
+.adventureInvitationForm label {
+  display: grid;
+  gap: 5px;
+  color: var(--mut);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.adventureInvitationForm select,
+.adventureInvitationForm input {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: white;
+  color: var(--fd);
+  font: 600 0.82rem Georgia, serif;
+  letter-spacing: normal;
+  padding: 9px 10px;
+  text-transform: none;
+}
+.adventureInvitationForm button {
+  grid-column: 1 / -1;
+  border: 0;
+  border-radius: 11px;
+  background: var(--f);
+  color: white;
+  padding: 10px 12px;
+  font-weight: 700;
+}
+.adventureInvitationForm button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+.adventureInvitationStatus {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--fd);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+@media (max-width: 520px) {
+  .adventureInvitationForm {
+    grid-template-columns: 1fr;
+  }
+}
 .badge {
   background: var(--f);
   color: white;

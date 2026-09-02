@@ -316,6 +316,72 @@ function initializeAvailableAdventureSwitcher(
     });
 }
 
+async function initializeAdventureInvitationExperience(
+  accessState = ADVENTURE_ACCESS_STATE,
+) {
+  const panel = document.querySelector(
+    "#adventureInvitationPanel",
+  );
+
+  if (panel) {
+    panel.hidden = true;
+  }
+
+  const provider =
+    globalThis.AdventureAccessProvider;
+  const identityService =
+    globalThis.AdventurerIdentity;
+  const adventure =
+    ADVENTURE_STARTUP_RESULT
+      ?.activeAdventureService
+      ?.getActiveAdventure?.();
+
+  if (
+    accessState?.status !== "authorized" ||
+    !adventure ||
+    !identityService ||
+    typeof provider?.hasAdventureAdminClaim !==
+      "function" ||
+    typeof provider?.createAdventureInvitation !==
+      "function" ||
+    typeof globalThis.AdventureInvitation
+      ?.initializeAdventureInvitation !== "function"
+  ) {
+    return null;
+  }
+
+  try {
+    const isAdventureAdmin =
+      await provider.hasAdventureAdminClaim();
+
+    if (
+      ADVENTURE_ACCESS_STATE.status !== "authorized" ||
+      ADVENTURE_ACCESS_STATE.activeAdventureId !==
+        adventure.id
+    ) {
+      return null;
+    }
+
+    return globalThis.AdventureInvitation
+      .initializeAdventureInvitation({
+        document,
+        adventure,
+        adventurers:
+          identityService.getAdventurers(),
+        activeAdventurerId:
+          accessState.activeAdventurerId,
+        isAdventureAdmin,
+        createInvitation: (input) =>
+          provider.createAdventureInvitation(input),
+      });
+  } catch (error) {
+    if (panel) {
+      panel.hidden = true;
+    }
+    return null;
+  }
+}
+
 if (!ADVENTURE_AWARE_ACCESS_ENABLED) {
   initializeAvailableAdventureSwitcher();
 }
@@ -2793,6 +2859,10 @@ function publishAdventureAccessState(state) {
   );
 
   initializeAvailableAdventureSwitcher(
+    ADVENTURE_ACCESS_STATE,
+  );
+
+  void initializeAdventureInvitationExperience(
     ADVENTURE_ACCESS_STATE,
   );
 
