@@ -13,6 +13,7 @@ const ASSETS=[
   "./adventure-brain.js",
   "./living-campfire.js",
   "./shared-state.js",
+  "./service-worker-update.js",
   "./app.js",
   "./weather-service.js",
   "./weather-ui.js",
@@ -29,7 +30,9 @@ self.addEventListener("install",event=>{
 });
 
 self.addEventListener("message",event=>{
-  if(event.data?.type==="SKIP_WAITING") self.skipWaiting();
+  if(event.data?.type==="SKIP_WAITING"){
+    event.waitUntil(self.skipWaiting());
+  }
 });
 
 self.addEventListener("activate",event=>{

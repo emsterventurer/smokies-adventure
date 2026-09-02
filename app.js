@@ -37,10 +37,6 @@ function hideUpdateToast(){
  setTimeout(()=>toast.hidden=true,APP_CONFIG.ui.toastCloseMs??250);
 }
 
-function activateWaitingWorker(reg){
-  if(reg?.waiting)reg.waiting.postMessage({type:"SKIP_WAITING"});
-}
-
 function currentScreenLabel(){
   const activeDay=document.querySelector(".dayDetail:not([hidden]) h1, .dayDetail:not([hidden]) h2");
   if(activeDay?.textContent)return activeDay.textContent.trim();
@@ -152,13 +148,6 @@ function wireBuildTools(){
 
   document.querySelector("#viewFeedback")?.addEventListener("click",renderSavedFeedback);
   document.querySelector("#dismissUpdate")?.addEventListener("click",hideUpdateToast);
-  document.querySelector("#refreshApp")?.addEventListener("click",async()=>{
-    try{
-      const reg=await navigator.serviceWorker?.getRegistration();
-      activateWaitingWorker(reg);
-    }catch(e){}
-    window.location.reload();
-  });
 }
 
 
@@ -3488,13 +3477,6 @@ if("serviceWorker" in navigator){
           }
         });
       });
-
-      navigator.serviceWorker.addEventListener(
-        "controllerchange",
-        ()=>{
-          window.location.reload();
-        }
-      );
 
       // Always check production for the newest
       // service worker and imported build metadata.
