@@ -19,15 +19,15 @@
     "use strict";
 
     const build=Object.freeze({
-    version:"M4-02.4",
+    version:"M4-03",
     milestone:"Milestone 4",
-    feature:"Pacific Coast Castle Rock & Carolyn Traveler",
+    feature:"Adventure Invitations & Adventure-Aware Access",
     build:"Build 1",
     updated:"September 1, 2026",
-    cache:"adventure-companion-m4-02-4-build-1",
-    eyebrow:"M4-02.4 · PACIFIC COAST CASTLE ROCK & CAROLYN TRAVELER",
+    cache:"adventure-companion-m4-03-build-1",
+    eyebrow:"M4-03 · ADVENTURE INVITATIONS & ADVENTURE-AWARE ACCESS",
       description:
-        "Adventure Companion now includes Castle Rock and Carolyn in the Pacific Coast experience, with reviewed drive estimates and preservation-first upgrades while preserving Smokies."
+        "Adventure Companion now includes the trusted invitation and Adventure-aware access foundation while keeping the new access experience safely disabled for this production checkpoint."
     });
 
     function applyToDocument(doc){
