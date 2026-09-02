@@ -1,25 +1,25 @@
 {
-  "indexes": [
+  "indexes": [],
+  "fieldOverrides": [
     {
       "collectionGroup": "invitations",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
+      "fieldPath": "emailKey",
+      "indexes": [
         {
-          "fieldPath": "emailKey",
-          "order": "ASCENDING"
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION_GROUP"
         }
       ]
     },
     {
       "collectionGroup": "members",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
+      "fieldPath": "firebaseUid",
+      "indexes": [
         {
-          "fieldPath": "firebaseUid",
-          "order": "ASCENDING"
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION_GROUP"
         }
       ]
     }
-  ],
-  "fieldOverrides": []
+  ]
 }
