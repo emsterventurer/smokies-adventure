@@ -42,6 +42,8 @@ jobs:
           node --check app.js
           node --check reliability.js
           node --check service-worker.js
+          node --check service-worker-update.js
+          node --check service-worker-update.test.js
           node --check weather-service.js
           node --check weather-ui.js
           node --check weather-service.test.js
@@ -110,6 +112,7 @@ jobs:
             app.js
             styles.css
             service-worker.js
+            service-worker-update.js
             config.js
             manifest.webmanifest
             weather-service.js
@@ -154,5 +157,5 @@ jobs:
           grep -q 'src="reliability.js"' index.html
           grep -q 'AdventureCompanionBuild' app.js
           grep -q 'importScripts("./config.js","./version.js")' service-worker.js
-          grep -q 'adventure-companion-m4-03-build-2' version.js
+          grep -q 'adventure-companion-m4-03-build-3' version.js
           echo "Critical startup protection is present."

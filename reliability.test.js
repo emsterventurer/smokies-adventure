@@ -22,10 +22,12 @@ assert(reliability.includes('showRecovery'),"friendly recovery screen is missing
 assert(reliability.includes('clearAppCache'),"cache recovery tool is missing");
 assert(reliability.includes('diagnosticChecks'),"diagnostic checks are missing");
 assert(worker.includes('importScripts("./config.js","./version.js")'),"service worker must consume centralized build information");
-assert(version.includes('adventure-companion-m4-03-build-2'),"central cache identity is stale");
+assert(version.includes('adventure-companion-m4-03-build-3'),"central cache identity is stale");
 assert(worker.includes('./version.js'),"version.js is not cached");
 assert(worker.includes('./reliability.js'),"reliability.js is not cached");
-for(const file of ['version.js','app.js','index.html','reliability.js','service-worker.js']) assert(fs.statSync(file).size>0,`${file} is empty`);
+assert(worker.includes('./service-worker-update.js'),"service-worker update controller is not cached");
+assert(html.indexOf('src="service-worker-update.js"')<html.indexOf('src="app.js"'),"service-worker update controller must load before app.js");
+for(const file of ['version.js','app.js','index.html','reliability.js','service-worker.js','service-worker-update.js']) assert(fs.statSync(file).size>0,`${file} is empty`);
 assert(workflow.includes('reliability.test.js'),"GitHub Actions does not run reliability tests");
 assert(workflow.includes('version-foundation.test.js'),"GitHub Actions does not run version foundation tests");
 assert(workflow.includes('configuration-foundation.test.js'),"GitHub Actions does not run configuration foundation tests");
