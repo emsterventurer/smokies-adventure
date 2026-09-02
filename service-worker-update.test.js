@@ -30,6 +30,83 @@ function createHarness() {
   };
 }
 
+function createWorkerHarness({
+  cacheName = "corrected-release-cache",
+  existingCaches = [],
+  addAll = () => Promise.resolve(),
+} = {}) {
+  const listeners = {};
+  const events = [];
+  const cachesInUse = new Set(existingCaches);
+  let skipWaitingCalls = 0;
+  let claimCalls = 0;
+  const worker = fs.readFileSync("service-worker.js", "utf8");
+  const context = {
+    importScripts() {
+      context.self.AdventureCompanionBuild = {
+        cache: cacheName,
+        version: "corrected-release",
+      };
+    },
+    self: {
+      addEventListener(type, listener) { listeners[type] = listener; },
+      skipWaiting() {
+        skipWaitingCalls += 1;
+        events.push("skipWaiting");
+        return Promise.resolve();
+      },
+      clients: {
+        claim() {
+          claimCalls += 1;
+          events.push("clients.claim");
+          return Promise.resolve();
+        },
+      },
+    },
+    caches: {
+      open(name) {
+        cachesInUse.add(name);
+        return Promise.resolve({
+          addAll(assets) {
+            events.push("cache.addAll:start");
+            return addAll(assets).then((result) => {
+              events.push("cache.addAll:complete");
+              return result;
+            });
+          },
+        });
+      },
+      keys() { return Promise.resolve([...cachesInUse]); },
+      delete(name) {
+        events.push(`cache.delete:${name}`);
+        return Promise.resolve(cachesInUse.delete(name));
+      },
+      match() { return Promise.resolve(); },
+    },
+    fetch() {},
+  };
+
+  vm.runInNewContext(worker, context);
+
+  return {
+    listeners,
+    events,
+    cachesInUse,
+    skipWaitingCalls: () => skipWaitingCalls,
+    claimCalls: () => claimCalls,
+  };
+}
+
+function dispatchLifetimeEvent(listener, event = {}) {
+  let lifetime;
+  listener({
+    ...event,
+    waitUntil(promise) { lifetime = promise; },
+  });
+  assert.ok(lifetime instanceof Promise);
+  return lifetime;
+}
+
 test("Refresh now requests activation without reloading under the old controller", () => {
   const harness = createHarness();
 
@@ -121,36 +198,78 @@ test("browser flow intercepts an old Refresh handler until controllerchange", as
 });
 
 test("waiting worker keeps skipWaiting alive when an old client reloads", async () => {
-  const listeners = {};
-  let skipWaitingCalls = 0;
-  const worker = fs.readFileSync("service-worker.js", "utf8");
-  const context = {
-    importScripts() {
-      context.self.AdventureCompanionBuild = {
-        cache: "test-cache",
-        version: "test-build",
-      };
-    },
-    self: {
-      addEventListener(type, listener) { listeners[type] = listener; },
-      skipWaiting() {
-        skipWaitingCalls += 1;
-        return Promise.resolve();
-      },
-      clients: { claim() {} },
-    },
-    caches: {},
-    fetch() {},
-  };
-
-  vm.runInNewContext(worker, context);
-  let lifetime;
-  listeners.message({
+  const harness = createWorkerHarness();
+  const lifetime = dispatchLifetimeEvent(harness.listeners.message, {
     data: { type: "SKIP_WAITING" },
-    waitUntil(promise) { lifetime = promise; },
   });
 
-  assert.equal(skipWaitingCalls, 1);
-  assert.ok(lifetime instanceof Promise);
+  assert.equal(harness.skipWaitingCalls(), 1);
   await lifetime;
+});
+
+test("install caches every release asset before automatic activation", async () => {
+  let finishCaching;
+  let cachedAssets;
+  const caching = new Promise((resolve) => { finishCaching = resolve; });
+  const harness = createWorkerHarness({
+    addAll(assets) {
+      cachedAssets = [...assets];
+      return caching;
+    },
+  });
+
+  const lifetime = dispatchLifetimeEvent(harness.listeners.install);
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(harness.skipWaitingCalls(), 0);
+
+  finishCaching();
+  await lifetime;
+
+  assert.ok(cachedAssets.includes("./index.html"));
+  assert.ok(cachedAssets.includes("./service-worker-update.js"));
+  assert.deepEqual(harness.events, [
+    "cache.addAll:start",
+    "cache.addAll:complete",
+    "skipWaiting",
+  ]);
+  assert.equal(harness.skipWaitingCalls(), 1);
+});
+
+test("failed release caching prevents automatic activation", async () => {
+  const cacheError = new Error("synthetic cache failure");
+  const harness = createWorkerHarness({
+    addAll() { return Promise.reject(cacheError); },
+  });
+
+  await assert.rejects(
+    dispatchLifetimeEvent(harness.listeners.install),
+    cacheError,
+  );
+
+  assert.equal(harness.skipWaitingCalls(), 0);
+  assert.deepEqual(harness.events, ["cache.addAll:start"]);
+});
+
+test("a repeated release replaces the previous cache and claims clients automatically", async () => {
+  const previousCache = "adventure-companion-m4-03-build-3";
+  const correctedCache = "corrected-release-cache";
+  const harness = createWorkerHarness({
+    cacheName: correctedCache,
+    existingCaches: [previousCache],
+  });
+
+  await dispatchLifetimeEvent(harness.listeners.install);
+  await dispatchLifetimeEvent(harness.listeners.activate);
+
+  assert.deepEqual(harness.events, [
+    "cache.addAll:start",
+    "cache.addAll:complete",
+    "skipWaiting",
+    `cache.delete:${previousCache}`,
+    "clients.claim",
+  ]);
+  assert.equal(harness.skipWaitingCalls(), 1);
+  assert.equal(harness.claimCalls(), 1);
+  assert.deepEqual([...harness.cachesInUse], [correctedCache]);
 });
