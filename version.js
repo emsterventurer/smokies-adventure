@@ -22,12 +22,12 @@
     version:"M4-03",
     milestone:"Milestone 4",
     feature:"Adventure Invitations & Adventure-Aware Access",
-    build:"Build 1",
+    build:"Build 2",
     updated:"September 1, 2026",
-    cache:"adventure-companion-m4-03-build-1",
+    cache:"adventure-companion-m4-03-build-2",
     eyebrow:"M4-03 · ADVENTURE INVITATIONS & ADVENTURE-AWARE ACCESS",
       description:
-        "Adventure Companion now includes the trusted invitation and Adventure-aware access foundation while keeping the new access experience safely disabled for this production checkpoint."
+        "Adventure Companion now uses trusted Adventure-aware access to show each signed-in traveler only the Adventures and identity assigned to them."
     });
 
     function applyToDocument(doc){

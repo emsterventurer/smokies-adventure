@@ -392,13 +392,13 @@ test("access listing failure fails the resolution sequence", async () => {
   );
 });
 
-test("activation remains disabled and legacy membership path remains available", () => {
+test("activation is enabled while the legacy membership path remains available for rollback", () => {
   const config = require("./config.js");
   const app = fs.readFileSync("app.js", "utf8");
 
   assert.equal(
     config.features.adventureAwareAccess,
-    false,
+    true,
   );
   assert.match(
     app,
