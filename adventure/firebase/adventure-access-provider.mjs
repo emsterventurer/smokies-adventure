@@ -4,7 +4,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-functions.js";
 
 import {
+  getIdTokenResult,
+} from "https://www.gstatic.com/firebasejs/12.17.0/firebase-auth.js";
+
+import {
   app,
+  auth,
 } from "./firebase-client.mjs";
 
 const functions = getFunctions(app, "us-central1");
@@ -17,6 +22,11 @@ const acceptInvitationsCallable = httpsCallable(
 const listAccessCallable = httpsCallable(
   functions,
   "listMyAdventureAccess",
+);
+
+const createInvitationCallable = httpsCallable(
+  functions,
+  "createAdventureInvitation",
 );
 
 async function acceptPendingAdventureInvitations() {
@@ -35,6 +45,31 @@ async function listMyAdventureAccess() {
   return result.data;
 }
 
+async function hasAdventureAdminClaim() {
+  const user = auth.currentUser;
+
+  if (!user) {
+    return false;
+  }
+
+  const tokenResult = await getIdTokenResult(
+    user,
+    true,
+  );
+
+  return tokenResult.claims?.adventureAdmin === true;
+}
+
+async function createAdventureInvitation(input) {
+  const result = await createInvitationCallable({
+    adventureId: input?.adventureId,
+    adventurerId: input?.adventurerId,
+    email: input?.email,
+  });
+
+  return result.data;
+}
+
 const accessClient = globalThis.AdventureAccess
   .createAdventureAccessClient({
     acceptPendingInvitations:
@@ -45,6 +80,8 @@ const accessClient = globalThis.AdventureAccess
 const AdventureAccessProvider = Object.freeze({
   acceptPendingAdventureInvitations,
   listMyAdventureAccess,
+  hasAdventureAdminClaim,
+  createAdventureInvitation,
   resolveCurrentAdventureAccess:
     accessClient.resolveCurrentAdventureAccess,
 });

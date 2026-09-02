@@ -40,6 +40,23 @@ test("uses the existing Firebase SDK and us-central1 callable names", () => {
   );
   assert.match(provider, /acceptPendingAdventureInvitations/);
   assert.match(provider, /listMyAdventureAccess/);
+  assert.match(provider, /createAdventureInvitation/);
+});
+
+test("reads only the adventureAdmin token claim and keeps backend invitation authorization authoritative", () => {
+  assert.match(
+    provider,
+    /getIdTokenResult\(\s*user,\s*true,?\s*\)/,
+  );
+  assert.match(
+    provider,
+    /tokenResult\.claims\?\.adventureAdmin === true/,
+  );
+  assert.match(
+    provider,
+    /createInvitationCallable\(\{[\s\S]*adventureId:[\s\S]*adventurerId:[\s\S]*email:/,
+  );
+  assert.doesNotMatch(provider, /localStorage|sessionStorage|emailKey/);
 });
 
 test("invitation acceptance exposes no email input", () => {

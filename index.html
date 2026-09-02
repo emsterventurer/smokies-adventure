@@ -233,6 +233,22 @@
      <span>Adventure</span>
      <select id="adventureSwitcher" aria-label="Choose active Adventure"></select>
     </label>
+    <details id="adventureInvitationPanel" class="adventureInvitationPanel" hidden>
+      <summary>Invite a traveler</summary>
+      <p>Prepare access for someone already traveling on this Adventure.</p>
+      <form id="adventureInvitationForm" class="adventureInvitationForm">
+        <label>
+          <span>Traveler</span>
+          <select id="adventureInvitationTarget" required></select>
+        </label>
+        <label>
+          <span>Email address</span>
+          <input id="adventureInvitationEmail" type="email" autocomplete="email" required>
+        </label>
+        <button id="adventureInvitationSubmit" type="submit">Prepare invitation</button>
+        <p id="adventureInvitationStatus" class="adventureInvitationStatus" role="status" aria-live="polite" hidden></p>
+      </form>
+    </details>
 </div>
  <span id="phaseBadge" class="badge">Planning</span>
  <div class="phases">
@@ -315,6 +331,7 @@
 <script src="adventure/adventurer-directory.js"></script>
 <script src="adventure/adventurer-identity.js"></script>
 <script src="adventure/adventure-access.js"></script>
+<script src="adventure/adventure-invitation.js"></script>
 <script src="adventure/adventure-data.js"></script>
 <script src="adventure/adventure-normalization.js"></script>
 <script src="adventure/adventure-validation.js"></script>
