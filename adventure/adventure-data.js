@@ -109,6 +109,9 @@ function createPacificCoastLandDays() {
         "Travel from Healdsburg to Eureka through wine country, easy-access redwoods, and Victorian Ferndale, with time to settle in before dinner.",
       routeLabel: "Healdsburg → Eureka",
       pace: "Scenic drive with easy walks and a hotel reset",
+      travelNotes: [
+        "Required scenic route: drive the full Avenue of the Giants south to north. Visitor Center and Founders Grove visits are optional; use the skip-optional route links to stay on CA-254 through the northern end before Ferndale. Ferndale's visit can serve as the schedule buffer.",
+      ],
       stops: [
         {
           id: "healdsburg-inn-departure",
@@ -134,49 +137,108 @@ function createPacificCoastLandDays() {
           id: "avenue-cafe-miranda",
           name: "Avenue Cafe / Miranda",
           kind: "lunch",
-          timeLabel: "About 12:35 PM",
+          timeLabel: "About 1:10 PM",
           duration: "Allow about 50 minutes",
           navigationQuery:
             "Avenue Cafe, Miranda, CA",
           priority: "planned",
-          driveFromPrevious: "1 hr 25 min",
+          driveFromPrevious: "About 2 hr",
+          routeFromPrevious: {
+            fromStopId: "nelson-family-vineyards",
+            // Road coordinates checked in Google Maps, September 4, 2026.
+            // CA-254 just north of its southern US-101 / Exit 645 junction.
+            via: [{
+              id: "avenue-south-entrance",
+              name: "CA-254 southern entrance (routing only)",
+              navigationQuery: "40.182939,-123.773775",
+            }],
+            guidance: "Enter CA-254 / Avenue of the Giants at the southern entrance near Phillipsville (Exit 645), then stay on the Avenue to Miranda. Routing anchors are drive-through points, not additional activities; check Google's route before setting off.",
+          },
         },
         {
           id: "humboldt-redwoods-visitor-center",
           name: "Humboldt Redwoods Visitor Center / Avenue of the Giants",
           kind: "scenic stop",
-          timeLabel: "About 1:55 PM",
+          timeLabel: "Optional stop after lunch",
           duration: "Allow 20–25 minutes",
           navigationQuery:
             "Humboldt Redwoods State Park Visitor Center, Weott, CA",
-          priority: "planned",
+          priority: "optional",
           driveFromPrevious: "30 min",
+          routeFromPrevious: {
+            fromStopId: "avenue-cafe-miranda",
+            // CA-254 east of the river before its loop through Myers Flat.
+            via: [{
+              id: "avenue-myers-flat-approach",
+              name: "CA-254 Myers Flat approach (routing only)",
+              navigationQuery: "40.272306,-123.850154",
+            }],
+            guidance: "Continue on CA-254 / Avenue of the Giants through Myers Flat to the Visitor Center, rather than taking US-101. The waypoint is a drive-through routing anchor, not an extra stop.",
+          },
           notes:
-            "Easy-access redwood context; no hiking is assumed.",
+            "Optional: stop for a short visit or continue on the Avenue. Easy-access redwood context; no hiking is assumed.",
+          routingPassBy: {
+            id: "avenue-visitor-center-pass-by",
+            name: "CA-254 beside Visitor Center (routing only)",
+            navigationQuery: "40.3081954,-123.9088866",
+          },
         },
         {
           id: "founders-grove",
           name: "Founders Grove",
           kind: "redwood experience",
-          timeLabel: "About 2:30 PM",
+          timeLabel: "Optional stop along the Avenue",
           duration: "Allow 30–45 minutes",
           navigationQuery:
             "Founders Grove, Dyerville Loop Road, Weott, CA",
-          priority: "planned",
+          priority: "optional",
           driveFromPrevious: "10 min",
           notes:
-            "Keep this a short, easy redwood experience; no strenuous walking.",
+            "Optional: stop for the short redwood walk or continue north on CA-254 without taking the Dyerville Loop spur. No strenuous walking is assumed.",
+          routingPassBy: {
+            id: "avenue-founders-pass-by",
+            name: "CA-254 beside Founders Grove (routing only)",
+            navigationQuery: "40.351793,-123.926232",
+          },
         },
         {
           id: "ferndale",
           name: "Ferndale",
           kind: "town exploration",
-          timeLabel: "About 4:05 PM",
+          timeLabel: "About 4:15–4:30 PM",
           duration: "Allow about 1 hour 20–25 minutes",
           navigationQuery:
             "Main Street, Ferndale, CA",
           priority: "planned",
           driveFromPrevious: "50 min",
+          routeFromPrevious: {
+            fromStopId: "founders-grove",
+            // CA-254 through-points south/north of Redcrest, then the
+            // northern end immediately before US-101 / Exit 674.
+            via: [
+              {
+                id: "avenue-south-of-redcrest",
+                name: "CA-254 south of Redcrest (routing only)",
+                navigationQuery: "40.384477,-123.926349",
+              },
+              {
+                id: "avenue-north-of-redcrest",
+                name: "CA-254 north of Redcrest (routing only)",
+                navigationQuery: "40.416374,-123.963342",
+              },
+              {
+                id: "avenue-pepperwood-approach",
+                name: "CA-254 Pepperwood approach (routing only)",
+                navigationQuery: "40.4403259,-123.9853689",
+              },
+              {
+                id: "avenue-north-end",
+                name: "CA-254 northern end (routing only)",
+                navigationQuery: "40.441289,-124.031664",
+              },
+            ],
+            guidance: "Return to CA-254 after Founders Grove. Stay on CA-254 / Avenue of the Giants through the northern end before continuing toward Ferndale. Do not take an early US-101 shortcut; Google may suggest one even with routing anchors.",
+          },
           notes:
             "Browse Victorian Main Street, shops, and galleries; leave around 5:30 PM.",
         },
@@ -184,7 +246,7 @@ function createPacificCoastLandDays() {
           id: "holiday-inn-express-eureka",
           name: "Holiday Inn Express & Suites Eureka",
           kind: "lodging",
-          timeLabel: "About 6:00 PM",
+          timeLabel: "About 5:45–6:00 PM",
           duration: "Quick check-in and drop bags before dinner",
           address: "815 W Wabash Ave, Eureka, CA",
           navigationQuery:
@@ -847,6 +909,64 @@ function preparePacificSeaGrillFriday(day) {
   };
 }
 
+function preparePacificAvenueRouting(day, bundledDay) {
+  if (day?.id !== "2026-09-25" || day.date !== bundledDay.date ||
+      !Array.isArray(day.stops) || day.routeAlternatives !== undefined ||
+      day.alternativeRouteStops !== undefined ||
+      day.stops.length !== bundledDay.stops.length ||
+      !day.stops.every((stop, index) => stop?.id === bundledDay.stops[index].id)) {
+    return { day, enriched: false };
+  }
+
+  // Only the unchanged bundled scenic corridor is eligible. Fail closed for
+  // customized stops, destinations, scheduling, or pre-existing routing.
+  const corridor = bundledDay.stops.slice(1, 7);
+  const sameValue = (a, b) => a === b || Boolean(a && b &&
+    typeof a === "object" && typeof b === "object" &&
+    Array.isArray(a) === Array.isArray(b) &&
+    Object.keys(a).length === Object.keys(b).length &&
+    Object.keys(a).every((key) => Object.hasOwn(b, key) && sameValue(a[key], b[key])));
+  if (day.travelNotes !== undefined && !sameValue(day.travelNotes, bundledDay.travelNotes)) {
+    return { day, enriched: false };
+  }
+  const oldLabels = {
+    "avenue-cafe-miranda": "About 12:35 PM",
+    "humboldt-redwoods-visitor-center": "About 1:55 PM",
+    "founders-grove": "About 2:30 PM",
+    ferndale: "About 4:05 PM",
+    "holiday-inn-express-eureka": "About 6:00 PM",
+  };
+  const matchesLegacy = ["original", "routed", "optional"].some((shape) => corridor.every((bundledStop, offset) => {
+    const legacy = { ...bundledStop };
+    if (shape !== "optional") delete legacy.routingPassBy;
+    if (shape === "original") delete legacy.routeFromPrevious;
+    if (shape !== "optional" && legacy.id === "avenue-cafe-miranda") legacy.driveFromPrevious = "1 hr 25 min";
+    if (shape !== "optional" && legacy.id === "humboldt-redwoods-visitor-center") {
+      legacy.priority = "planned";
+      legacy.notes = "Easy-access redwood context; no hiking is assumed.";
+    }
+    if (shape !== "optional" && legacy.id === "founders-grove") {
+      legacy.priority = "planned";
+      legacy.notes = "Keep this a short, easy redwood experience; no strenuous walking.";
+    }
+    const stored = day.stops[offset + 1];
+    if (oldLabels[legacy.id] && stored.timeLabel === oldLabels[legacy.id]) {
+      legacy.timeLabel = stored.timeLabel;
+    }
+    return sameValue(stored, legacy);
+  }));
+  if (!matchesLegacy) return { day, enriched: false };
+
+  const updatedDay = {
+      ...day,
+      travelNotes: cloneValue(bundledDay.travelNotes),
+      stops: day.stops.map((stop, index) => {
+        return index >= 1 && index <= 6 ? cloneValue(bundledDay.stops[index]) : stop;
+      }),
+    };
+  return { day: updatedDay, enriched: !sameValue(day, updatedDay) };
+}
+
 function enrichPacificCoastAdventureRecord(record) {
   if (
     !record ||
@@ -895,13 +1015,16 @@ function enrichPacificCoastAdventureRecord(record) {
         fridayPrepared.day,
         bundledDay,
       );
+      const routingPrepared = preparePacificAvenueRouting(
+        prepared.day, bundledDay,
+      );
 
       existingDataEnriched ||=
         mondayPrepared.enriched ||
         fridayPrepared.enriched ||
-        prepared.enriched;
+        prepared.enriched || routingPrepared.enriched;
 
-      return [bundledDay.id, prepared.day];
+      return [bundledDay.id, routingPrepared.day];
     }),
   );
   const bundledDays = canonicalBundledDays.filter(

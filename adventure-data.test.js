@@ -6,6 +6,88 @@ const assert = require("node:assert/strict");
 const AdventureData = require("./adventure/adventure-data.js");
 const AdventurerDirectory = require("./adventure/adventurer-directory.js");
 
+function legacyAvenueAdventure(withRouting = false) {
+  const adventure = AdventureData.prepareBundledAdventureRecord(
+    AdventureData.createPacificCoastAdventureRecord(),
+  );
+  const friday = adventure.itinerary.days.find((day) => day.id === "2026-09-25");
+  delete friday.travelNotes;
+  if (!withRouting) friday.stops.forEach((stop) => { delete stop.routeFromPrevious; });
+  friday.stops.forEach((stop) => { delete stop.routingPassBy; });
+  friday.stops[2].driveFromPrevious = "1 hr 25 min";
+  friday.stops[3].priority = friday.stops[4].priority = "planned";
+  friday.stops[3].notes = "Easy-access redwood context; no hiking is assumed.";
+  friday.stops[4].notes = "Keep this a short, easy redwood experience; no strenuous walking.";
+  return adventure;
+}
+
+test("Avenue preparation upgrades only approved routing, optional visits and lunch drive time", () => {
+  const legacy = legacyAvenueAdventure();
+  legacy.itinerary.days[1].custom = { keep: true };
+  const original = structuredClone(legacy);
+  const prepared = AdventureData.prepareBundledAdventureRecord(legacy);
+  const friday = prepared.itinerary.days[1];
+  assert.equal(friday.stops[2].routeFromPrevious.fromStopId, "nelson-family-vineyards");
+  assert.equal(friday.stops[5].routeFromPrevious.fromStopId, "founders-grove");
+  const withoutRouting = structuredClone(prepared);
+  withoutRouting.itinerary.days[1].stops.forEach((stop) => { delete stop.routeFromPrevious; });
+  withoutRouting.itinerary.days[1].stops.forEach((stop) => { delete stop.routingPassBy; });
+  const expected = structuredClone(original);
+  expected.itinerary.days[1].travelNotes = AdventureData.createPacificCoastLandDays()[0].travelNotes;
+  expected.itinerary.days[1].stops[2].driveFromPrevious = "About 2 hr";
+  for (const index of [3, 4]) {
+    expected.itinerary.days[1].stops[index].priority = "optional";
+    expected.itinerary.days[1].stops[index].notes = AdventureData.createPacificCoastLandDays()[0].stops[index].notes;
+  }
+  assert.deepEqual(withoutRouting, expected); // All other times, reservations, days and participants preserved.
+  assert.deepEqual(legacy, original);
+  const repeated = AdventureData.enrichPacificCoastAdventureRecord(prepared);
+  assert.equal(repeated.enriched, false);
+  assert.deepEqual(repeated.adventure, prepared);
+  const smokies = AdventureData.createSmokiesAdventureRecord();
+  assert.deepEqual(AdventureData.prepareBundledAdventureRecord(smokies), smokies);
+  const unrelated = { ...original, id: "unrelated-adventure" };
+  assert.deepEqual(AdventureData.prepareBundledAdventureRecord(unrelated), unrelated);
+  const priorRouting = legacyAvenueAdventure(true);
+  assert.deepEqual(AdventureData.prepareBundledAdventureRecord(priorRouting),
+    AdventureData.prepareBundledAdventureRecord(legacyAvenueAdventure()));
+});
+
+test("Avenue upgrade leaves customized Friday routes and stops unchanged", () => {
+  for (const customize of [
+    (day) => { day.stops[2].navigationQuery = "Traveler destination"; },
+    (day) => { day.stops[4].notes = "Traveler guidance"; },
+    (day) => { day.stops[5].driveFromPrevious = "Traveler estimate"; },
+    (day) => { day.stops[1].custom = true; },
+    (day) => { day.stops[2].routeFromPrevious = { fromStopId: "custom", via: [] }; },
+    (day) => { day.stops.splice(3, 0, { ...day.stops[2], id: "custom-stop" }); },
+    (day) => { [day.stops[3], day.stops[4]] = [day.stops[4], day.stops[3]]; },
+    (day) => { day.routeAlternatives = []; },
+    (day) => { day.travelNotes = ["Traveler route guidance"]; },
+  ]) {
+    const legacy = legacyAvenueAdventure();
+    customize(legacy.itinerary.days[1]);
+    const original = structuredClone(legacy);
+    assert.deepEqual(AdventureData.prepareBundledAdventureRecord(legacy), original);
+  }
+});
+
+test("Friday clock amendment upgrades only known labels and preserves customizations", () => {
+  const canonical = AdventureData.prepareBundledAdventureRecord(AdventureData.createPacificCoastAdventureRecord());
+  for (const withRouting of [false, true, "optional"]) {
+    const old = withRouting === "optional" ? structuredClone(canonical) : legacyAvenueAdventure(withRouting);
+    const day = old.itinerary.days[1];
+    ["About 12:35 PM", "About 1:55 PM", "About 2:30 PM", "About 4:05 PM", "About 6:00 PM"]
+      .forEach((label, index) => { day.stops[index + 2].timeLabel = label; });
+    assert.deepEqual(AdventureData.prepareBundledAdventureRecord(old), canonical);
+    day.stops[2].timeLabel = "Traveler lunch time";
+    assert.deepEqual(AdventureData.prepareBundledAdventureRecord(old), old);
+  }
+  const repeated = AdventureData.enrichPacificCoastAdventureRecord(canonical);
+  assert.equal(repeated.enriched, false);
+  assert.deepEqual(repeated.adventure, canonical);
+});
+
 test("creates the initial Adventurer Directory", () => {
   const directory = AdventurerDirectory.createInitialAdventurerDirectory();
 
@@ -682,7 +764,7 @@ test("preserves the reviewed Pacific drive durations and intentional gaps", () =
       .map((stop) => stop.driveFromPrevious),
     [
       "55 min",
-      "1 hr 25 min",
+      "About 2 hr",
       "30 min",
       "10 min",
       "50 min",
