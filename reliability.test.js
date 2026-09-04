@@ -22,7 +22,7 @@ assert(reliability.includes('showRecovery'),"friendly recovery screen is missing
 assert(reliability.includes('clearAppCache'),"cache recovery tool is missing");
 assert(reliability.includes('diagnosticChecks'),"diagnostic checks are missing");
 assert(worker.includes('importScripts("./config.js","./version.js")'),"service worker must consume centralized build information");
-assert(version.includes('adventure-companion-m4-03-build-8'),"central cache identity is stale");
+assert(version.includes('adventure-companion-m4-03-build-9'),"central cache identity is stale");
 assert(worker.includes('./version.js'),"version.js is not cached");
 assert(worker.includes('./reliability.js'),"reliability.js is not cached");
 assert(worker.includes('./service-worker-update.js'),"service-worker update controller is not cached");
