@@ -110,7 +110,7 @@ function createPacificCoastLandDays() {
       routeLabel: "Healdsburg → Eureka",
       pace: "Scenic drive with easy walks and a hotel reset",
       travelNotes: [
-        "Required scenic route: drive the full Avenue of the Giants south to north. Visitor Center and Founders Grove visits are optional; use the skip-optional route links to stay on CA-254 through the northern end before Ferndale. Ferndale's visit can serve as the schedule buffer.",
+        "Required scenic route: drive the full Avenue of the Giants south to north, staying on CA-254 through the northern end near Pepperwood before continuing to Ferndale. Shrine Drive-Thru Tree, the Visitor Center, and Founders Grove are optional stops along the way. Ferndale's visit can serve as the schedule buffer.",
       ],
       stops: [
         {

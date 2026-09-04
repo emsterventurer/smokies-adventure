@@ -85,8 +85,9 @@ test("Friday route-only Avenue anchors reach both ends without adding activities
   const html = AdventureItinerary.renderCanonicalItinerary(adventure, { selectedDayId: friday.id });
   assert.equal((html.match(/<article class="stopCard/g) || []).length, 8);
   assert.match(html, /Stay on CA-254 all the way through the Avenue to its northern end near Pepperwood/);
-  assert.match(html, /Next stop · route part 1 of 2/);
-  assert.match(html, /Next stop · route part 2 of 2/);
+  assert.match(html, /Avenue Drive 1 of 2/);
+  assert.match(html, /Avenue Drive 2 of 2/);
+  assert.doesNotMatch(html, /Next stop · route part/);
   assert.match(html, /6:45 PM/);
   assert.equal(friday.stops.at(-1).reservation.status, "Confirmed");
   assert.deepEqual(adventure, before);
@@ -132,7 +133,9 @@ test("optional Friday visits can be skipped without losing the scenic routing an
   assert.equal((html.match(/<article class="stopCard/g) || []).length, 8);
   assert.match(html, /Next drive · About 2 hr →/);
   assert.doesNotMatch(html, /~About/);
-  assert.match(html, /Map without optional visits/);
+  assert.doesNotMatch(html, /Open Day Map/);
+  assert.doesNotMatch(html, /Map without optional visits/);
+  assert.doesNotMatch(html, /Skip .*continue to .*Follow all numbered route parts/);
   assert.match(html, /If you skip it, simply stay on CA-254 and continue north/);
   assert.match(html, /Quick check-in and drop bags before dinner/);
   assert.match(html, /6:45 PM/);
@@ -699,8 +702,22 @@ test("creates complete ordered Day Maps with a safe segmented fallback", () => {
   );
   assert.equal(
     mapActionCount,
-    9,
+    5,
   );
+  const fridayHtml =
+  AdventureItinerary.renderCanonicalItinerary(
+    adventure,
+    { selectedDayId: "2026-09-25" },
+  );
+
+assert.doesNotMatch(
+  fridayHtml,
+  /Open Day Map/,
+);
+assert.doesNotMatch(
+  fridayHtml,
+  /Map without optional visits/,
+);
 });
 
 test("Saturday Day Map follows the selected route and Monday excludes break suggestions", () => {

@@ -450,13 +450,15 @@ function renderCanonicalItinerary(adventure, options = {}) {
               <span>🚗 ${escapeHtml(day.routeLabel)}</span>
               <span>🌿 ${escapeHtml(day.pace)}</span>
             </div>
-            <div class="canonicalMapActions">
-              ${renderRouteActions(
-                day.dayMapSegments,
-                "Open Day Map",
-              )}
-              ${day.withoutOptionalMapSegments.length ? `<p>Full scenic route without optional visits:</p>${renderRouteActions(day.withoutOptionalMapSegments, "Map without optional visits")}` : ""}
-            </div>
+            ${day.id !== "2026-09-25" ? `
+              <div class="canonicalMapActions">
+                  ${renderRouteActions(
+                     day.dayMapSegments,
+                      "Open Day Map",
+                  )}
+                  ${day.withoutOptionalMapSegments.length ? `<p>Full scenic route without optional visits:</p>${renderRouteActions(day.withoutOptionalMapSegments, "Map without optional visits")}` : ""}
+              </div>
+            ` : ""}
             ${day.travelNotes.length ? `
               <aside class="canonicalTravelGuidance" aria-label="Travel guidance">
                 <strong>${day.withoutOptionalMapSegments.length ? "Scenic route guidance" : "Flexible travel guidance"}</strong>
@@ -521,8 +523,12 @@ function renderCanonicalItinerary(adventure, options = {}) {
                         <a href="${stop.navigation.waze}" target="_blank" rel="noopener">🚙 Waze</a>
                         <a href="${stop.navigation.googleMaps}" target="_blank" rel="noopener">📍 Google Maps</a>
                         ${stop.navigation.nextStop ? `<a class="nextRoute" href="${stop.navigation.nextStop}" target="_blank" rel="noopener">${stop.nextDrive ? `Next drive · ${escapeHtml(driveLabel(stop.nextDrive))} →` : "Next stop →"}</a>` : ""}
-                        ${stop.navigation.nextSegments.length > 1 ? `<span>Follow all numbered route parts to the next activity (${escapeHtml(stop.nextDrive ? `${driveLabel(stop.nextDrive)} total` : "drive time not supplied")}).</span>${renderRouteActions(stop.navigation.nextSegments, "Next stop · route part", "nextRoute")}` : ""}
-                        ${stop.navigation.optionalBypasses.map((bypass) => `<div><p>Skip ${escapeHtml(bypass.skipped.join(" and "))}; continue to ${escapeHtml(bypass.destination)}. Follow all numbered route parts; routing anchors are not visits.</p>${renderRouteActions(bypass.segments, `Continue to ${bypass.destination} · route part`, "nextRoute")}</div>`).join("")}
+                        ${stop.navigation.nextSegments.length > 1 ? (
+                          day.id === "2026-09-25"
+                            ? `<span>Continue the full Avenue drive to the next activity (${escapeHtml(stop.nextDrive ? `${driveLabel(stop.nextDrive)} total` : "drive time not supplied")}).</span>${renderRouteActions(stop.navigation.nextSegments, "Avenue Drive", "nextRoute")}`
+                            : `<span>Follow all numbered route parts to the next activity (${escapeHtml(stop.nextDrive ? `${driveLabel(stop.nextDrive)} total` : "drive time not supplied")}).</span>${renderRouteActions(stop.navigation.nextSegments, "Next stop · route part", "nextRoute")}`
+                        ) : ""}
+                        ${day.id !== "2026-09-25" ? stop.navigation.optionalBypasses.map((bypass) => `<div><p>Skip ${escapeHtml(bypass.skipped.join(" and "))}; continue to ${escapeHtml(bypass.destination)}. Follow all numbered route parts; routing anchors are not visits.</p>${renderRouteActions(bypass.segments, `Continue to ${bypass.destination} · route part`, "nextRoute")}</div>`).join("") : ""}
                       </div>
                     </div>
                   </article>
