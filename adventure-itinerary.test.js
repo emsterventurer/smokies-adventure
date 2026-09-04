@@ -84,7 +84,7 @@ test("Friday route-only Avenue anchors reach both ends without adding activities
   }
   const html = AdventureItinerary.renderCanonicalItinerary(adventure, { selectedDayId: friday.id });
   assert.equal((html.match(/<article class="stopCard/g) || []).length, 8);
-  assert.match(html, /Stay on CA-254 \/ Avenue of the Giants through the northern end/);
+  assert.match(html, /Stay on CA-254 all the way through the Avenue to its northern end near Pepperwood/);
   assert.match(html, /Next stop · route part 1 of 2/);
   assert.match(html, /Next stop · route part 2 of 2/);
   assert.match(html, /6:45 PM/);
@@ -133,7 +133,7 @@ test("optional Friday visits can be skipped without losing the scenic routing an
   assert.match(html, /Next drive · About 2 hr →/);
   assert.doesNotMatch(html, /~About/);
   assert.match(html, /Map without optional visits/);
-  assert.match(html, /without taking the Dyerville Loop spur/);
+  assert.match(html, /If you skip it, simply stay on CA-254 and continue north/);
   assert.match(html, /Quick check-in and drop bags before dinner/);
   assert.match(html, /6:45 PM/);
   assert.equal(friday.stops[7].reservation.status, "Confirmed");

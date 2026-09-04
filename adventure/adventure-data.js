@@ -152,7 +152,7 @@ function createPacificCoastLandDays() {
               name: "CA-254 southern entrance (routing only)",
               navigationQuery: "40.182939,-123.773775",
             }],
-            guidance: "Enter CA-254 / Avenue of the Giants at the southern entrance near Phillipsville (Exit 645), then stay on the Avenue to Miranda. Routing anchors are drive-through points, not additional activities; check Google's route before setting off.",
+            guidance: "FULL AVENUE DRIVE: Enter CA-254 / Avenue of the Giants at the southern entrance near Phillipsville (Exit 645). Stay on CA-254 all the way through the Avenue to its northern end near Pepperwood (Exit 674); do not return to US-101 early. Along the way, you will naturally pass Myers Flat, where you can optionally stop at Shrine Drive-Thru Tree. The Visitor Center and Founders Grove are also optional stops later on the Avenue.",
           },
         },
         {
@@ -173,10 +173,10 @@ function createPacificCoastLandDays() {
               name: "CA-254 Myers Flat approach (routing only)",
               navigationQuery: "40.272306,-123.850154",
             }],
-            guidance: "Continue on CA-254 / Avenue of the Giants through Myers Flat to the Visitor Center, rather than taking US-101. The waypoint is a drive-through routing anchor, not an extra stop.",
+            guidance: "Continue north on CA-254 / Avenue of the Giants through Myers Flat. OPTIONAL along the way: watch for signs for Shrine Drive-Thru Tree if you want a quick drive-through-tree stop. Then continue on the Avenue toward the Visitor Center; do not return to US-101.",
           },
           notes:
-            "Optional: stop for a short visit or continue on the Avenue. Easy-access redwood context; no hiking is assumed.",
+            "OPTIONAL: The Visitor Center is directly along the Avenue of the Giants. Stop for a short visit if you want, or simply continue north on CA-254. You do not need to stop here to follow the full Avenue route.",
           routingPassBy: {
             id: "avenue-visitor-center-pass-by",
             name: "CA-254 beside Visitor Center (routing only)",
@@ -194,7 +194,7 @@ function createPacificCoastLandDays() {
           priority: "optional",
           driveFromPrevious: "10 min",
           notes:
-            "Optional: stop for the short redwood walk or continue north on CA-254 without taking the Dyerville Loop spur. No strenuous walking is assumed.",
+            "OPTIONAL: Stop here if you want a short walk among the redwoods. Founders Grove is a brief detour from the Avenue. If you stop, return to CA-254 / Avenue of the Giants afterward and continue north toward Pepperwood. If you skip it, simply stay on CA-254 and continue north.",
           routingPassBy: {
             id: "avenue-founders-pass-by",
             name: "CA-254 beside Founders Grove (routing only)",
@@ -237,7 +237,7 @@ function createPacificCoastLandDays() {
                 navigationQuery: "40.441289,-124.031664",
               },
             ],
-            guidance: "Return to CA-254 after Founders Grove. Stay on CA-254 / Avenue of the Giants through the northern end before continuing toward Ferndale. Do not take an early US-101 shortcut; Google may suggest one even with routing anchors.",
+            guidance: "FULL AVENUE DRIVE: Stay on CA-254 / Avenue of the Giants through Redcrest and Pepperwood to the northern end near Exit 674 before following navigation toward Ferndale. If you stopped at Founders Grove, return to CA-254 first. Do not take an earlier US-101 shortcut.",
           },
           notes:
             "Browse Victorian Main Street, shops, and galleries; leave around 5:30 PM.",
