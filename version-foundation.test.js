@@ -34,12 +34,12 @@ assert.equal(
 
 assert.equal(
   build.build,
-  "Build 7",
+  "Build 8",
 );
 
 assert.equal(
   build.cache,
-  "adventure-companion-m4-03-build-7",
+  "adventure-companion-m4-03-build-8",
 );
 
 assert(
