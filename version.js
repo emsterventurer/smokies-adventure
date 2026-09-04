@@ -22,9 +22,9 @@
     version:"M4-03",
     milestone:"Milestone 4",
     feature:"Adventure Invitations & Adventure-Aware Access",
-    build:"Build 6",
-    updated:"September 2, 2026",
-    cache:"adventure-companion-m4-03-build-6",
+    build:"Build 7",
+    updated:"September 4, 2026",
+    cache:"adventure-companion-m4-03-build-7",
     eyebrow:"M4-03 · ADVENTURE INVITATIONS & ADVENTURE-AWARE ACCESS",
       description:
         "Adventure Companion now uses trusted Adventure-aware access to show each signed-in traveler only the Adventures and identity assigned to them."
