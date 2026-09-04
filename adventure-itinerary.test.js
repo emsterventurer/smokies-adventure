@@ -44,6 +44,116 @@ function createStoredAdventureWithoutDriveMetadata() {
   return adventure;
 }
 
+test("Friday route-only Avenue anchors reach both ends without adding activities", () => {
+  const adventure = createArrivalAdventure();
+  const before = structuredClone(adventure);
+  const friday = AdventureItinerary.createItineraryViewModel(adventure)
+    .find((day) => day.id === "2026-09-25");
+  const activityIds = ["healdsburg-inn-departure", "nelson-family-vineyards",
+    "avenue-cafe-miranda", "humboldt-redwoods-visitor-center", "founders-grove",
+    "ferndale", "holiday-inn-express-eureka", "sea-grill"];
+  assert.deepEqual(friday.stops.map((stop) => stop.id), activityIds);
+  const flatten = (segments) => segments.flatMap((segment, index) =>
+    segment.points.slice(index ? 1 : 0).map((point) => point.id));
+  assert.deepEqual(flatten(friday.dayMapSegments), [
+    ...activityIds.slice(0, 2), "avenue-south-entrance", activityIds[2],
+    "avenue-myers-flat-approach", ...activityIds.slice(3, 5),
+    "avenue-south-of-redcrest", "avenue-north-of-redcrest", "avenue-pepperwood-approach",
+    "avenue-north-end", ...activityIds.slice(5),
+  ]);
+  const nelson = friday.stops[1];
+  const founders = friday.stops[4];
+  assert.equal(new URL(nelson.navigation.nextStop).searchParams.get("waypoints"),
+    "40.182939,-123.773775");
+  assert.equal(new URL(friday.stops[2].navigation.nextStop).searchParams.get("waypoints"),
+    "40.272306,-123.850154");
+  assert.deepEqual(flatten(founders.navigation.nextSegments), [
+    "founders-grove", "avenue-south-of-redcrest", "avenue-north-of-redcrest",
+    "avenue-pepperwood-approach", "avenue-north-end", "ferndale",
+  ]);
+  assert.equal(founders.navigation.nextSegments.length, 2);
+  assert.equal(founders.navigation.nextStop, null); // No misleading truncated one-click route.
+  for (const segment of [...friday.dayMapSegments, ...founders.navigation.nextSegments]) {
+    const url = new URL(segment.url);
+    assert.equal(url.searchParams.get("origin"), segment.points[0].query);
+    assert.equal(url.searchParams.get("destination"), segment.points.at(-1).query);
+    const via = segment.points.slice(1, -1).map((point) => point.query);
+    assert.equal(url.searchParams.get("waypoints"), via.length ? via.join("|") : null);
+    assert.ok(via.length <= 3);
+    assert.ok(segment.url.length < 2048);
+  }
+  const html = AdventureItinerary.renderCanonicalItinerary(adventure, { selectedDayId: friday.id });
+  assert.equal((html.match(/<article class="stopCard/g) || []).length, 8);
+  assert.match(html, /Stay on CA-254 \/ Avenue of the Giants through the northern end/);
+  assert.match(html, /Next stop · route part 1 of 2/);
+  assert.match(html, /Next stop · route part 2 of 2/);
+  assert.match(html, /6:45 PM/);
+  assert.equal(friday.stops.at(-1).reservation.status, "Confirmed");
+  assert.deepEqual(adventure, before);
+});
+
+test("optional Friday visits can be skipped without losing the scenic routing anchors", () => {
+  const adventure = createArrivalAdventure();
+  const original = structuredClone(adventure);
+  const model = AdventureItinerary.createItineraryViewModel(adventure);
+  const friday = model.find((day) => day.id === "2026-09-25");
+  const ids = (segments) => segments.flatMap((segment, index) =>
+    segment.points.slice(index ? 1 : 0).map((point) => point.id));
+  assert.deepEqual(friday.stops.map((stop) => stop.priority),
+    ["required", "planned", "planned", "optional", "optional", "planned", "required", "required"]);
+  assert.equal(friday.stops[1].nextDrive, "About 2 hr");
+  assert.deepEqual(friday.stops.map((stop) => stop.timeLabel), [
+    "Depart 9:30 AM", "About 10:25 AM", "About 1:10 PM", "Optional stop after lunch",
+    "Optional stop along the Avenue", "About 4:15–4:30 PM", "About 5:45–6:00 PM", "6:45 PM",
+  ]);
+  const [skipVisitor, skipBoth] = friday.stops[2].navigation.optionalBypasses;
+  assert.deepEqual(ids(skipVisitor.segments), ["avenue-cafe-miranda", "avenue-myers-flat-approach",
+    "avenue-visitor-center-pass-by", "founders-grove"]);
+  assert.deepEqual(ids(skipBoth.segments), ["avenue-cafe-miranda", "avenue-myers-flat-approach",
+    "avenue-visitor-center-pass-by", "avenue-founders-pass-by", "avenue-south-of-redcrest",
+    "avenue-north-of-redcrest", "avenue-pepperwood-approach", "avenue-north-end", "ferndale"]);
+  assert.deepEqual(ids(friday.stops[3].navigation.optionalBypasses[0].segments),
+    ["humboldt-redwoods-visitor-center", "avenue-founders-pass-by", "avenue-south-of-redcrest",
+      "avenue-north-of-redcrest", "avenue-pepperwood-approach", "avenue-north-end", "ferndale"]);
+  const full = ids(friday.withoutOptionalMapSegments);
+  assert.deepEqual(full, ["healdsburg-inn-departure", "nelson-family-vineyards", "avenue-south-entrance",
+    ...ids(skipBoth.segments), "holiday-inn-express-eureka", "sea-grill"]);
+  for (const segment of [...skipBoth.segments, ...friday.withoutOptionalMapSegments]) {
+    const url = new URL(segment.url);
+    assert.deepEqual((url.searchParams.get("waypoints") || "").split("|").filter(Boolean),
+      segment.points.slice(1, -1).map((point) => point.query));
+    assert.ok(segment.points.length <= 5);
+    assert.doesNotMatch(decodeURIComponent(segment.url), /Dyerville Loop|Founders Grove|Visitor Center/);
+  }
+  assert.ok(model.filter((day) => day !== friday).every((day) =>
+    day.withoutOptionalMapSegments.length === 0 && day.stops.every((stop) => !stop.navigation.optionalBypasses.length)));
+  const html = AdventureItinerary.renderCanonicalItinerary(adventure, { selectedDayId: friday.id });
+  assert.equal((html.match(/canonicalPriority optional/g) || []).length, 2);
+  assert.equal((html.match(/<article class="stopCard/g) || []).length, 8);
+  assert.match(html, /Next drive · About 2 hr →/);
+  assert.doesNotMatch(html, /~About/);
+  assert.match(html, /Map without optional visits/);
+  assert.match(html, /without taking the Dyerville Loop spur/);
+  assert.match(html, /Quick check-in and drop bags before dinner/);
+  assert.match(html, /6:45 PM/);
+  assert.equal(friday.stops[7].reservation.status, "Confirmed");
+  assert.deepEqual(adventure, original);
+});
+
+test("routing metadata applies only to the intended adjacent leg and handles malformed metadata", () => {
+  const adventure = createArrivalAdventure();
+  const friday = adventure.itinerary.days.find((day) => day.id === "2026-09-25");
+  const cafe = friday.stops[2];
+  for (const route of [null, {}, { fromStopId: "someone-else", via: cafe.routeFromPrevious.via },
+    { fromStopId: "nelson-family-vineyards", via: [null] },
+    { fromStopId: "nelson-family-vineyards", via: [{ id: "bad", name: "bad", navigationQuery: "" }] }]) {
+    cafe.routeFromPrevious = route;
+    const model = AdventureItinerary.createItineraryViewModel(adventure).find((day) => day.id === friday.id);
+    assert.equal(new URL(model.stops[1].navigation.nextStop).searchParams.get("waypoints"), null);
+    assert.equal(model.stops[1].nextRouteGuidance, null);
+  }
+});
+
 test("September 24 survives Adventure normalization and storage", () => {
   const adventure = createArrivalAdventure();
   const normalized =
@@ -567,7 +677,10 @@ test("creates complete ordered Day Maps with a safe segmented fallback", () => {
       ? day.routeAlternatives.find(
           (route) => route.preferred,
         ).stops.map((stop) => stop.id)
-      : sourceDays.get(day.id).stops.map((stop) => stop.id);
+      : sourceDays.get(day.id).stops.flatMap((stop) => [
+          ...(stop.routeFromPrevious?.via || []).map((point) => point.id),
+          stop.id,
+        ]);
 
     assert.deepEqual(
       routePointIds(day.dayMapSegments),
@@ -586,7 +699,7 @@ test("creates complete ordered Day Maps with a safe segmented fallback", () => {
   );
   assert.equal(
     mapActionCount,
-    7,
+    9,
   );
 });
 
@@ -651,7 +764,7 @@ test("maps canonical destination drive durations onto the preceding stop", () =>
     friday.stops.map((stop) => stop.nextDrive),
     [
       "55 min",
-      "1 hr 25 min",
+      "About 2 hr",
       "30 min",
       "10 min",
       "50 min",

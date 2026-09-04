@@ -33,13 +33,37 @@ function googleRoute(origin, destination, waypoints = []) {
   return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}${waypointParameter}&travelmode=driving`;
 }
 
-function createGoogleRouteSegments(stops) {
-  const points = stops
+// Routing-only points belong to a specific leg, never to the activity list.
+function routeFromPrevious(previous, stop) {
+  const route = stop?.routeFromPrevious;
+  return previous && route?.fromStopId === previous.id &&
+    Array.isArray(route.via) && route.via.length > 0 &&
+    route.via.every((point) =>
+      point && [point.id, point.name, point.navigationQuery].every(
+        (value) => typeof value === "string" && value.trim(),
+      ))
+    ? route : null;
+}
+
+function expandRouteStops(stops, omittedIds = new Set()) {
+  return stops
+    .flatMap((stop, index) => [
+      ...(routeFromPrevious(stops[index - 1], stop)?.via || []),
+      ...(omittedIds.has(stop.id) ? (stop.routingPassBy &&
+        [stop.routingPassBy.id, stop.routingPassBy.name, stop.routingPassBy.navigationQuery]
+          .every((value) => typeof value === "string" && value.trim())
+        ? [stop.routingPassBy] : []) : [stop]),
+    ])
     .map((stop) => ({
       id: stop.id,
       name: stop.name,
-      query: stop.navigationQuery || stop.address,
-    }))
+      navigationQuery: stop.navigationQuery || stop.address,
+    }));
+}
+
+function createGoogleRouteSegments(stops) {
+  const points = expandRouteStops(stops)
+    .map((point) => ({ id: point.id, name: point.name, query: point.navigationQuery }))
     .filter(
       (point) =>
         typeof point.query === "string" &&
@@ -249,6 +273,10 @@ function createItineraryViewModel(adventure, options = {}) {
     const mapStops = selectedRoute
       ? selectedRoute.stops
       : day.stops;
+    // Expand the original adjacent legs BEFORE omitting optional activities:
+    // their routing-only through-points must survive without their parking/spurs.
+    const hasRouting = mapStops.some((stop, index) => routeFromPrevious(mapStops[index - 1], stop));
+    const optionalIds = new Set(mapStops.filter((stop) => stop.priority === "optional").map((stop) => stop.id));
     const decorateStops = (stops) =>
       stops.map((stop, index) => {
       const query =
@@ -261,19 +289,33 @@ function createItineraryViewModel(adventure, options = {}) {
 
       const reservation =
         reservationMap.get(stop.reservationId) || null;
+      const nextRoute = routeFromPrevious(stop, nextStop);
+      const nextSegments = nextQuery
+        ? createGoogleRouteSegments([stop, nextStop]) : [];
+      const optionalBypasses = [];
+      if (hasRouting) {
+        for (let end = index + 1; end < stops.length - 1 && stops[end].priority === "optional"; end += 1) {
+          const omitted = new Set(stops.slice(index + 1, end + 1).map((item) => item.id));
+          optionalBypasses.push({
+            destination: stops[end + 1].name,
+            skipped: stops.slice(index + 1, end + 1).map((item) => item.name),
+            segments: createGoogleRouteSegments(expandRouteStops(stops.slice(index, end + 2), omitted)),
+          });
+        }
+      }
 
       return {
         ...stop,
         timeLabel:
           reservation?.time || stop.timeLabel,
         reservation,
+        nextRouteGuidance: nextRoute?.guidance || null,
         navigation: {
           googleMaps: mapsSearch(query),
           waze: wazeSearch(query),
-          nextStop:
-            nextQuery
-              ? googleRoute(query, nextQuery)
-              : null,
+          nextStop: nextSegments.length === 1 ? nextSegments[0].url : null,
+          nextSegments,
+          optionalBypasses,
         },
         nextDrive:
           typeof nextStop?.driveFromPrevious === "string" &&
@@ -290,6 +332,8 @@ function createItineraryViewModel(adventure, options = {}) {
       travelNotes: createTravelNotes(day),
       dayMapSegments:
         createGoogleRouteSegments(mapStops),
+      withoutOptionalMapSegments: hasRouting && optionalIds.size
+        ? createGoogleRouteSegments(expandRouteStops(mapStops, optionalIds)) : [],
       stops: decorateStops(displayedStops),
     };
   });
@@ -309,11 +353,15 @@ function formatDate(date) {
   );
 }
 
-function renderRouteActions(segments, label) {
+function driveLabel(duration) {
+  return duration.startsWith("About ") ? duration : `~${duration}`;
+}
+
+function renderRouteActions(segments, label, className = "") {
   return segments
     .map(
       (segment, index) => `
-        <a href="${segment.url}" target="_blank" rel="noopener">
+        <a${className ? ` class="${escapeHtml(className)}"` : ""} href="${segment.url}" target="_blank" rel="noopener">
           ${escapeHtml(label)}${segments.length > 1 ? ` ${index + 1} of ${segments.length}` : ""}
         </a>
       `,
@@ -407,10 +455,11 @@ function renderCanonicalItinerary(adventure, options = {}) {
                 day.dayMapSegments,
                 "Open Day Map",
               )}
+              ${day.withoutOptionalMapSegments.length ? `<p>Full scenic route without optional visits:</p>${renderRouteActions(day.withoutOptionalMapSegments, "Map without optional visits")}` : ""}
             </div>
             ${day.travelNotes.length ? `
               <aside class="canonicalTravelGuidance" aria-label="Travel guidance">
-                <strong>Flexible travel guidance</strong>
+                <strong>${day.withoutOptionalMapSegments.length ? "Scenic route guidance" : "Flexible travel guidance"}</strong>
                 ${day.travelNotes
                   .map(
                     (note) =>
@@ -459,7 +508,8 @@ function renderCanonicalItinerary(adventure, options = {}) {
                       ${stop.duration ? `<p><strong>${escapeHtml(stop.duration)}</strong></p>` : ""}
                       ${stop.address ? `<p>${escapeHtml(stop.address)}</p>` : ""}
                       ${stop.notes ? `<p>${escapeHtml(stop.notes)}</p>` : ""}
-                      ${stop.nextDrive ? `<p class="canonicalNextDrive"><strong>Next drive: ~${escapeHtml(stop.nextDrive)}</strong></p>` : ""}
+                      ${stop.nextRouteGuidance ? `<p>${escapeHtml(stop.nextRouteGuidance)}</p>` : ""}
+                      ${stop.nextDrive ? `<p class="canonicalNextDrive"><strong>Next drive: ${escapeHtml(driveLabel(stop.nextDrive))}</strong></p>` : ""}
                       ${stop.reservation ? `
                         <div class="canonicalReservation">
                           <strong>${escapeHtml(stop.reservation.status)}</strong>
@@ -470,7 +520,9 @@ function renderCanonicalItinerary(adventure, options = {}) {
                       <div class="navActions">
                         <a href="${stop.navigation.waze}" target="_blank" rel="noopener">🚙 Waze</a>
                         <a href="${stop.navigation.googleMaps}" target="_blank" rel="noopener">📍 Google Maps</a>
-                        ${stop.navigation.nextStop ? `<a class="nextRoute" href="${stop.navigation.nextStop}" target="_blank" rel="noopener">${stop.nextDrive ? `Next drive · ~${escapeHtml(stop.nextDrive)} →` : "Next stop →"}</a>` : ""}
+                        ${stop.navigation.nextStop ? `<a class="nextRoute" href="${stop.navigation.nextStop}" target="_blank" rel="noopener">${stop.nextDrive ? `Next drive · ${escapeHtml(driveLabel(stop.nextDrive))} →` : "Next stop →"}</a>` : ""}
+                        ${stop.navigation.nextSegments.length > 1 ? `<span>Follow all numbered route parts to the next activity (${escapeHtml(stop.nextDrive ? `${driveLabel(stop.nextDrive)} total` : "drive time not supplied")}).</span>${renderRouteActions(stop.navigation.nextSegments, "Next stop · route part", "nextRoute")}` : ""}
+                        ${stop.navigation.optionalBypasses.map((bypass) => `<div><p>Skip ${escapeHtml(bypass.skipped.join(" and "))}; continue to ${escapeHtml(bypass.destination)}. Follow all numbered route parts; routing anchors are not visits.</p>${renderRouteActions(bypass.segments, `Continue to ${bypass.destination} · route part`, "nextRoute")}</div>`).join("")}
                       </div>
                     </div>
                   </article>

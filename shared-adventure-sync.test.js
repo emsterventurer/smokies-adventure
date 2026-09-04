@@ -292,6 +292,13 @@ test("inbound Pacific preparation upgrades the known legacy Sea Grill reservatio
   const legacySeaGrillStop = legacyFriday.stops.find(
     (stop) => stop.id === "sea-grill",
   );
+  legacyFriday.stops.forEach((stop) => { delete stop.routeFromPrevious; });
+  legacyFriday.stops.forEach((stop) => { delete stop.routingPassBy; });
+  delete legacyFriday.travelNotes;
+  legacyFriday.stops[2].driveFromPrevious = "1 hr 25 min";
+  legacyFriday.stops[3].priority = legacyFriday.stops[4].priority = "planned";
+  legacyFriday.stops[3].notes = "Easy-access redwood context; no hiking is assumed.";
+  legacyFriday.stops[4].notes = "Keep this a short, easy redwood experience; no strenuous walking.";
   legacySeaGrillStop.priority = "target";
   legacySeaGrillStop.timeLabel =
     "Target about 7:00 PM";
@@ -352,6 +359,11 @@ test("inbound Pacific preparation upgrades the known legacy Sea Grill reservatio
   assert.equal(seaGrill.status, "Confirmed");
   assert.equal(seaGrill.time, "6:45 PM");
   assert.equal(seaGrill.notes, undefined);
+  assert.equal(friday.stops[2].routeFromPrevious.via[0].id, "avenue-south-entrance");
+  assert.equal(friday.stops[5].routeFromPrevious.via.at(-1).id, "avenue-north-end");
+  assert.equal(friday.stops[2].driveFromPrevious, "About 2 hr");
+  assert.equal(friday.stops[3].priority, "optional");
+  assert.equal(friday.stops[4].priority, "optional");
 });
 
 test("inbound Pacific preparation upgrades Monday and adds Carolyn consistently", async () => {
